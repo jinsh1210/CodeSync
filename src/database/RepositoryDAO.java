@@ -137,5 +137,17 @@ public class RepositoryDAO {
 	    }
 	    return repositories;
 	}
+	public boolean deleteRepository(int repoId, int userId) {
+		String sql = "DELETE FROM repositories WHERE id = ? AND user_id = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, repoId);
+	        pstmt.setInt(2, userId);
+	        int affected = pstmt.executeUpdate();
+	        return affected > 0;
 
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
 }
