@@ -195,7 +195,7 @@ public class RepositoryView extends JFrame {
 		button.setFocusPainted(false);
 		button.setBorderPainted(false);
 		button.setContentAreaFilled(false);   // 🔧 배경을 채움
-	    button.setOpaque(true);              // 🔧 불투명으로 설정
+	    button.setOpaque(true);              // 🔧 불투명으로 설정s
 		button.setPreferredSize(new Dimension(130, 40));
 		return button;
 	}

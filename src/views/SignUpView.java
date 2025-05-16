@@ -26,7 +26,7 @@ public class SignUpView extends JFrame {
 	}
 
 	private void initializeUI() {
-		setTitle("File Sharing System - Sign Up");
+		setTitle("J.S.Repo - Sign Up");
 		setSize(500, 580);
 		setResizable(false); // 🔒 창 크기 고정 (사용자가 크기 변경 불가)
 
