@@ -15,17 +15,18 @@ public class RepositoryDAO {
 	}
 
 	// ✅ 1. Repository 생성
-	public boolean createRepository(String name, String description, int userId) {
-		String sql = "INSERT INTO repositories (name, description, user_id) VALUES (?, ?, ?)";
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			pstmt.setString(1, name);
-			pstmt.setString(2, description);
-			pstmt.setInt(3, userId);
-			return pstmt.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
+	public boolean createRepository(String name, String description, int userId, String visibility) {
+	    String sql = "INSERT INTO repositories (name, description, user_id, visibility) VALUES (?, ?, ?, ?)";
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setString(1, name);
+	        pstmt.setString(2, description);
+	        pstmt.setInt(3, userId);
+	        pstmt.setString(4, visibility);  // 'public' 또는 'private'
+	        return pstmt.executeUpdate() > 0;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
 
 	// ✅ 2. 단일 Repository 조회
@@ -116,4 +117,25 @@ public class RepositoryDAO {
 			return false;
 		}
 	}
+	// ✅ 7. 공개(public) 저장소 목록 조회
+	public List<Repository> getPublicRepositories() {
+	    List<Repository> repositories = new ArrayList<>();
+	    String sql = "SELECT * FROM repositories WHERE visibility = 'public'";
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        ResultSet rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	            repositories.add(new Repository(
+	                rs.getInt("id"),
+	                rs.getString("name"),
+	                rs.getString("description"),
+	                rs.getInt("user_id"),
+	                rs.getTimestamp("created_at")
+	            ));
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return repositories;
+	}
+
 }
