@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.util.List;
 import models.User;
+import utils.Style;
 import models.Repository;
 import models.FileInfo;
 import database.RepositoryDAO;
@@ -22,13 +23,6 @@ public class RepositoryView extends JFrame {
 	private JButton deleteButton;
 	private Timer refreshTimer;
 
-	private static final Color PRIMARY_COLOR = new Color(52, 152, 219);
-	private static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
-	private static final Color FIELD_BACKGROUND = Color.WHITE;
-	private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 26);
-	private static final Font LABEL_FONT = new Font("Segoe UI", Font.PLAIN, 16);
-	private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 16);
-
 	public RepositoryView(Repository repository, User currentUser) {
 		this.repository = repository;
 		this.currentUser = currentUser;
@@ -38,43 +32,44 @@ public class RepositoryView extends JFrame {
 	}
 
 	private void initializeUI() {
+		// 전체 화면 구성
 		setTitle("J.S.Repo - Repository");
 		setSize(550, 600);
-		setMinimumSize(new Dimension(500, 600)); // 너비 500px, 높이 600px 이상 못 줄임
+		setMinimumSize(new Dimension(500, 600));
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // ✅ 창 닫아도 프로그램 종료 안 됨
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 
 		JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
-		mainPanel.setBackground(BACKGROUND_COLOR);
+		mainPanel.setBackground(Style.BACKGROUND_COLOR);
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-		// Header
+		// 헤더
 		JLabel titleLabel = new JLabel("저장소 : " + repository.getName(), SwingConstants.LEFT);
-		titleLabel.setFont(TITLE_FONT);
-		titleLabel.setForeground(PRIMARY_COLOR);
+		titleLabel.setFont(Style.TITLE_FONT);
+		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
 		JLabel descLabel = new JLabel("설명 : " + repository.getDescription());
-		descLabel.setFont(LABEL_FONT);
+		descLabel.setFont(Style.LABEL_FONT);
 		descLabel.setForeground(new Color(80, 80, 80));
 
 		JPanel headerPanel = new JPanel(new BorderLayout());
-		headerPanel.setBackground(BACKGROUND_COLOR);
+		headerPanel.setBackground(Style.BACKGROUND_COLOR);
 		headerPanel.add(titleLabel, BorderLayout.NORTH);
 		headerPanel.add(descLabel, BorderLayout.SOUTH);
 
-		// Buttons
-		uploadButton = createStyledButton("파일 업로드", PRIMARY_COLOR, Color.WHITE);
-		downloadButton = createStyledButton("다운로드", new Color(41, 128, 185), Color.WHITE);
-		deleteButton = createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
+		// 버튼
+		uploadButton = Style.createStyledButton("파일 업로드", Style.PRIMARY_COLOR, Color.WHITE);
+		downloadButton = Style.createStyledButton("다운로드", new Color(41, 128, 185), Color.WHITE);
+		deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
-		buttonPanel.setBackground(BACKGROUND_COLOR);
+		buttonPanel.setBackground(Style.BACKGROUND_COLOR);
 		buttonPanel.add(uploadButton);
 		buttonPanel.add(downloadButton);
 		buttonPanel.add(deleteButton);
 
-		// File list
+		// 저장소 파일 리스트
 		listModel = new DefaultListModel<>();
 		fileList = new JList<>(listModel);
 		fileList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -84,14 +79,13 @@ public class RepositoryView extends JFrame {
 		JScrollPane scrollPane = new JScrollPane(fileList);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
-		// Assemble panels
 		mainPanel.add(headerPanel, BorderLayout.NORTH);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
 		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 		add(mainPanel);
 
-		// Actions
+		// 기능 연결
 		uploadButton.addActionListener(e -> handleUpload());
 		downloadButton.addActionListener(e -> handleDownload());
 		deleteButton.addActionListener(e -> handleDelete());
@@ -108,6 +102,7 @@ public class RepositoryView extends JFrame {
 		});
 	}
 
+	// DB에서 파일 불러오기
 	private void loadFiles() {
 		listModel.clear();
 		List<FileInfo> files = repositoryDAO.getRepositoryFiles(repository.getId());
@@ -116,6 +111,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
+	// DB에 파일 업로드 로직
 	private void handleUpload() {
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showOpenDialog(this);
@@ -138,6 +134,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
+	// 다운로드 로직
 	private void handleDownload() {
 		List<FileInfo> selectedFiles = fileList.getSelectedValuesList();
 		if (selectedFiles.isEmpty()) {
@@ -165,6 +162,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
+	// 삭제 로직
 	private void handleDelete() {
 		List<FileInfo> selectedFiles = fileList.getSelectedValuesList();
 		if (selectedFiles.isEmpty()) {
@@ -172,34 +170,39 @@ public class RepositoryView extends JFrame {
 			return;
 		}
 
-		int confirm = JOptionPane.showConfirmDialog(this, "선택한 " + selectedFiles.size() + "개의 파일을 정말로 삭제하시겠습니까?",
+		int confirm = JOptionPane.showConfirmDialog(this, "선택한 " 
+				+ selectedFiles.size() 
+				+ "개의 파일을 정말로 삭제하시겠습니까?",
 				"파일 삭제 확인", JOptionPane.YES_NO_OPTION);
 
 		if (confirm == JOptionPane.YES_OPTION) {
 			int deletedCount = 0;
+			int failedCount = 0;
+
 			for (FileInfo file : selectedFiles) {
-				if (repositoryDAO.deleteFile(file.getId())) {
+				if (repositoryDAO.deleteFile(file.getId(), currentUser.getId())) {
 					deletedCount++;
+				} else {
+					failedCount++;
 				}
 			}
-			JOptionPane.showMessageDialog(this, deletedCount + "개의 파일이 삭제되었습니다.");
+
+			String message = "";
+			if (deletedCount > 0) {
+			    message += deletedCount + "개의 파일이 삭제되었습니다.";
+			}
+			if (failedCount > 0) {
+			    if (!message.isEmpty()) message += "\n";
+			    message += failedCount + "개의 파일은 삭제 권한이 없거나 오류가 발생했습니다.";
+			}
+			if (!message.isEmpty()) {
+	            JOptionPane.showMessageDialog(this, message);
+	        }
 			loadFiles();
 		}
 	}
 
-	private JButton createStyledButton(String text, Color bgColor, Color fgColor) {
-		JButton button = new JButton(text);
-		button.setFont(BUTTON_FONT);
-		button.setBackground(bgColor);
-		button.setForeground(fgColor);
-		button.setFocusPainted(false);
-		button.setBorderPainted(false);
-		button.setContentAreaFilled(false);   // 🔧 배경을 채움
-	    button.setOpaque(true);              // 🔧 불투명으로 설정s
-		button.setPreferredSize(new Dimension(130, 40));
-		return button;
-	}
-
+	// 파일 표시 형식
 	private class FileListCellRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -212,6 +215,7 @@ public class RepositoryView extends JFrame {
 			return this;
 		}
 
+		// 단위 표시
 		private String formatFileSize(long size) {
 			if (size < 1024)
 				return size + " B";
