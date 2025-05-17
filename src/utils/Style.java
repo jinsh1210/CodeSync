@@ -3,6 +3,7 @@ package utils;
 import javax.swing.*;
 import java.awt.*;
 
+//기본 스타일
 public class Style {
 	// 공통 색상/폰트
 	public static final Color PRIMARY_COLOR = new Color(52, 152, 219);

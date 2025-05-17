@@ -2,6 +2,10 @@ package models;
 
 import java.sql.Timestamp;
 
+import lombok.*;
+@Getter
+@Setter
+
 public class User {
     private int id;
     private String username;
@@ -17,36 +21,37 @@ public class User {
         this.createdAt = createdAt;
     }
     
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-    
-    public String getUsername() {
-        return username;
-    }
-    
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
-    public String getEmail() {
-        return email;
-    }
-    
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
+    //롬복이 없을 경우 사용
+//    // Getters and Setters
+//    public int getId() {
+//        return id;
+//    }
+//    
+//    public String getUsername() {
+//        return username;
+//    }
+//    
+//    public void setUsername(String username) {
+//        this.username = username;
+//    }
+//    
+//    public String getPassword() {
+//        return password;
+//    }
+//    
+//    public void setPassword(String password) {
+//        this.password = password;
+//    }
+//    
+//    public String getEmail() {
+//        return email;
+//    }
+//    
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
+//    
+//    public Timestamp getCreatedAt() {
+//        return createdAt;
+//    }
 } 

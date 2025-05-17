@@ -118,10 +118,30 @@ public class RepositoryView extends JFrame {
 
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
+			
+			//브랜치 선택 UI
+			String[] branches = {"main", "feature", "dev"};
+	        String selectedBranch = (String) JOptionPane.showInputDialog(
+	                this, "업로드할 브랜치를 선택하세요:",
+	                "브랜치 선택",
+	                JOptionPane.PLAIN_MESSAGE,
+	                null,
+	                branches,
+	                "main");
+	        if (selectedBranch == null) return; // 사용자가 취소한 경우
+			
 			try {
 				byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
-				FileInfo fileInfo = new FileInfo(0, currentUser.getId(), repository.getId(), selectedFile.getName(),
-						fileBytes, new java.sql.Timestamp(System.currentTimeMillis()));
+				FileInfo fileInfo = new FileInfo(
+						0
+						, currentUser.getId()
+						, repository.getId()
+						, selectedFile.getName()
+						,fileBytes
+						, new java.sql.Timestamp(System.currentTimeMillis())
+						,selectedBranch
+				);
+				
 				if (repositoryDAO.addFile(fileInfo)) {
 					loadFiles();
 				} else {

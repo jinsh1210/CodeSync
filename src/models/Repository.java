@@ -1,6 +1,10 @@
 package models;
 
 import java.sql.Timestamp;
+import lombok.*;
+
+@Getter
+@Setter
 
 public class Repository {
     private int id;
@@ -17,32 +21,33 @@ public class Repository {
         this.createdAt = createdAt;
     }
     
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public int getUserId() {
-        return userId;
-    }
-    
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
+    //롬복이 없을 경우 사용
+//    // Getters and Setters
+//    public int getId() {
+//        return id;
+//    }
+//    
+//    public String getName() {
+//        return name;
+//    }
+//    
+//    public void setName(String name) {
+//        this.name = name;
+//    }
+//    
+//    public String getDescription() {
+//        return description;
+//    }
+//    
+//    public void setDescription(String description) {
+//        this.description = description;
+//    }
+//    
+//    public int getUserId() {
+//        return userId;
+//    }
+//    
+//    public Timestamp getCreatedAt() {
+//        return createdAt;
+//    }
 } 

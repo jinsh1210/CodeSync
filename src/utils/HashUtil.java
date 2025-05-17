@@ -2,6 +2,7 @@ package utils;
 
 import java.security.MessageDigest;
 
+//해시 로직
 public class HashUtil {
     public static String sha256(String input) {
         try {

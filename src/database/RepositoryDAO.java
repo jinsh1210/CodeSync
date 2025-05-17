@@ -39,8 +39,14 @@ public class RepositoryDAO {
 			pstmt.setInt(1, repositoryId);
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
-				files.add(new FileInfo(rs.getInt("id"), rs.getInt("user_id"), rs.getInt("repository_id"),
-						rs.getString("filename"), rs.getBytes("file_data"), rs.getTimestamp("upload_time")));
+				files.add(new FileInfo(
+						rs.getInt("id")
+						, rs.getInt("user_id")
+						, rs.getInt("repository_id")
+						, rs.getString("filename")
+						, rs.getBytes("file_data")
+						, rs.getTimestamp("upload_time")
+						, rs.getString("branch")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
