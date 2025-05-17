@@ -1,7 +1,22 @@
 package views;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
 import database.UserDAO;
 import models.User;
 import utils.Style;
