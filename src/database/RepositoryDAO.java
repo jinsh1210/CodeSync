@@ -24,13 +24,14 @@ public class RepositoryDAO {
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
 				repositories.add(new Repository(rs.getInt("id"), rs.getString("name"), rs.getString("description"),
-						rs.getInt("user_id"), rs.getTimestamp("created_at")));
+						rs.getInt("user_id"), rs.getTimestamp("created_at"), rs.getString("visibility")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return repositories;
 	}
+
 	// 저장소 파일 목록
 	public List<FileInfo> getRepositoryFiles(int repositoryId) {
 		List<FileInfo> files = new ArrayList<>();
@@ -39,14 +40,9 @@ public class RepositoryDAO {
 			pstmt.setInt(1, repositoryId);
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
-				files.add(new FileInfo(
-						rs.getInt("id")
-						, rs.getInt("user_id")
-						, rs.getInt("repository_id")
-						, rs.getString("filename")
-						, rs.getBytes("file_data")
-						, rs.getTimestamp("upload_time")
-						, rs.getString("branch")));
+				files.add(new FileInfo(rs.getInt("id"), rs.getInt("user_id"), rs.getInt("repository_id"),
+						rs.getString("filename"), rs.getBytes("file_data"), rs.getTimestamp("upload_time"),
+						rs.getString("branch")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -70,6 +66,7 @@ public class RepositoryDAO {
 			return false;
 		}
 	}
+
 	// 파일 삭제
 	public boolean deleteFile(int fileId, int userId) {
 		String sql = "DELETE FROM files WHERE id = ? AND user_id = ?";
@@ -82,7 +79,7 @@ public class RepositoryDAO {
 			return false;
 		}
 	}
- 
+
 	// 저장소 관련..
 	// 저장소 생성
 	public boolean createRepository(String name, String description, int userId, String visibility) {
@@ -98,6 +95,7 @@ public class RepositoryDAO {
 			return false;
 		}
 	}
+
 	// 저장소 삭제
 	public boolean deleteRepository(int repoId, int userId) {
 		String sql = "DELETE FROM repositories WHERE id = ? AND user_id = ?";
@@ -121,13 +119,14 @@ public class RepositoryDAO {
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				return new Repository(rs.getInt("id"), rs.getString("name"), rs.getString("description"),
-						rs.getInt("user_id"), rs.getTimestamp("created_at"));
+						rs.getInt("user_id"), rs.getTimestamp("created_at"), rs.getString("visibility"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
+
 	// 공개(public) 저장소 조회
 	public List<Repository> getPublicRepositories() {
 		List<Repository> repositories = new ArrayList<>();
@@ -136,7 +135,7 @@ public class RepositoryDAO {
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
 				repositories.add(new Repository(rs.getInt("id"), rs.getString("name"), rs.getString("description"),
-						rs.getInt("user_id"), rs.getTimestamp("created_at")));
+						rs.getInt("user_id"), rs.getTimestamp("created_at"), rs.getString("visibility")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

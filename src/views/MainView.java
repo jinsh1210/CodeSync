@@ -77,11 +77,11 @@ public class MainView extends JFrame {
 					Rectangle bounds = repositoryList.getCellBounds(index, index);
 					if (bounds.contains(e.getPoint())) {
 						repositoryList.setSelectedIndex(index); // 항목 선택
-						
+
 						if (SwingUtilities.isRightMouseButton(e)) {
-							popupMenu.show(repositoryList, e.getX(), e.getY());	// 우클릭
+							popupMenu.show(repositoryList, e.getX(), e.getY()); // 우클릭
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-							openRepository(listModel.get(index));	// 더블클릭
+							openRepository(listModel.get(index)); // 더블클릭
 						}
 					}
 				}
@@ -176,7 +176,7 @@ public class MainView extends JFrame {
 		RepositoryView repoView = new RepositoryView(repository, currentUser);
 		repoView.setVisible(true);
 	}
-	
+
 	// 로그아웃 기능
 	private void handleLogout() {
 		int confirm = JOptionPane.showConfirmDialog(this, "정말 로그아웃 하시겠습니까?", "로그아웃", JOptionPane.YES_NO_OPTION);
@@ -187,7 +187,7 @@ public class MainView extends JFrame {
 		}
 	}
 
-	//저장소 표시 형식
+	// 저장소 표시 형식
 	private class RepositoryListCellRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -195,7 +195,8 @@ public class MainView extends JFrame {
 			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			if (value instanceof Repository) {
 				Repository repo = (Repository) value;
-				setText(repo.getName() + " - " + repo.getDescription());
+				setText("(" + repo.getVisibility() + ") " + repo.getName() + " | " + repo.getDescription());
+
 			}
 			return this;
 		}
