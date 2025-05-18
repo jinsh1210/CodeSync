@@ -1,72 +1,120 @@
 package utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
+import models.FileInfo;
 
-//아직 미구현 서버 클라이언트간 통신 방식 맞춰줘야함
 public class ClientSock {
-	final String SERVERIP = "sjc07250.iptime.org"; // 접속할 서버 IP
-	final int PORT = 9969; // 서버 포트
-	final String VERISION = "v0.0.1b";
-	final String TOKEN = "fjk123#%k2!lsd!234!%^^f17!@#sdfs!@$3$*s1s56!@#";
-	private Socket socket = null;
-	private PrintWriter out = null;
-	private BufferedReader in = null;
+    private static final String SERVERIP = "sjc07250.iptime.org";
+    private static final int PORT = 9969;
+    private static final String VERISION = "v0.0.1b";
+    private static final String TOKEN = "fjk123#%k2!lsd!234!%^^f17!@#sdfs!@$3$*s1s56!@#";
 
-	public ClientSock() {
-		try {
-			socket = new Socket(SERVERIP, PORT);
-			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    private static Socket socket;
+    private static PrintWriter out;
+    private static BufferedReader in;
+    private static InputStream inputStream;
+    private static OutputStream outputStream;
 
-	public void Send(String msg) {
-		Scanner scanner = new Scanner(System.in);
-		while (true) {
-			String userInput = scanner.nextLine();
-			out.println(userInput);
-			if ("exit".equalsIgnoreCase(userInput)) {
-				try {
-					socket.close();
-					System.out.println("연결 종료");
-					System.exit(0);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+    public static void connect() {
+        try {
+            socket = new Socket(SERVERIP, PORT);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
 
-	public void main() {
-		try {
-			Thread receiveThread = new Thread(() -> {
-				try {
-					InputStream in = socket.getInputStream();
-					byte[] buffer = new byte[1024];
-					int bytesRead;
+            // 초기 인증
+            out.println(TOKEN);
+            out.println(VERISION);
+            
+            try {
+                byte[] buffer = new byte[1024];
+                int bytesRead=inputStream.read(buffer);
+                if (bytesRead != -1) {
+                	
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-					while ((bytesRead = in.read(buffer)) != -1) {
-						String received = new String(buffer, 0, bytesRead, "UTF-8");
-						System.out.println("받은 내용: " + received);
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-			// 사용자 입력 송신 쓰레드
+            System.out.println("[Client] 서버에 연결되었습니다.");
+        } catch (IOException e) {
+            System.err.println("[Client] 서버 연결 실패");
+            e.printStackTrace();
+        }
+    }
 
-			receiveThread.start();
+    public static void sendCommand(String msg) {
+        if (out != null) {
+            out.println(msg);
+        }
+    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public static String receiveResponse() {
+    	try {
+            byte[] buffer = new byte[1024];
+            int bytesRead=inputStream.read(buffer);
+            if (bytesRead != -1) {
+                return new String(buffer, 0, bytesRead, "UTF-8");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    	return null;
+    }
+
+    public static void startReceiver() {
+        Thread receiveThread = new Thread(() -> {
+            String line;
+            try {
+                while ((line = in.readLine()) != null) {
+                    System.out.println("[서버 응답] " + line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        receiveThread.start();
+    }
+
+    public static void uploadFileToServer(FileInfo file) {
+        try {
+            sendCommand("UPLOAD|" + file.getFilename() + "|" + file.getBranch() + "|" + file.getFileData().length);
+            outputStream.write(file.getFileData());
+            outputStream.flush();
+
+            String response = receiveResponse();
+            if (response != null) {
+                System.out.println("[서버 응답] " + response);
+            }
+        } catch (Exception e) {
+            System.err.println("[Client] 파일 업로드 중 오류 발생");
+            e.printStackTrace();
+        }
+    }
+
+    public static List<FileInfo> receiveFileList(int repositoryId) {
+        List<FileInfo> files = new ArrayList<>();
+        try {
+            sendCommand("LIST_FILES|" + repositoryId);
+            String response = receiveResponse();
+
+            // TODO: JSON 파싱 필요 시 여기에 파싱 로직 작성
+            System.out.println("[파일 목록 수신]: " + response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return files;
+    }
+
+    public static void disconnect() {
+        try {
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

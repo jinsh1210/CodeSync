@@ -13,6 +13,8 @@ public class User {
     private String email;
     private Timestamp createdAt;
     
+    public User() {}
+    
     public User(int id, String username, String password, String email, Timestamp createdAt) {
         this.id = id;
         this.username = username;

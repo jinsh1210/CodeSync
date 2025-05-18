@@ -21,8 +21,15 @@ public class Repository {
         this.userId = userId;
         this.createdAt = createdAt;
         this.visibility = visibility;
-        
     }
+
+    public Repository(int id, String name, String description, String visibility) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.visibility = visibility;
+    }
+
     
     //롬복이 없을 경우 사용
 //    // Getters and Setters

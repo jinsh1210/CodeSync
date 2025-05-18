@@ -6,39 +6,28 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
+import java.awt.event.*;
 
-import database.UserDAO;
 import models.User;
 import utils.Style;
+import utils.ClientSock;
 
 public class LoginView extends JFrame {
 	private JTextField usernameField;
 	private JPasswordField passwordField;
 	private JButton loginButton;
 	private JButton signUpButton;
-	private UserDAO userDAO;
 
 	public LoginView() {
-		userDAO = new UserDAO();
+		ClientSock.connect();
 		initializeUI();
 	}
 
 	private void initializeUI() {
-		//전체 화면 구성
 		setTitle("J.S.Repo - Login");
 		setSize(500, 400);
 		setResizable(false);
-
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
@@ -59,10 +48,7 @@ public class LoginView extends JFrame {
 		gbc.anchor = GridBagConstraints.CENTER;
 		mainPanel.add(titleLabel, gbc);
 
-		gbc.gridwidth = 2;
 		gbc.gridy++;
-
-		// 사용자 이름
 		JLabel userLabel = new JLabel("사용자 이름");
 		userLabel.setFont(Style.LABEL_FONT);
 		mainPanel.add(userLabel, gbc);
@@ -71,7 +57,6 @@ public class LoginView extends JFrame {
 		usernameField = Style.createStyledTextField();
 		mainPanel.add(usernameField, gbc);
 
-		// 비밀번호
 		gbc.gridy++;
 		JLabel passLabel = new JLabel("비밀번호");
 		passLabel.setFont(Style.LABEL_FONT);
@@ -81,7 +66,6 @@ public class LoginView extends JFrame {
 		passwordField = Style.createStyledPasswordField();
 		mainPanel.add(passwordField, gbc);
 
-		// 버튼
 		gbc.gridy++;
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
 		buttonPanel.setBackground(Style.BACKGROUND_COLOR);
@@ -89,48 +73,60 @@ public class LoginView extends JFrame {
 		signUpButton = Style.createStyledButton("회원가입", new Color(127, 140, 141), Color.WHITE);
 		buttonPanel.add(loginButton);
 		buttonPanel.add(signUpButton);
-
 		mainPanel.add(buttonPanel, gbc);
+
 		add(mainPanel);
 
-		// 기능 연결
 		loginButton.addActionListener(e -> handleLogin());
 		signUpButton.addActionListener(e -> openSignUpView());
 
 		getRootPane().setDefaultButton(loginButton);
 	}
-	//로그인 기능
+
 	private void handleLogin() {
-		String username = usernameField.getText();
-		String password = new String(passwordField.getPassword());
+		String username = usernameField.getText().trim();
+		String password = new String(passwordField.getPassword()).trim();
 
 		if (username.isEmpty() || password.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "사용자 이름과 비밀번호를 입력해주세요.");
 			return;
 		}
-		// 데이터베이스에서 받아오는 로직
-		User user = userDAO.getUser(username, password);
-		if (user != null) {
-			MainView mainView = new MainView(user);
-			mainView.setVisible(true);
-			this.dispose();
-		} else {
-			JOptionPane.showMessageDialog(this, "로그인 실패: 사용자 이름 또는 비밀번호가 잘못되었습니다.");
+
+		try {
+			ClientSock.sendCommand(":c:login");
+			ClientSock.sendCommand(username);
+			ClientSock.sendCommand(password);
+			String response = ClientSock.receiveResponse();
+
+			if (response != null && response.startsWith("/#/info")) {
+				User user = new User();
+				user.setUsername(username); // 로그인 성공 시 사용자 정보 저장
+
+				JOptionPane.showMessageDialog(this, "로그인 성공");
+				new MainView(user).setVisible(true); // client 객체 전달
+				this.dispose();
+			} else {
+				JOptionPane.showMessageDialog(this, "로그인 실패: " + response);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			JOptionPane.showMessageDialog(this, "서버 연결 실패");
 		}
 	}
-	//회원가입 화면 이동
+
 	private void openSignUpView() {
-		SignUpView signUpView = new SignUpView();
-		signUpView.setVisible(true);
+		new SignUpView().setVisible(true);
 		this.dispose();
 	}
 
 	public static void main(String[] args) {
+		
 		try {
 			UIManager.setLookAndFeel(new javax.swing.plaf.nimbus.NimbusLookAndFeel());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
 	}
 }
