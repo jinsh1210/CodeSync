@@ -22,6 +22,8 @@ public class MainView extends JFrame {
     private JButton refreshButton;
     private JButton logoutButton;
     private JPopupMenu popupMenu;
+    private JButton publicReposButton;
+
 
     public MainView(User user) {
         this.currentUser = user;
@@ -31,7 +33,7 @@ public class MainView extends JFrame {
 
     private void initializeUI() {
         setTitle("J.S.Repo - Main");
-        setSize(700, 600);
+        setSize(850, 600);
         setMinimumSize(new Dimension(700, 400));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -50,12 +52,14 @@ public class MainView extends JFrame {
 
         createRepoButton = Style.createStyledButton("저장소 만들기", Style.PRIMARY_COLOR, Color.WHITE);
         refreshButton = Style.createStyledButton("새로고침", Style.PRIMARY_COLOR, Color.WHITE);
+        publicReposButton = Style.createStyledButton("공개 저장소", Style.PRIMARY_COLOR, Color.WHITE);
         logoutButton = Style.createStyledButton("로그아웃", new Color(231, 76, 60), Color.WHITE);
-
+        
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setBackground(Style.BACKGROUND_COLOR);
         buttonPanel.add(createRepoButton);
         buttonPanel.add(refreshButton);
+        buttonPanel.add(publicReposButton);
         buttonPanel.add(logoutButton);
 
         topPanel.add(buttonPanel, BorderLayout.EAST);
@@ -96,6 +100,7 @@ public class MainView extends JFrame {
         createRepoButton.addActionListener(e -> showCreateRepositoryDialog());
         refreshButton.addActionListener(e -> loadRepositories());
         logoutButton.addActionListener(e -> handleLogout());
+        publicReposButton.addActionListener(e -> loadPublicRepositories());
 
         popupMenu = new JPopupMenu();
         JMenuItem deleteItem = new JMenuItem("삭제");
@@ -199,9 +204,12 @@ public class MainView extends JFrame {
                 if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
                     JOptionPane.showMessageDialog(this, "저장소 생성 성공");
                     loadRepositories();
-                } else {
-                    JOptionPane.showMessageDialog(this, "저장소 생성 실패: " + response);
-                }
+                } else if (response != null && response.startsWith("/#/error")) {
+    				String msg = response.replace("/#/error", "").trim();
+    				showErrorDialog("저장소 생성 실패: "+msg);
+    			} else {
+    				showErrorDialog("알 수 없는 서버 응답: " + response);
+    			}
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "서버 연결 실패");
             }
@@ -250,12 +258,65 @@ public class MainView extends JFrame {
                 if (response.startsWith("/#/repo_delete_success")) {
                     JOptionPane.showMessageDialog(this, "저장소가 삭제되었습니다.");
                     loadRepositories();
-                } else {
-                    JOptionPane.showMessageDialog(this, "삭제 실패: " + response);
-                }
+                } else if (response != null && response.startsWith("/#/repo_delete_fail")) {
+    				showErrorDialog("삭제 실패: 저장소 삭제 권한이 없습니다.");
+    			} else {
+    				showErrorDialog(response);
+    			}
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "서버 연결 실패");
             }
         }
     }
+    private void loadPublicRepositories() {
+        listModel.clear();
+        try {
+            ClientSock.sendCommand("/list_public_repos");
+
+            String line;
+            StringBuilder jsonBuilder = new StringBuilder();
+            boolean inList = false;
+
+            while ((line = ClientSock.receiveResponse()) != null) {
+                if (line.equals("/#/list_public_repos_SOL")) {
+                    inList = true;
+                    continue;
+                } else if (line.equals("/#/list_public_repos_EOL")) {
+                    break;
+                }
+
+                if (inList) {
+                    jsonBuilder.append(line);
+                }
+            }
+
+            JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
+            Set<Integer> addedIds = new HashSet<>();
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                int id = obj.optInt("id", i); // 서버에서 id 제공 시 사용
+                String name = obj.getString("name");
+                String description = obj.getString("description");
+                String visibility = obj.getString("visibility");
+
+                if (!addedIds.contains(id)) {
+                    Repository repo = new Repository(id, name, description, visibility);
+                    listModel.addElement(repo);
+                    addedIds.add(id);
+                }
+            }
+
+            if (jsonArray.length() == 0) {
+                JOptionPane.showMessageDialog(this, "공개 저장소가 없습니다.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
+        }
+    }
+    private void showErrorDialog(String message) {
+		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
+	}
 }

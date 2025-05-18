@@ -141,8 +141,12 @@ public class SignUpView extends JFrame {
 			if (response != null && response.startsWith("/#/info")) {
 				showSuccessDialog("회원가입이 완료되었습니다.");
 				openLoginView();
+			} else if (response != null && response.startsWith("/#/error")) {
+				String msg = response.replace("/#/error", "").trim();
+				showErrorDialog("회원가입 실패: " + msg);
 			} else {
-				showErrorDialog("회원가입 실패: " + response);
+				showErrorDialog(response);
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

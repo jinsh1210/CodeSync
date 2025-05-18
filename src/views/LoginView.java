@@ -105,8 +105,12 @@ public class LoginView extends JFrame {
 				JOptionPane.showMessageDialog(this, "로그인 성공");
 				new MainView(user).setVisible(true); // client 객체 전달
 				this.dispose();
+
+			} else if (response != null && response.startsWith("/#/error")) {
+				String msg = response.replace("/#/error", "").trim();
+				showErrorDialog(msg+": 사용자 이름 또는 비밀번호가 일치하지 않습니다.");
 			} else {
-				JOptionPane.showMessageDialog(this, "로그인 실패: " + response);
+				showErrorDialog(response);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -120,13 +124,16 @@ public class LoginView extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		
+
 		try {
 			UIManager.setLookAndFeel(new javax.swing.plaf.nimbus.NimbusLookAndFeel());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
+	}
+	private void showErrorDialog(String message) {
+		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
 }
