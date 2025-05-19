@@ -10,9 +10,9 @@ public class Style {
 	public static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
 	public static final Color FIELD_BACKGROUND = Color.WHITE;
 
-	public static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 26);
-	public static final Font LABEL_FONT = new Font("Segoe UI", Font.PLAIN, 16);
-	public static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 16);
+	public static final Font TITLE_FONT = new Font("Malgun Gothic", Font.BOLD, 26);
+	public static final Font LABEL_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
+	public static final Font BUTTON_FONT = new Font("Malgun Gothic", Font.BOLD, 16);
 
 	// 공통 텍스트 필드
 	public static JTextField createStyledTextField() {

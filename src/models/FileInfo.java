@@ -25,6 +25,27 @@ public class FileInfo {
 		this.branch = branch;
 	}
 
+	private String path;
+    private String type; // "file" 또는 "dir"
+
+    public FileInfo() {}
+
+    public FileInfo(String path, String type) {
+        this.path = path;
+        this.type = type;
+    }
+
+	@Override
+	public String toString() {
+		if (path != null && type != null) {
+			return type.equals("dir") ? "[폴더] " + path : path;
+		} else if (filename != null) {
+			return filename;
+		}
+		return "(알 수 없음)";
+	}
+
+
 	//롬복이 없을 경우 사용
 //	// Getters and Setters
 //	public int getId() {
