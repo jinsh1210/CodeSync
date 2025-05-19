@@ -111,10 +111,10 @@ public class ClientSock {
                 }
                 continue;
             }
-
             if (line.startsWith("/#/pull_file ")) {
                 receiveFile(line, baseFolder);
             }
+
         }
     }
 

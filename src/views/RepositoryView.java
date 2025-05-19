@@ -257,13 +257,6 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-
-
-	private boolean isFileNode(DefaultMutableTreeNode node) {
-		String name = node.getUserObject().toString();
-		return name.contains(".") && !name.equals("[비어 있음]");
-	}
-
    	private void addPathToTree(String path, String type) {
 		String[] parts = path.split("/");
 		DefaultMutableTreeNode current = rootNode;
@@ -346,18 +339,22 @@ public class RepositoryView extends JFrame {
 		String selectedPath = sb.toString();
 
 		JFileChooser folderChooser = new JFileChooser();
+		folderChooser.setDialogTitle("다운로드 경로 선택");
 		folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = folderChooser.showSaveDialog(this);
+		int result = folderChooser.showDialog(this, "선택");
 
 		if (result != JFileChooser.APPROVE_OPTION) return;
 		File targetFolder = folderChooser.getSelectedFile();
 
 		
 		try {
-			ClientSock.pull(repository.getName(), selectedPath, targetFolder);
-			SwingUtilities.invokeLater(() ->
-				JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다.")
-			);
+			new Thread(()->{
+				refreshTimer.stop();
+				ClientSock.pull(repository.getName(), selectedPath, targetFolder);
+				SwingUtilities.invokeLater(() ->
+					JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다."));
+				refreshTimer.start();
+			}).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 			SwingUtilities.invokeLater(() ->
@@ -369,12 +366,10 @@ public class RepositoryView extends JFrame {
 
     private void handleDelete() {
         TreePath selectedPath = fileTree.getSelectionPath();
-
         if (selectedPath == null) {
             JOptionPane.showMessageDialog(this, "삭제할 항목을 먼저 선택해주세요.");
             return;
         }
-
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
 
         // 루트 노드 방지
