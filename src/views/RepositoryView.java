@@ -145,7 +145,6 @@ public class RepositoryView extends JFrame {
 				if (i < nodes.length - 1) sb.append("/");
 			}
 			lastSelectedPath = sb.toString();
-			System.out.println(lastSelectedPath);
 		});
 
     }
@@ -377,15 +376,15 @@ public class RepositoryView extends JFrame {
             JOptionPane.showMessageDialog(this, "루트 노드는 삭제할 수 없습니다.");
             return;
         }
-
+		TreePath path = fileTree.getSelectionPath();
         // 트리 경로를 기반으로 실제 경로 생성
         StringBuilder sb = new StringBuilder();
-        Object[] nodes = selectedPath.getPath();
-        for (int i = 1; i < nodes.length; i++) {  // [0]은 루트 노드
-            sb.append(nodes[i].toString());
-            if (i < nodes.length - 1) sb.append("/");
-        }
-        String targetPath = sb.toString();
+		Object[] nodes = path.getPath();
+		for (int i = 1; i < nodes.length; i++) {  // [0]은 root
+			sb.append(nodes[i].toString());
+			if (i < nodes.length - 1) sb.append("/");
+		}
+		String targetPath = sb.toString();
 
         int confirm = JOptionPane.showConfirmDialog(this,
             "선택한 항목(" + targetPath + ")을 삭제하시겠습니까?",
