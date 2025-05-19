@@ -52,25 +52,28 @@ public class ClientSock {
 
     public static void sendCommand(String msg) {
         if (out != null) {
-            System.out.println(msg);
             out.println(msg);
         }
     }
 
-    private static void receiveFile(String header, File baseFolder) throws IOException {
-        String[] tokens = header.substring(13).trim().split(" ");
-        if (tokens.length < 2) throw new IOException("pull_file 명령어 파싱 실패: " + header);
+    private static void receiveFile(String headerLine, File baseFolder) throws IOException {
+        String[] tokens = headerLine.substring(13).trim().split(" ");
+        if (tokens.length < 2) throw new IOException("pull_file 명령어 파싱 실패: " + headerLine);
 
         int size = Integer.parseInt(tokens[tokens.length - 1]);
         String filePath = String.join(" ", Arrays.copyOf(tokens, tokens.length - 1));
+
         File targetFile = new File(baseFolder, filePath);
-        targetFile.getParentFile().mkdirs();
+        File parent = targetFile.getParentFile();
+        if (!parent.exists()) parent.mkdirs();
+
+        System.out.println("[파일 수신 시작]: " + filePath + " (" + size + " bytes)");
 
         byte[] buffer = new byte[size];
         int offset = 0;
         while (offset < size) {
             int read = inputStream.read(buffer, offset, size - offset);
-            if (read == -1) throw new IOException("파일 수신 중 끊김: " + filePath);
+            if (read == -1) throw new EOFException("파일 수신 도중 스트림 종료됨: " + filePath);
             offset += read;
         }
 
@@ -81,6 +84,8 @@ public class ClientSock {
         System.out.println("[파일 저장 완료]: " + targetFile.getPath());
     }
 
+
+
     private static void handleSingleFilePull(String header, File baseFolder) throws IOException {
         receiveFile(header, baseFolder);
     }
@@ -88,6 +93,7 @@ public class ClientSock {
     private static void handleDirectoryPull(BufferedReader reader, File baseFolder) throws IOException {
         while (true) {
             String line = reader.readLine();
+            if(line.startsWith("/#/")) System.out.println("[명령어 수신]: " + line);
             if (line == null) throw new IOException("서버 연결 끊김");
 
             if (line.equals("/#/pull_dir_EOL")) {
@@ -131,8 +137,6 @@ public class ClientSock {
                 System.err.println("[서버 오류]: " + line);
                 return;
             }
-
-            // ✅ 파일인지 폴더인지 구분은 클라이언트가 요청 전에 판단
             if (line.startsWith("/#/pull_file ")) {
                 handleSingleFilePull(line, targetFolder);
             } else if (line.equals("/#/pull_dir_SOL")) {
@@ -148,7 +152,6 @@ public class ClientSock {
             System.out.println("[pull 완료]");
         }
     }
-
 
     public static void push(File file, String repoName, int userId, String serverPath) { //파일형식 오버로드된 메소드
         try {
@@ -180,7 +183,7 @@ public class ClientSock {
         // 상대 경로 계산
         String relativePath = basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName();
 
-        // ✅ 빈 폴더면 mkdir 명령어 전송
+        // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
             sendCommand("/mkdir " + repository + " " + relativePath);
             String response = receiveResponse();
@@ -198,7 +201,6 @@ public class ClientSock {
             }
         }
     }
-
 
     public static String receiveResponse() {
     	try {

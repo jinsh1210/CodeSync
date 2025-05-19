@@ -368,7 +368,54 @@ public class RepositoryView extends JFrame {
 
 
     private void handleDelete() {
-        JOptionPane.showMessageDialog(this, "트리 구조에서는 삭제 기능은 직접 선택 처리 방식으로 구현 필요");
+        TreePath selectedPath = fileTree.getSelectionPath();
+
+        if (selectedPath == null) {
+            JOptionPane.showMessageDialog(this, "삭제할 항목을 먼저 선택해주세요.");
+            return;
+        }
+
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
+
+        // 루트 노드 방지
+        if (selectedNode.getParent() == null) {
+            JOptionPane.showMessageDialog(this, "루트 노드는 삭제할 수 없습니다.");
+            return;
+        }
+
+        // 트리 경로를 기반으로 실제 경로 생성
+        StringBuilder sb = new StringBuilder();
+        Object[] nodes = selectedPath.getPath();
+        for (int i = 1; i < nodes.length; i++) {  // [0]은 루트 노드
+            sb.append(nodes[i].toString());
+            if (i < nodes.length - 1) sb.append("/");
+        }
+        String targetPath = sb.toString();
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "선택한 항목(" + targetPath + ")을 삭제하시겠습니까?",
+            "삭제 확인", JOptionPane.YES_NO_OPTION);
+
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        try {
+            // 서버에 삭제 요청
+            ClientSock.sendCommand("/delete_file " + repository.getName() + " " + targetPath + " " + currentUser.getUsername());
+
+            // 응답 확인
+            String response = ClientSock.receiveResponse();
+            if (response.startsWith("/#/delete_success")) {
+                JOptionPane.showMessageDialog(this, "삭제가 완료되었습니다.");
+                loadFiles();
+            } else if (response.startsWith("/#/error")) {
+                JOptionPane.showMessageDialog(this, "❌ " + response.replace("/#/error", "").trim());
+            } else {
+                JOptionPane.showMessageDialog(this, "❓ 알 수 없는 응답: " + response);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "삭제 중 오류가 발생했습니다.");
+        }
     }
 }
 
