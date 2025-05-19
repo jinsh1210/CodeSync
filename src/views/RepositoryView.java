@@ -96,9 +96,10 @@ public class RepositoryView extends JFrame {
 			}
 		});
 	}
-
+	// 파일 로딩
 	private void loadFiles() {
 		listModel.clear();
+		//서버 데베 연결해야됨
 		ClientSock.sendCommand("LIST_FILES|" + repository.getId());
 		List<FileInfo> files = ClientSock.receiveFileList(repository.getId());
 		if (files != null) {
@@ -107,7 +108,7 @@ public class RepositoryView extends JFrame {
 			}
 		}
 	}
-
+	// 업로드
 	private void handleUpload() {
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showOpenDialog(this);
@@ -132,7 +133,7 @@ public class RepositoryView extends JFrame {
 			}
 		}
 	}
-
+	// 다운로드
 	private void handleDownload() {
 		List<FileInfo> selectedFiles = fileList.getSelectedValuesList();
 		if (selectedFiles.isEmpty()) {
@@ -157,7 +158,7 @@ public class RepositoryView extends JFrame {
 			JOptionPane.showMessageDialog(this, "선택한 파일이 다운로드되었습니다.");
 		}
 	}
-
+	// 삭제
 	private void handleDelete() {
 		List<FileInfo> selectedFiles = fileList.getSelectedValuesList();
 		if (selectedFiles.isEmpty()) {
@@ -175,7 +176,7 @@ public class RepositoryView extends JFrame {
 			loadFiles();
 		}
 	}
-
+	// 파일 표시 형식
 	private class FileListCellRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,

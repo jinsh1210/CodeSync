@@ -92,7 +92,7 @@ public class SignUpView extends JFrame {
 		signUpButton.addActionListener(e -> handleSignUp());
 		cancelButton.addActionListener(e -> openLoginView());
 	}
-
+	
 	private JPanel createLabelPanel(String text) {
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		panel.setBackground(Style.BACKGROUND_COLOR);
@@ -109,7 +109,7 @@ public class SignUpView extends JFrame {
 		panel.add(component, BorderLayout.CENTER);
 		return panel;
 	}
-
+	// 회원가입
 	private void handleSignUp() {
 		String username = usernameField.getText().trim();
 		String password = new String(passwordField.getPassword()).trim();
@@ -153,15 +153,15 @@ public class SignUpView extends JFrame {
 			showErrorDialog("서버 연결 실패");
 		}
 	}
-
+	// 에러 표시 형
 	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
-
+	// 성공 표시 형식
 	private void showSuccessDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "성공", JOptionPane.INFORMATION_MESSAGE);
 	}
-
+	// 로그인 화면 로딩
 	private void openLoginView() {
 		new LoginView().setVisible(true);
 		this.dispose();

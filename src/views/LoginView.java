@@ -82,7 +82,7 @@ public class LoginView extends JFrame {
 
 		getRootPane().setDefaultButton(loginButton);
 	}
-
+	// 로그인
 	private void handleLogin() {
 		String username = usernameField.getText().trim();
 		String password = new String(passwordField.getPassword()).trim();
@@ -117,12 +117,12 @@ public class LoginView extends JFrame {
 			JOptionPane.showMessageDialog(this, "서버 연결 실패");
 		}
 	}
-
+	// 회원가입 로딩
 	private void openSignUpView() {
 		new SignUpView().setVisible(true);
 		this.dispose();
 	}
-
+	// 메인
 	public static void main(String[] args) {
 
 		try {
@@ -133,6 +133,7 @@ public class LoginView extends JFrame {
 
 		SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
 	}
+	// 에러 메시지 형식
 	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}

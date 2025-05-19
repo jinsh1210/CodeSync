@@ -24,7 +24,6 @@ public class MainView extends JFrame {
     private JPopupMenu popupMenu;
     private JButton publicReposButton;
 
-
     public MainView(User user) {
         this.currentUser = user;
         initializeUI();
@@ -113,7 +112,7 @@ public class MainView extends JFrame {
             }
         });
     }
-
+    // 개인 저장소 로딩
     private void loadRepositories() {
         listModel.clear();
         try {
@@ -158,7 +157,7 @@ public class MainView extends JFrame {
             JOptionPane.showMessageDialog(this, "저장소 로딩 실패");
         }
     }
-
+    // 저장소 생성 화면
     private void showCreateRepositoryDialog() {
         JTextField nameField = new JTextField();
         JTextArea descField = new JTextArea(3, 20);
@@ -215,7 +214,7 @@ public class MainView extends JFrame {
             }
         }
     }
-
+    // 저장소 열기
     private void openRepository(Repository repository) {
         try {
             RepositoryView repoView = new RepositoryView(repository, currentUser);
@@ -225,7 +224,7 @@ public class MainView extends JFrame {
             JOptionPane.showMessageDialog(this, "저장소 열기 실패: " + e.getMessage());
         }
     }
-
+    // 로그아웃
     private void handleLogout() {
         int confirm = JOptionPane.showConfirmDialog(this, "정말 로그아웃 하시겠습니까?", "로그아웃", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
@@ -233,7 +232,7 @@ public class MainView extends JFrame {
             this.dispose();
         }
     }
-
+    // 저장소 표시 형식
     private class RepositoryListCellRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -246,7 +245,7 @@ public class MainView extends JFrame {
             return this;
         }
     }
-
+    // 저장소 삭제
     private void handleDeleteRepository(Repository selected) {
         int confirm = JOptionPane.showConfirmDialog(this, "정말로 '" + selected.getName() + "' 저장소를 삭제하시겠습니까?",
                 "저장소 삭제 확인", JOptionPane.YES_NO_OPTION);
@@ -268,6 +267,7 @@ public class MainView extends JFrame {
             }
         }
     }
+    // 공개 저장소 로딩
     private void loadPublicRepositories() {
         listModel.clear();
         try {
@@ -316,6 +316,7 @@ public class MainView extends JFrame {
             JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
         }
     }
+    // 에러 메시지 형식
     private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
