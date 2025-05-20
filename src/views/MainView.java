@@ -14,310 +14,318 @@ import utils.ClientSock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+//MainView 클래스 - 로그인된 사용자의 저장소를 보여주고 관리하는 메인 UI
 public class MainView extends JFrame {
-    private User currentUser;
-    private JList<Repository> repositoryList;
-    private DefaultListModel<Repository> listModel;
-    private JButton createRepoButton;
-    private JButton refreshButton;
-    private JButton logoutButton;
-    private JPopupMenu popupMenu;
-    private JButton publicReposButton;
+	private User currentUser;
+	private JList<Repository> repositoryList;
+	private DefaultListModel<Repository> listModel;
+	private JButton createRepoButton;
+	private JButton refreshButton;
+	private JButton logoutButton;
+	private JPopupMenu popupMenu;
+	private JButton publicReposButton;
 
-    public MainView(User user) {
-        this.currentUser = user;
-        initializeUI();
-        loadRepositories();
-    }
+	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
+	public MainView(User user) {
+		this.currentUser = user;
+		initializeUI();
+		loadRepositories();
+	}
 
-    private void initializeUI() {
-        setTitle("J.S.Repo - Main");
-        setSize(850, 600);
-        setMinimumSize(new Dimension(700, 400));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+	// 메인 화면 UI 구성 및 이벤트 바인딩
+	private void initializeUI() {
+		setTitle("J.S.Repo - Main");
+		setSize(850, 600);
+		setMinimumSize(new Dimension(700, 400));
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        mainPanel.setBackground(Style.BACKGROUND_COLOR);
+		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+		mainPanel.setBackground(Style.BACKGROUND_COLOR);
 
-        JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
-        titleLabel.setFont(Style.TITLE_FONT);
-        titleLabel.setForeground(Style.PRIMARY_COLOR);
+		JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
+		titleLabel.setFont(Style.TITLE_FONT);
+		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(Style.BACKGROUND_COLOR);
-        topPanel.add(titleLabel, BorderLayout.WEST);
+		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.setBackground(Style.BACKGROUND_COLOR);
+		topPanel.add(titleLabel, BorderLayout.WEST);
 
-        createRepoButton = Style.createStyledButton("저장소 만들기", Style.PRIMARY_COLOR, Color.WHITE);
-        refreshButton = Style.createStyledButton("새로고침", Style.PRIMARY_COLOR, Color.WHITE);
-        publicReposButton = Style.createStyledButton("공개 저장소", Style.PRIMARY_COLOR, Color.WHITE);
-        logoutButton = Style.createStyledButton("로그아웃", new Color(231, 76, 60), Color.WHITE);
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonPanel.setBackground(Style.BACKGROUND_COLOR);
-        buttonPanel.add(createRepoButton);
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(publicReposButton);
-        buttonPanel.add(logoutButton);
+		createRepoButton = Style.createStyledButton("저장소 만들기", Style.PRIMARY_COLOR, Color.WHITE);
+		refreshButton = Style.createStyledButton("새로고침", Style.PRIMARY_COLOR, Color.WHITE);
+		publicReposButton = Style.createStyledButton("공개 저장소", Style.PRIMARY_COLOR, Color.WHITE);
+		logoutButton = Style.createStyledButton("로그아웃", new Color(231, 76, 60), Color.WHITE);
 
-        topPanel.add(buttonPanel, BorderLayout.EAST);
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+		buttonPanel.setBackground(Style.BACKGROUND_COLOR);
+		buttonPanel.add(createRepoButton);
+		buttonPanel.add(refreshButton);
+		buttonPanel.add(publicReposButton);
+		buttonPanel.add(logoutButton);
 
-        listModel = new DefaultListModel<>();
-        repositoryList = new JList<>(listModel);
-        repositoryList.setCellRenderer(new RepositoryListCellRenderer());
-        repositoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        repositoryList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		topPanel.add(buttonPanel, BorderLayout.EAST);
 
-        repositoryList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int index = repositoryList.locationToIndex(e.getPoint());
-                if (index != -1) {
-                    Rectangle bounds = repositoryList.getCellBounds(index, index);
-                    if (bounds.contains(e.getPoint())) {
-                        repositoryList.setSelectedIndex(index);
+		listModel = new DefaultListModel<>();
+		repositoryList = new JList<>(listModel);
+		repositoryList.setCellRenderer(new RepositoryListCellRenderer());
+		repositoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		repositoryList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-                        if (SwingUtilities.isRightMouseButton(e)) {
-                            popupMenu.show(repositoryList, e.getX(), e.getY());
-                        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-                            openRepository(listModel.get(index));
-                        }
-                    }
-                }
-            }
-        });
+		repositoryList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int index = repositoryList.locationToIndex(e.getPoint());
+				if (index != -1) {
+					Rectangle bounds = repositoryList.getCellBounds(index, index);
+					if (bounds.contains(e.getPoint())) {
+						repositoryList.setSelectedIndex(index);
 
-        JScrollPane scrollPane = new JScrollPane(repositoryList);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+						if (SwingUtilities.isRightMouseButton(e)) {
+							popupMenu.show(repositoryList, e.getX(), e.getY());
+						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+							openRepository(listModel.get(index));
+						}
+					}
+				}
+			}
+		});
 
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(repositoryList);
+		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
-        add(mainPanel);
+		mainPanel.add(topPanel, BorderLayout.NORTH);
+		mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        createRepoButton.addActionListener(e -> showCreateRepositoryDialog());
-        refreshButton.addActionListener(e -> loadRepositories());
-        logoutButton.addActionListener(e -> handleLogout());
-        publicReposButton.addActionListener(e -> loadPublicRepositories());
+		add(mainPanel);
 
-        popupMenu = new JPopupMenu();
-        JMenuItem deleteItem = new JMenuItem("삭제");
-        popupMenu.add(deleteItem);
+		createRepoButton.addActionListener(e -> showCreateRepositoryDialog());
+		refreshButton.addActionListener(e -> loadRepositories());
+		logoutButton.addActionListener(e -> handleLogout());
+		publicReposButton.addActionListener(e -> loadPublicRepositories());
 
-        deleteItem.addActionListener(e -> {
-            Repository selected = repositoryList.getSelectedValue();
-            if (selected != null) {
-                handleDeleteRepository(selected);
-            }
-        });
-    }
-    // 개인 저장소 로딩
-    private void loadRepositories() {
-        listModel.clear();
-        try {
-            ClientSock.sendCommand("/repo_list");
+		popupMenu = new JPopupMenu();
+		JMenuItem deleteItem = new JMenuItem("삭제");
+		popupMenu.add(deleteItem);
 
-            String line;
-            StringBuilder jsonBuilder = new StringBuilder();
-            boolean inRepoList = false;
+		deleteItem.addActionListener(e -> {
+			Repository selected = repositoryList.getSelectedValue();
+			if (selected != null) {
+				handleDeleteRepository(selected);
+			}
+		});
+	}
 
-            while ((line = ClientSock.receiveResponse()) != null) {
-                if (line.equals("/#/repo_SOL")) {
-                    inRepoList = true;
-                    continue;
-                } else if (line.equals("/#/repo_EOL")) {
-                    break;
-                }
+	// 서버로부터 개인 저장소 목록을 불러와 리스트에 표시
+	private void loadRepositories() {
+		listModel.clear();
+		try {
+			ClientSock.sendCommand("/repo_list");
 
-                if (inRepoList) {
-                    jsonBuilder.append(line);
-                }
-            }
+			String line;
+			StringBuilder jsonBuilder = new StringBuilder();
+			boolean inRepoList = false;
 
-            JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
-            Set<Integer> addedIds = new HashSet<>();
+			while ((line = ClientSock.receiveResponse()) != null) {
+				if (line.equals("/#/repo_SOL")) {
+					inRepoList = true;
+					continue;
+				} else if (line.equals("/#/repo_EOL")) {
+					break;
+				}
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
-                String name = obj.getString("name");
-                String description = obj.getString("description");
-                String visibility = obj.getString("visibility");
-                int id = i; // 서버에서 id를 전달하지 않으면 인덱스로 임시 부여
+				if (inRepoList) {
+					jsonBuilder.append(line);
+				}
+			}
 
-                if (!addedIds.contains(id)) {
-                    Repository repo = new Repository(id, name, description, visibility);
-                    listModel.addElement(repo);
-                    addedIds.add(id);
-                }
-            }
+			JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
+			Set<Integer> addedIds = new HashSet<>();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "저장소 로딩 실패");
-        }
-    }
-    // 저장소 생성 화면
-    private void showCreateRepositoryDialog() {
-        JTextField nameField = new JTextField();
-        JTextArea descField = new JTextArea(3, 20);
-        descField.setLineWrap(true);
-        descField.setWrapStyleWord(true);
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				String name = obj.getString("name");
+				String description = obj.getString("description");
+				String visibility = obj.getString("visibility");
+				int id = i;
 
-        JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
-        panel.setBackground(Style.BACKGROUND_COLOR);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(new JLabel("저장소 이름:"));
-        panel.add(nameField);
-        panel.add(new JLabel("설명:"));
-        panel.add(new JScrollPane(descField));
+				if (!addedIds.contains(id)) {
+					Repository repo = new Repository(id, name, description, visibility);
+					listModel.addElement(repo);
+					addedIds.add(id);
+				}
+			}
 
-        String[] options = {"private", "public"};
-        String selected = (String) JOptionPane.showInputDialog(this, "접근 권한:", "설정",
-                JOptionPane.PLAIN_MESSAGE, null, options, "private");
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "저장소 로딩 실패");
+		}
+	}
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
-        if (result == JOptionPane.OK_OPTION && selected != null) {
-        	String rawName = nameField.getText().trim(); // 사용자가 입력한 원본 이름
-        	String name = nameField.getText().trim().replaceAll("\\s+", "_"); // 공백 -> _
-            String description = descField.getText().trim();
-            
-            // 안내 메시지: 이름이 자동 수정되었을 때만 표시
-            if (!name.equals(rawName)) {
-                JOptionPane.showMessageDialog(this,
-                    "저장소 이름에 포함된 공백은 밑줄(_)로 자동 변경됩니다.\n변경된 이름: " + name,
-                    "이름 자동 수정",
-                    JOptionPane.INFORMATION_MESSAGE);
-            }
+	// 저장소 생성 다이얼로그를 띄우고 서버에 생성 요청
+	private void showCreateRepositoryDialog() {
+		JTextField nameField = new JTextField();
+		JTextArea descField = new JTextArea(3, 20);
+		descField.setLineWrap(true);
+		descField.setWrapStyleWord(true);
 
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "저장소 이름을 입력해주세요.");
-                return;
-            }
+		JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
+		panel.setBackground(Style.BACKGROUND_COLOR);
+		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		panel.add(new JLabel("저장소 이름:"));
+		panel.add(nameField);
+		panel.add(new JLabel("설명:"));
+		panel.add(new JScrollPane(descField));
 
-            try {
-                ClientSock.sendCommand("/repo_create " + name + " \"" + description + "\" " + selected);
-                String response = ClientSock.receiveResponse();
-                
-                if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
-                    JOptionPane.showMessageDialog(this, "저장소 생성 성공");
-                    loadRepositories();
-                } else if (response != null && response.startsWith("/#/error")) {
-    				String msg = response.replace("/#/error", "").trim();
-    				showErrorDialog("저장소 생성 실패: "+msg);
-    			} else {
-    				showErrorDialog("알 수 없는 서버 응답: " + response);
-    			}
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "서버 연결 실패");
-            }
-        }
-    }
-    // 저장소 열기
-    private void openRepository(Repository repository) {
-        try {
-            RepositoryView repoView = new RepositoryView(repository, currentUser);
-            repoView.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace(); // 콘솔 확인
-            JOptionPane.showMessageDialog(this, "저장소 열기 실패: " + e.getMessage());
-        }
-    }
-    // 로그아웃
-    private void handleLogout() {
-        int confirm = JOptionPane.showConfirmDialog(this, "정말 로그아웃 하시겠습니까?", "로그아웃", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            new LoginView().setVisible(true);
-            this.dispose();
-        }
-    }
-    // 저장소 표시 형식
-    private class RepositoryListCellRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-                                                      boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (value instanceof Repository) {
-                Repository repo = (Repository) value;
-                setText("(" + repo.getVisibility() + ") " + repo.getName() + " | " + repo.getDescription());
-            }
-            return this;
-        }
-    }
-    // 저장소 삭제
-    private void handleDeleteRepository(Repository selected) {
-        int confirm = JOptionPane.showConfirmDialog(this, "정말로 '" + selected.getName() + "' 저장소를 삭제하시겠습니까?",
-                "저장소 삭제 확인", JOptionPane.YES_NO_OPTION);
+		String[] options = { "private", "public" };
+		String selected = (String) JOptionPane.showInputDialog(this, "접근 권한:", "설정", JOptionPane.PLAIN_MESSAGE, null,
+				options, "private");
 
-        if (confirm == JOptionPane.YES_OPTION) {
-            try {
-                ClientSock.sendCommand("/repo_delete " + selected.getName());
-                String response = ClientSock.receiveResponse();
-                if (response.startsWith("/#/repo_delete_success")) {
-                    JOptionPane.showMessageDialog(this, "저장소가 삭제되었습니다.");
-                    loadRepositories();
-                } else if (response != null && response.startsWith("/#/repo_delete_fail")) {
-    				showErrorDialog("삭제 실패: 저장소 삭제 권한이 없습니다.");
-    			} else {
-    				showErrorDialog(response);
-    			}
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "서버 연결 실패");
-            }
-        }
-    }
-    // 공개 저장소 로딩
-    private void loadPublicRepositories() {
-        listModel.clear();
-        try {
-            ClientSock.sendCommand("/list_public_repos");
+		int result = JOptionPane.showConfirmDialog(this, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE);
+		if (result == JOptionPane.OK_OPTION && selected != null) {
+			String rawName = nameField.getText().trim();
+			String name = nameField.getText().trim().replaceAll("\\s+", "_");
+			String description = descField.getText().trim();
 
-            String line;
-            StringBuilder jsonBuilder = new StringBuilder();
-            boolean inList = false;
+			if (!name.equals(rawName)) {
+				JOptionPane.showMessageDialog(this, "저장소 이름에 포함된 공백은 밑줄(_)로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
 
-            while ((line = ClientSock.receiveResponse()) != null) {
-                if (line.equals("/#/list_public_repos_SOL")) {
-                    inList = true;
-                    continue;
-                } else if (line.equals("/#/list_public_repos_EOL")) {
-                    break;
-                }
+			if (name.isEmpty()) {
+				JOptionPane.showMessageDialog(this, "저장소 이름을 입력해주세요.");
+				return;
+			}
 
-                if (inList) {
-                    jsonBuilder.append(line);
-                }
-            }
+			try {
+				ClientSock.sendCommand("/repo_create " + name + " \"" + description + "\" " + selected);
+				String response = ClientSock.receiveResponse();
 
-            JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
-            Set<Integer> addedIds = new HashSet<>();
+				if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
+					JOptionPane.showMessageDialog(this, "저장소 생성 성공");
+					loadRepositories();
+				} else if (response != null && response.startsWith("/#/error")) {
+					String msg = response.replace("/#/error", "").trim();
+					showErrorDialog("저장소 생성 실패: " + msg);
+				} else {
+					showErrorDialog("알 수 없는 서버 응답: " + response);
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(this, "서버 연결 실패");
+			}
+		}
+	}
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
-                int id = obj.optInt("id", i); // 서버에서 id 제공 시 사용
-                String name = obj.getString("name");
-                String description = obj.getString("description");
-                String visibility = obj.getString("visibility");
+	// 저장소를 더블클릭했을 때 RepositoryView 창 열기
+	private void openRepository(Repository repository) {
+		try {
+			RepositoryView repoView = new RepositoryView(repository, currentUser);
+			repoView.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "저장소 열기 실패: " + e.getMessage());
+		}
+	}
 
-                if (!addedIds.contains(id)) {
-                    Repository repo = new Repository(id, name, description, visibility);
-                    listModel.addElement(repo);
-                    addedIds.add(id);
-                }
-            }
+	// 로그아웃 처리 - 로그인 화면으로 전환하고 현재 창 닫기
+	private void handleLogout() {
+		int confirm = JOptionPane.showConfirmDialog(this, "정말 로그아웃 하시겠습니까?", "로그아웃", JOptionPane.YES_NO_OPTION);
+		if (confirm == JOptionPane.YES_OPTION) {
+			new LoginView().setVisible(true);
+			this.dispose();
+		}
+	}
 
-            if (jsonArray.length() == 0) {
-                JOptionPane.showMessageDialog(this, "공개 저장소가 없습니다.");
-            }
+	// 저장소 리스트 셀 렌더링 (형식 지정)
+	private class RepositoryListCellRenderer extends DefaultListCellRenderer {
+		@Override
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
+			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			if (value instanceof Repository) {
+				Repository repo = (Repository) value;
+				setText("(" + repo.getVisibility() + ") " + repo.getName() + " | " + repo.getDescription());
+			}
+			return this;
+		}
+	}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
-        }
-    }
-    // 에러 메시지 형식
-    private void showErrorDialog(String message) {
+	// 저장소 삭제 요청 및 응답 처리
+	private void handleDeleteRepository(Repository selected) {
+		int confirm = JOptionPane.showConfirmDialog(this, "정말로 '" + selected.getName() + "' 저장소를 삭제하시겠습니까?",
+				"저장소 삭제 확인", JOptionPane.YES_NO_OPTION);
+
+		if (confirm == JOptionPane.YES_OPTION) {
+			try {
+				ClientSock.sendCommand("/repo_delete " + selected.getName());
+				String response = ClientSock.receiveResponse();
+				if (response.startsWith("/#/repo_delete_success")) {
+					JOptionPane.showMessageDialog(this, "저장소가 삭제되었습니다.");
+					loadRepositories();
+				} else if (response != null && response.startsWith("/#/repo_delete_fail")) {
+					showErrorDialog("삭제 실패: 저장소 삭제 권한이 없습니다.");
+				} else {
+					showErrorDialog(response);
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(this, "서버 연결 실패");
+			}
+		}
+	}
+
+	// 서버에서 공개 저장소 목록 로드
+	private void loadPublicRepositories() {
+		listModel.clear();
+		try {
+			ClientSock.sendCommand("/list_public_repos");
+
+			String line;
+			StringBuilder jsonBuilder = new StringBuilder();
+			boolean inList = false;
+
+			while ((line = ClientSock.receiveResponse()) != null) {
+				if (line.equals("/#/list_public_repos_SOL")) {
+					inList = true;
+					continue;
+				} else if (line.equals("/#/list_public_repos_EOL")) {
+					break;
+				}
+
+				if (inList) {
+					jsonBuilder.append(line);
+				}
+			}
+
+			JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
+			Set<Integer> addedIds = new HashSet<>();
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				int id = obj.optInt("id", i);
+				String name = obj.getString("name");
+				String description = obj.getString("description");
+				String visibility = obj.getString("visibility");
+
+				if (!addedIds.contains(id)) {
+					Repository repo = new Repository(id, name, description, visibility);
+					listModel.addElement(repo);
+					addedIds.add(id);
+				}
+			}
+
+			if (jsonArray.length() == 0) {
+				JOptionPane.showMessageDialog(this, "공개 저장소가 없습니다.");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
+		}
+	}
+
+	// 에러 메시지 일괄 처리 팝업
+	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
 }

@@ -5,6 +5,7 @@ import java.awt.*;
 import utils.Style;
 import utils.ClientSock;
 
+// SignUpView 클래스 - 사용자 회원가입을 처리하는 UI 프레임
 public class SignUpView extends JFrame {
 	private JTextField usernameField;
 	private JPasswordField passwordField;
@@ -13,10 +14,12 @@ public class SignUpView extends JFrame {
 	private JButton signUpButton;
 	private JButton cancelButton;
 
+	// 생성자 - UI 초기화
 	public SignUpView() {
 		initializeUI();
 	}
 
+	// UI 구성 및 이벤트 등록
 	private void initializeUI() {
 		setTitle("J.S.Repo - Sign Up");
 		setSize(500, 580);
@@ -72,6 +75,7 @@ public class SignUpView extends JFrame {
 
 		mainPanel.add(buttonPanel);
 
+		// 배경에 그라디언트 효과 추가
 		JPanel containerPanel = new JPanel() {
 			@Override
 			protected void paintComponent(Graphics g) {
@@ -89,10 +93,12 @@ public class SignUpView extends JFrame {
 		containerPanel.add(mainPanel, BorderLayout.CENTER);
 		add(containerPanel);
 
+		// 버튼 클릭 이벤트 등록
 		signUpButton.addActionListener(e -> handleSignUp());
 		cancelButton.addActionListener(e -> openLoginView());
 	}
-	
+
+	// 라벨이 포함된 패널 생성
 	private JPanel createLabelPanel(String text) {
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		panel.setBackground(Style.BACKGROUND_COLOR);
@@ -103,13 +109,15 @@ public class SignUpView extends JFrame {
 		return panel;
 	}
 
+	// 입력 필드를 BorderLayout에 감싸는 패널 생성
 	private JPanel wrapInPanel(JComponent component) {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBackground(Style.BACKGROUND_COLOR);
 		panel.add(component, BorderLayout.CENTER);
 		return panel;
 	}
-	// 회원가입
+
+	// 회원가입 처리 로직
 	private void handleSignUp() {
 		String username = usernameField.getText().trim();
 		String password = new String(passwordField.getPassword()).trim();
@@ -146,22 +154,24 @@ public class SignUpView extends JFrame {
 				showErrorDialog("회원가입 실패: " + msg);
 			} else {
 				showErrorDialog(response);
-
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			showErrorDialog("서버 연결 실패");
 		}
 	}
-	// 에러 표시 형
+
+	// 에러 메시지 팝업 표시
 	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
-	// 성공 표시 형식
+
+	// 성공 메시지 팝업 표시
 	private void showSuccessDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "성공", JOptionPane.INFORMATION_MESSAGE);
 	}
-	// 로그인 화면 로딩
+
+	// 로그인 화면으로 돌아가기
 	private void openLoginView() {
 		new LoginView().setVisible(true);
 		this.dispose();
