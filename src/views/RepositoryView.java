@@ -10,14 +10,11 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import models.User;
 import models.Repository;
-import models.FileInfo;
 import utils.ClientSock;
 import utils.Style;
 

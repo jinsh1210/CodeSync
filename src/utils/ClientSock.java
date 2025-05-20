@@ -10,7 +10,7 @@ import models.FileInfo;
 import models.Repository;
 
 public class ClientSock {
-    private static final String SERVERIP = "sjc07250.iptime.org";
+   private static final String SERVERIP = "sjc07250.iptime.org";
     private static final int PORT = 9969;
     private static final String VERISION = "v0.0.1b";
     private static final String TOKEN = "fjk123#%k2!lsd!234!%^^f17!@#sdfs!@$3$*s1s56!@#";
