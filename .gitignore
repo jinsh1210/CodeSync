@@ -12,6 +12,7 @@
 
 # macOS Finder
 .DS_Store
+.vscode/
 
 # Logs
 *.log
