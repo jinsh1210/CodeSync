@@ -6,8 +6,6 @@ import javax.swing.tree.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import lombok.Setter;
-
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -357,9 +355,10 @@ public class RepositoryView extends JFrame {
 			}
 			current = child;
 		}
-	}
+	} 
 
 	// 파일 업로드 처리 (파일 또는 폴더)
+	//TODO: 콜라보 유저만 가능하게 구현 필요
 	private void handleUpload() {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -433,6 +432,7 @@ public class RepositoryView extends JFrame {
 	}
 
 	// 파일 또는 폴더 삭제 처리
+	//TODO: 콜라보 유저만 가능하게 구현 필요
 	private void handleDelete() {
 		TreePath selectedPath = fileTree.getSelectionPath();
 		if (selectedPath == null) {

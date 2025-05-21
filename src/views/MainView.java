@@ -44,6 +44,10 @@ public class MainView extends JFrame {
 
 		refreshIconButton.setBackground(Color.WHITE); // 다크모드는 applyDarkMode에서 반영
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+		refreshIconButton.setFocusPainted(false); // 포커스 테두리 제거
+		refreshIconButton.setBorderPainted(false); // 버튼 테두리 제거
+		refreshIconButton.setContentAreaFilled(false); // 배경 채우기 제거
+		refreshIconButton.setOpaque(false); // 불투명 설정 해제
 
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -51,7 +55,7 @@ public class MainView extends JFrame {
 
 		JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
 		titleLabel.setFont(Style.TITLE_FONT);
-		titleLabel.setForeground(Style.TEXT_PRIMARY_COLOR);
+		titleLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.setBackground(Style.BACKGROUND_COLOR);
@@ -93,7 +97,11 @@ public class MainView extends JFrame {
 		menuBar.add(Box.createHorizontalGlue());
 
 		// 다크 모드 토글 버튼 생성
-		JToggleButton darkModeToggle = new JToggleButton("🌙");
+		JToggleButton darkModeToggle = new JToggleButton("");
+		ImageIcon moonIcon = new ImageIcon("src/icons/moon.png");
+		Image scaledMoon = moonIcon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+		darkModeToggle.setIcon(new ImageIcon(scaledMoon));
+		darkModeToggle.setText(""); // 텍스트 제거
 		darkModeToggle.setFont(Style.BUTTON_FONT);
 		darkModeToggle.setFocusable(false);
 		darkModeToggle.setSelected(Style.isDarkMode); // 현재 설정 상태 반영
@@ -184,11 +192,11 @@ public class MainView extends JFrame {
 		username.setFont(Style.LABEL_FONT.deriveFont(13f));
 		sizeLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
 
-		nameLabel.setForeground(Style.TEXT_PRIMARY_COLOR);
+		nameLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
 		descLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-		visibilityLabel.setForeground(Style.TEXT_META_COLOR);
-		username.setForeground(Style.TEXT_META_COLOR);
-		sizeLabel.setForeground(Style.TEXT_META_COLOR);
+		visibilityLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+		username.setForeground(Style.TEXT_SECONDARY_COLOR);
+		sizeLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
 
 		detailPanel.add(nameLabel);
 		detailPanel.add(Box.createVerticalStrut(5));
@@ -357,12 +365,14 @@ public class MainView extends JFrame {
 	// 저장소를 더블클릭했을 때 RepositoryView 창 열기
 	private void openRepository(Repository repository) {
 		try {
-			
-			String user=repository.getUsername();
+
+			String user = repository.getUsername();
 			RepositoryView repoView;
-			if(currentUser.getUsername().equals(user)) repoView = new RepositoryView(repository, currentUser,null);
-			else repoView = new RepositoryView(repository, currentUser,user);
-			
+			if (currentUser.getUsername().equals(user))
+				repoView = new RepositoryView(repository, currentUser, null);
+			else
+				repoView = new RepositoryView(repository, currentUser, user);
+
 			repoView.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
