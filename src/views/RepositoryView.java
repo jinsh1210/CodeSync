@@ -84,22 +84,21 @@ public class RepositoryView extends JFrame {
 
 		headerWrapper.add(headerPanel, BorderLayout.CENTER); // 제목 + 설명
 		if (repository.getUsername().equals(currentUser.getUsername())) {
-			// 메뉴 버튼
-			JPopupMenu menu = new JPopupMenu();
-			JMenuItem add = new JMenuItem("콜라보 추가");
-			JMenuItem view = new JMenuItem("콜라보 목록");
-			JMenuItem remove = new JMenuItem("콜라보 제거");
 
-			add.addActionListener(e -> handleAddCollaborator());
-			view.addActionListener(e -> handleViewCollaborators());
-			remove.addActionListener(e -> handleRemoveCollaborator());
-
-			menu.add(add);
-			menu.add(view);
-			menu.add(remove);
-
-			collaborateButton = Style.createStyledButton("콜라보 ▼", Style.TEXT_PRIMARY_COLOR, Color.WHITE);
-			collaborateButton.addActionListener(e -> menu.show(collaborateButton, 0, collaborateButton.getHeight()));
+			JButton collaborateButton = new JButton("");
+			collaborateButton.setMargin(new Insets(2, 4, 2, 4));
+			collaborateButton.setFocusable(false);
+			ImageIcon refreshIcon = new ImageIcon("src/icons/collabor.png");
+			Image scaledrefresh = refreshIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+			collaborateButton.setIcon(new ImageIcon(scaledrefresh));
+			collaborateButton.setBackground(Color.WHITE); // 다크모드는 applyDarkMode에서 반영
+			collaborateButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+			collaborateButton.setFocusPainted(false); // 포커스 테두리 제거
+			collaborateButton.setBorderPainted(false); // 버튼 테두리 제거
+			collaborateButton.setContentAreaFilled(false); // 배경 채우기 제거
+			collaborateButton.setOpaque(false); // 불투명 설정 해제
+			
+			collaborateButton.addActionListener(e -> handleViewCollaborators());
 
 			JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			topRightPanel.setBackground(Style.BACKGROUND_COLOR);
@@ -516,76 +515,106 @@ public class RepositoryView extends JFrame {
 	// 콜라보 조회
 	private void handleViewCollaborators() {
 		try {
-			ClientSock.sendCommand("/list_collaborators " + repository.getId());
+			ClientSock.sendCommand("/list_collaborators " + repository.getName());
 
 			StringBuilder responseBuilder = new StringBuilder();
+			boolean started = false;
+
 			while (true) {
 				String line = ClientSock.receiveResponse();
 				if (line == null)
 					break;
-				if (line.contains("/#/collaborator_list_EOL"))
+
+				if (line.contains("/#/collaborator_list_SOL")) {
+					started = true;
+					continue;
+				}
+				if (line.contains("/#/collaborator_list_EOL")) {
+					line = line.replace("/#/collaborator_list_EOL", "");
+					responseBuilder.append(line);
 					break;
-				if (!line.contains("/#/collaborator_list_SOL")) {
+				}
+				if (started) {
 					responseBuilder.append(line);
 				}
 			}
 
-			JSONArray collaborators = new JSONArray(responseBuilder.toString().trim());
-			StringBuilder list = new StringBuilder();
+			String jsonText = responseBuilder.toString().trim();
+			JSONArray collaborators = new JSONArray(jsonText);
+
+			DefaultListModel<String> listModel = new DefaultListModel<>();
 			for (int i = 0; i < collaborators.length(); i++) {
-				list.append("- ").append(collaborators.getString(i)).append("\n");
+				JSONObject userObj = collaborators.getJSONObject(i);
+				String userId = userObj.getString("user_id");
+				listModel.addElement((i + 1) + ". " + userId);
 			}
-			JOptionPane.showMessageDialog(this, list.length() > 0 ? list.toString() : "콜라보레이터가 없습니다.");
+
+			JList<String> collaboratorList = new JList<>(listModel);
+			collaboratorList.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+			JScrollPane scrollPane = new JScrollPane(collaboratorList);
+			scrollPane.setPreferredSize(new Dimension(300, 200));
+
+			// 삭제 우클릭 메뉴
+			JPopupMenu menu = new JPopupMenu();
+			JMenuItem removeItem = new JMenuItem("삭제");
+			removeItem.addActionListener(ev -> {
+				int index = collaboratorList.getSelectedIndex();
+				if (index >= 0) {
+					String selected = listModel.get(index);
+					String targetId = selected.substring(selected.indexOf(" ") + 1);
+					int confirm = JOptionPane.showConfirmDialog(null,
+							"[" + targetId + "] 사용자를 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
+					if (confirm == JOptionPane.YES_OPTION) {
+						try {
+							ClientSock.sendCommand("/remove_collaborator " + repository.getName() + " " + targetId);
+							String res = ClientSock.receiveResponse();
+							if (res.startsWith("/#/remove_collaborator")) {
+								listModel.remove(index);
+							} else {
+								JOptionPane.showMessageDialog(null, "❌ 삭제 실패: " + res.replace("/#/error", "").trim());
+							}
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							JOptionPane.showMessageDialog(null, "서버 오류");
+						}
+					}
+				}
+			});
+			menu.add(removeItem);
+			collaboratorList.setComponentPopupMenu(menu);
+
+			// 추가 버튼
+			JButton addButton = new JButton("추가");
+			addButton.addActionListener(e -> {
+				String newUser = JOptionPane.showInputDialog(null, "추가할 사용자 아이디 입력:");
+				if (newUser != null && !newUser.trim().isEmpty()) {
+					try {
+						ClientSock.sendCommand("/add_collaborator " + repository.getName() + " " + newUser.trim());
+						String response = ClientSock.receiveResponse();
+						if (response.startsWith("/#/add_collaborator")) {
+							listModel.addElement((listModel.size() + 1) + ". " + newUser.trim());
+						} else {
+							JOptionPane.showMessageDialog(null, "❌ 추가 실패: " + response.replace("/#/error", "").trim());
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						JOptionPane.showMessageDialog(null, "서버 오류");
+					}
+				}
+			});
+
+			JPanel panel = new JPanel(new BorderLayout());
+			panel.add(scrollPane, BorderLayout.CENTER);
+
+			JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			controlPanel.add(addButton);
+			panel.add(controlPanel, BorderLayout.SOUTH);
+
+			JOptionPane.showMessageDialog(this, panel, "콜라보레이터 목록", JOptionPane.PLAIN_MESSAGE);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "콜라보레이터 목록을 불러오는 중 오류 발생");
-		}
-	}
-
-	// 콜라보 추가
-	private void handleAddCollaborator() {
-		String collaboratorId = JOptionPane.showInputDialog(this, "추가할 사용자 아이디를 입력하세요:");
-		
-		if (collaboratorId == null || collaboratorId.trim().isEmpty()) {
-			return;
-		}
-
-		try {
-			ClientSock.sendCommand(
-					"/add_collaborator " + repository.getName() + " " + collaboratorId.trim());
-			String response = ClientSock.receiveResponse();
-			if (response.startsWith("/#/add_success")) {
-				JOptionPane.showMessageDialog(this, "콜라보레이터가 성공적으로 추가되었습니다.");
-			} else if (response.startsWith("/#/error")) {
-				JOptionPane.showMessageDialog(this, "❌ " + response.replace("/#/error", "").trim());
-			} else {
-				JOptionPane.showMessageDialog(this, "❓ 알 수 없는 응답: " + response);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "서버 통신 중 오류 발생");
-		}
-	}
-
-	// 콜라보 제거
-	private void handleRemoveCollaborator() {
-		String collaboratorId = JOptionPane.showInputDialog(this, "삭제할 사용자 아이디를 입력하세요:");
-		if (collaboratorId == null || collaboratorId.trim().isEmpty())
-			return;
-
-		try {
-			ClientSock.sendCommand("/remove_collaborator " + repository.getName() + " " + collaboratorId.trim());
-
-			String response = ClientSock.receiveResponse();
-			if (response.startsWith("/#/remove_collaborator")) {
-				JOptionPane.showMessageDialog(this, "✅ 콜라보레이터가 삭제되었습니다.");
-			} else {
-				JOptionPane.showMessageDialog(this, "❌ " + response.replace("/#/error", "").trim());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "서버 통신 중 오류 발생");
 		}
 	}
 }
