@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,7 +121,7 @@ public class RepositoryView extends JFrame {
 		buttonPanel.add(deleteButton);
 
 		// 파일 트리 구성
-		rootNode = new DefaultMutableTreeNode("파일 목록");
+		rootNode = new DefaultMutableTreeNode(repository.getName());
 		treeModel = new DefaultTreeModel(rootNode);
 		fileTree = new JTree(treeModel);
 		fileTree.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
@@ -181,31 +182,65 @@ public class RepositoryView extends JFrame {
 		});
 
 		// 파일 트리 항목 선택 시 경로 저장
+		// fileTree.addTreeSelectionListener(e -> {
+		// 	TreePath path = fileTree.getSelectionPath();
+		// 	if (path == null || path.getPathCount() <= 1) {
+		// 		return;
+		// 	}
+
+		// 	DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+		// 	String selectedName = selectedNode.getUserObject().toString();
+
+		// 	if ("[비어 있음]".equals(selectedName)) {
+		// 		fileTree.clearSelection();
+		// 		lastSelectedPath = "";
+		// 		return;
+		// 	}
+
+		// 	StringBuilder sb = new StringBuilder();
+		// 	Object[] nodes = path.getPath();
+		// 	for (int i = 1; i < nodes.length; i++) {
+		// 		sb.append(nodes[i].toString());
+		// 		if (i < nodes.length - 1)
+		// 			sb.append("/");
+		// 	}
+		// 	lastSelectedPath = sb.toString();
+		// 	System.out.println("lastSelectedPath :"+lastSelectedPath); //디버그
+		// });
 		fileTree.addTreeSelectionListener(e -> {
 			TreePath path = fileTree.getSelectionPath();
-			if (path == null || path.getPathCount() <= 1) {
-				lastSelectedPath = "";
+			if (path == null) {
 				return;
 			}
 
 			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 			String selectedName = selectedNode.getUserObject().toString();
 
-			if ("[비어 있음]".equals(selectedName)) {
-				fileTree.clearSelection();
-				lastSelectedPath = "";
-				return;
-			}
+			// if ("[비어 있음]".equals(selectedName)) {
+			// 	fileTree.clearSelection();
+			// 	lastSelectedPath = "";
+			// 	return;
+			// }
 
 			StringBuilder sb = new StringBuilder();
 			Object[] nodes = path.getPath();
-			for (int i = 1; i < nodes.length; i++) {
-				sb.append(nodes[i].toString());
-				if (i < nodes.length - 1)
-					sb.append("/");
+
+			// ✅ 루트 노드만 선택된 경우 (예: MyRepo)
+			if (nodes.length == 2) { // [루트, 저장소이름]
+				lastSelectedPath = nodes[1].toString();  // 저장소 이름
+			} else {
+				for (int i = 1; i < nodes.length; i++) {
+					sb.append(nodes[i].toString());
+					if (i < nodes.length - 1)
+						sb.append("/");
+				}
+				lastSelectedPath = sb.toString();
 			}
-			lastSelectedPath = sb.toString();
+			if(lastSelectedPath.endsWith("/[비어 있음]")) lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "/[비어 있음]".length());
+			System.out.println("lastSelectedPath :" + lastSelectedPath); //디버그
 		});
+
+		
 	}
 
 	// 다크 모드 적용
@@ -401,8 +436,9 @@ public class RepositoryView extends JFrame {
 			File selectedFile = fileChooser.getSelectedFile();
 
 			try {
+				System.out.println("selectedPath 대입전 lastselectedpath: "+lastSelectedPath);
 				String selectedPath = lastSelectedPath;
-
+				System.out.println("if 전 selectedPath: "+selectedPath);
 				if (selectedPath.contains(".") && !selectedPath.endsWith("/")) {
 					int lastSlash = selectedPath.lastIndexOf("/");
 					selectedPath = (lastSlash != -1) ? selectedPath.substring(0, lastSlash) : "";
@@ -410,10 +446,14 @@ public class RepositoryView extends JFrame {
 
 				if (selectedFile.isFile()) {
 					String filename = selectedFile.getName();
-					String serverPath = selectedPath.isEmpty() ? filename : selectedPath + "/" + filename;
+					System.out.println("selectedPath: "+selectedPath);//디버그
+					String serverPath = selectedPath.equals("") ? filename : selectedPath + "/" + filename;
+					System.out.println("servPath: "+serverPath); //디버그
 					ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath);
 				} else if (selectedFile.isDirectory()) {
+					System.out.println("isDirectory: "+selectedPath);//디버그
 					ClientSock.push(selectedFile, selectedPath, repository.getName(), currentUser.getId());
+
 				}
 
 				loadFiles(targetUser);

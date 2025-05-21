@@ -3,6 +3,7 @@ package utils;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -157,6 +158,7 @@ public class ClientSock {
             int fileSize = data.length;
 
             sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize);
+            System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize); //디버그
             String response = receiveResponse();
             if (!"/#/push_ready".equals(response.trim())) {
                 System.err.println("[Client] push 실패: 서버 응답 = " + response);
@@ -172,14 +174,15 @@ public class ClientSock {
             e.printStackTrace();
         }
     }
-    
-    
+
+
     public static void push(File folder, String basePath, String repository, int userId) throws IOException { //폴더 형식 전송 오버로드 메소드
         File[] contents = folder.listFiles();
         boolean isEmpty = (contents == null || contents.length == 0);
 
         // 상대 경로 계산
         String relativePath = basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName();
+        System.out.println("폴더 전용 relativePath: "+relativePath+" | basePath: "+basePath); //디버그
 
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
