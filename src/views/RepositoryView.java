@@ -36,15 +36,17 @@ public class RepositoryView extends JFrame {
 	private JButton uploadButton;
 	private JButton downloadButton;
 	private JButton deleteButton;
-	private String targetUser=null;
+	private String targetUser = null;
+
 	// 자동 새로고침용 타이머
 	private Timer refreshTimer;
+	private JButton collaborateButton;
 
 	// 생성자 - 저장소 및 사용자 정보 전달받아 UI 초기화
 	public RepositoryView(Repository repository, User currentUser, String targetUser) {
 		this.repository = repository;
 		this.currentUser = currentUser;
-		this.targetUser=targetUser;
+		this.targetUser = targetUser;
 		initializeUI();
 		loadFiles(targetUser);
 	}
@@ -76,6 +78,36 @@ public class RepositoryView extends JFrame {
 		headerPanel.setBackground(Style.BACKGROUND_COLOR);
 		headerPanel.add(titleLabel, BorderLayout.NORTH);
 		headerPanel.add(descLabel, BorderLayout.SOUTH);
+
+		JPanel headerWrapper = new JPanel(new BorderLayout());
+		headerWrapper.setBackground(Style.BACKGROUND_COLOR);
+
+		headerWrapper.add(headerPanel, BorderLayout.CENTER); // 제목 + 설명
+		if (repository.getUsername().equals(currentUser.getUsername())) {
+			// 메뉴 버튼
+			JPopupMenu menu = new JPopupMenu();
+			JMenuItem add = new JMenuItem("콜라보 추가");
+			JMenuItem view = new JMenuItem("콜라보 목록");
+			JMenuItem remove = new JMenuItem("콜라보 제거");
+
+			add.addActionListener(e -> handleAddCollaborator());
+			view.addActionListener(e -> handleViewCollaborators());
+			remove.addActionListener(e -> handleRemoveCollaborator());
+
+			menu.add(add);
+			menu.add(view);
+			menu.add(remove);
+
+			collaborateButton = Style.createStyledButton("콜라보 ▼", Style.TEXT_PRIMARY_COLOR, Color.WHITE);
+			collaborateButton.addActionListener(e -> menu.show(collaborateButton, 0, collaborateButton.getHeight()));
+
+			JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			topRightPanel.setBackground(Style.BACKGROUND_COLOR);
+			topRightPanel.add(collaborateButton);
+
+			headerWrapper.add(topRightPanel, BorderLayout.EAST);
+		}
+		mainPanel.add(headerWrapper, BorderLayout.NORTH);
 
 		// 버튼 초기화 및 스타일 적용
 		uploadButton = Style.createStyledButton("업로드", Style.PRIMARY_COLOR, Color.WHITE);
@@ -124,7 +156,6 @@ public class RepositoryView extends JFrame {
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
 		// 메인 패널 구성
-		mainPanel.add(headerPanel, BorderLayout.NORTH);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
 		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -221,8 +252,10 @@ public class RepositoryView extends JFrame {
 		rootNode.removeAllChildren();
 
 		try {
-			if(userName==null) ClientSock.sendCommand("/repo_content " + repository.getName());
-			else ClientSock.sendCommand("/repo_content " +userName+" " +repository.getName());
+			if (userName == null)
+				ClientSock.sendCommand("/repo_content " + repository.getName());
+			else
+				ClientSock.sendCommand("/repo_content " + userName + " " + repository.getName());
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
@@ -355,10 +388,10 @@ public class RepositoryView extends JFrame {
 			}
 			current = child;
 		}
-	} 
+	}
 
 	// 파일 업로드 처리 (파일 또는 폴더)
-	//TODO: 콜라보 유저만 가능하게 구현 필요
+	// TODO: 콜라보 유저만 가능하게 구현 필요
 	private void handleUpload() {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -432,7 +465,7 @@ public class RepositoryView extends JFrame {
 	}
 
 	// 파일 또는 폴더 삭제 처리
-	//TODO: 콜라보 유저만 가능하게 구현 필요
+	// TODO: 콜라보 유저만 가능하게 구현 필요
 	private void handleDelete() {
 		TreePath selectedPath = fileTree.getSelectionPath();
 		if (selectedPath == null) {
@@ -477,6 +510,82 @@ public class RepositoryView extends JFrame {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(this, "삭제 중 오류가 발생했습니다.");
+		}
+	}
+
+	// 콜라보 조회
+	private void handleViewCollaborators() {
+		try {
+			ClientSock.sendCommand("/list_collaborators " + repository.getId());
+
+			StringBuilder responseBuilder = new StringBuilder();
+			while (true) {
+				String line = ClientSock.receiveResponse();
+				if (line == null)
+					break;
+				if (line.contains("/#/collaborator_list_EOL"))
+					break;
+				if (!line.contains("/#/collaborator_list_SOL")) {
+					responseBuilder.append(line);
+				}
+			}
+
+			JSONArray collaborators = new JSONArray(responseBuilder.toString().trim());
+			StringBuilder list = new StringBuilder();
+			for (int i = 0; i < collaborators.length(); i++) {
+				list.append("- ").append(collaborators.getString(i)).append("\n");
+			}
+			JOptionPane.showMessageDialog(this, list.length() > 0 ? list.toString() : "콜라보레이터가 없습니다.");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "콜라보레이터 목록을 불러오는 중 오류 발생");
+		}
+	}
+
+	// 콜라보 추가
+	private void handleAddCollaborator() {
+		String collaboratorId = JOptionPane.showInputDialog(this, "추가할 사용자 아이디를 입력하세요:");
+		
+		if (collaboratorId == null || collaboratorId.trim().isEmpty()) {
+			return;
+		}
+
+		try {
+			ClientSock.sendCommand(
+					"/add_collaborator " + repository.getName() + " " + collaboratorId.trim());
+			String response = ClientSock.receiveResponse();
+			if (response.startsWith("/#/add_success")) {
+				JOptionPane.showMessageDialog(this, "콜라보레이터가 성공적으로 추가되었습니다.");
+			} else if (response.startsWith("/#/error")) {
+				JOptionPane.showMessageDialog(this, "❌ " + response.replace("/#/error", "").trim());
+			} else {
+				JOptionPane.showMessageDialog(this, "❓ 알 수 없는 응답: " + response);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "서버 통신 중 오류 발생");
+		}
+	}
+
+	// 콜라보 제거
+	private void handleRemoveCollaborator() {
+		String collaboratorId = JOptionPane.showInputDialog(this, "삭제할 사용자 아이디를 입력하세요:");
+		if (collaboratorId == null || collaboratorId.trim().isEmpty())
+			return;
+
+		try {
+			ClientSock.sendCommand("/remove_collaborator " + repository.getName() + " " + collaboratorId.trim());
+
+			String response = ClientSock.receiveResponse();
+			if (response.startsWith("/#/remove_collaborator")) {
+				JOptionPane.showMessageDialog(this, "✅ 콜라보레이터가 삭제되었습니다.");
+			} else {
+				JOptionPane.showMessageDialog(this, "❌ " + response.replace("/#/error", "").trim());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "서버 통신 중 오류 발생");
 		}
 	}
 }
