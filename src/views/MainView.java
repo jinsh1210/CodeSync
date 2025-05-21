@@ -75,9 +75,9 @@ public class MainView extends JFrame {
 
 		JMenu repoMenu = new JMenu("저장소");
 		JMenuItem createRepoItem = new JMenuItem("저장소 만들기");
-		JMenuItem publicReposItem = new JMenuItem("공개 저장소");
+		JMenuItem searchReposItem = new JMenuItem("저장소 검색");
 		repoMenu.add(createRepoItem);
-		repoMenu.add(publicReposItem);
+		repoMenu.add(searchReposItem);
 
 		JMenu accountMenu = new JMenu("계정");
 		JMenuItem logoutItem = new JMenuItem("로그아웃");
@@ -101,7 +101,7 @@ public class MainView extends JFrame {
 
 		createRepoItem.addActionListener(e -> showCreateRepositoryDialog());
 		refreshIconButton.addActionListener(e -> loadRepositories());
-		publicReposItem.addActionListener(e -> loadPublicRepositories());
+		searchReposItem.addActionListener(e -> searchRepositories());
 		logoutItem.addActionListener(e -> handleLogout());
 		darkModeToggle.addItemListener(e -> {
 			Style.toggleDarkMode();
@@ -114,14 +114,13 @@ public class MainView extends JFrame {
 		// 메뉴바 전체 크기 조정
 		menuBar.setPreferredSize(new Dimension(0, 36)); // 기존보다 약간 높은 높이
 
-
 		// 각 메뉴의 폰트와 마진 확대
 		repoMenu.setFont(Style.menuFont);
 		accountMenu.setFont(Style.menuFont);
 
 		// 메뉴 아이템 폰트 확대
 		createRepoItem.setFont(Style.menuFont);
-		publicReposItem.setFont(Style.menuFont);
+		searchReposItem.setFont(Style.menuFont);
 		logoutItem.setFont(Style.menuFont);
 
 		// 다크모드 토글 버튼 크기 키우기
@@ -417,55 +416,57 @@ public class MainView extends JFrame {
 		}
 	}
 
-	// 서버에서 공개 저장소 목록 로드
-	private void loadPublicRepositories() {
-		listModel.clear();
-		try {
-			ClientSock.sendCommand("/list_public_repos");
-
-			String line;
-			StringBuilder jsonBuilder = new StringBuilder();
-			boolean inList = false;
-
-			while ((line = ClientSock.receiveResponse()) != null) {
-				if (line.equals("/#/list_public_repos_SOL")) {
-					inList = true;
-					continue;
-				} else if (line.equals("/#/list_public_repos_EOL")) {
-					break;
-				}
-
-				if (inList) {
-					jsonBuilder.append(line);
-				}
-			}
-
-			JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
-			Set<Integer> addedIds = new HashSet<>();
-
-			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject obj = jsonArray.getJSONObject(i);
-				int id = obj.optInt("id", i);
-				String name = obj.getString("name");
-				String description = obj.getString("description");
-				String visibility = obj.getString("visibility");
-
-				if (!addedIds.contains(id)) {
-					Repository repo = new Repository(id, name, description, visibility);
-					listModel.addElement(repo);
-					addedIds.add(id);
-				}
-			}
-
-			if (jsonArray.length() == 0) {
-				JOptionPane.showMessageDialog(this, "공개 저장소가 없습니다.");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
-		}
-	}
+	/*
+	 * // 서버에서 공개 저장소 목록 로드
+	 * private void loadPublicRepositories() {
+	 * listModel.clear();
+	 * try {
+	 * ClientSock.sendCommand("/list_public_repos");
+	 * 
+	 * String line;
+	 * StringBuilder jsonBuilder = new StringBuilder();
+	 * boolean inList = false;
+	 * 
+	 * while ((line = ClientSock.receiveResponse()) != null) {
+	 * if (line.equals("/#/list_public_repos_SOL")) {
+	 * inList = true;
+	 * continue;
+	 * } else if (line.equals("/#/list_public_repos_EOL")) {
+	 * break;
+	 * }
+	 * 
+	 * if (inList) {
+	 * jsonBuilder.append(line);
+	 * }
+	 * }
+	 * 
+	 * JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
+	 * Set<Integer> addedIds = new HashSet<>();
+	 * 
+	 * for (int i = 0; i < jsonArray.length(); i++) {
+	 * JSONObject obj = jsonArray.getJSONObject(i);
+	 * int id = obj.optInt("id", i);
+	 * String name = obj.getString("name");
+	 * String description = obj.getString("description");
+	 * String visibility = obj.getString("visibility");
+	 * 
+	 * if (!addedIds.contains(id)) {
+	 * Repository repo = new Repository(id, name, description, visibility);
+	 * listModel.addElement(repo);
+	 * addedIds.add(id);
+	 * }
+	 * }
+	 * 
+	 * if (jsonArray.length() == 0) {
+	 * JOptionPane.showMessageDialog(this, "공개 저장소가 없습니다.");
+	 * }
+	 * 
+	 * } catch (Exception e) {
+	 * e.printStackTrace();
+	 * JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
+	 * }
+	 * }
+	 */
 
 	// 에러 메시지 일괄 처리 팝업
 	private void showErrorDialog(String message) {
@@ -520,6 +521,7 @@ public class MainView extends JFrame {
 		}
 	}
 
+	// Public | Private 이미지 추가
 	private ImageIcon getVisibilityIcon(String visibility) {
 		String filename = visibility.equalsIgnoreCase("public")
 				? "unlocked.png"
@@ -538,5 +540,50 @@ public class MainView extends JFrame {
 		ImageIcon originalIcon = new ImageIcon(path);
 		Image scaledImage = originalIcon.getImage().getScaledInstance(30, 40, Image.SCALE_SMOOTH);
 		return new ImageIcon(scaledImage); // 파일 경로에서 직접 로딩
+	}
+
+	// 저장소 검색 기능
+	private void searchRepositories() {
+		String keyword = JOptionPane.showInputDialog(this, "검색할 키워드를 입력하세요:");
+		if (keyword == null || keyword.trim().isEmpty())
+			return;
+
+		listModel.clear();
+		try {
+			ClientSock.sendCommand("/search_repos " + keyword);
+
+			StringBuilder jsonBuilder = new StringBuilder();
+			String fullResponse = ClientSock.receiveFullResponse(); // ★ 커스텀 함수로 전체 수신
+			int start = fullResponse.indexOf("/#/search_repo_SOL");
+			int end = fullResponse.indexOf("/#/search_repo_EOL");
+
+			if (start != -1 && end != -1 && end > start) {
+				String jsonPart = fullResponse.substring(start + "/#/search_repo_SOL".length(), end).trim();
+				JSONArray jsonArray = new JSONArray(jsonPart);
+				Set<Integer> addedIds = new HashSet<>();
+
+				for (int i = 0; i < jsonArray.length(); i++) {
+					JSONObject obj = jsonArray.getJSONObject(i);
+					int id = obj.optInt("id", i);
+					String name = obj.getString("name");
+					String description = obj.getString("description");
+					String visibility = obj.getString("visibility");
+
+					if (!addedIds.contains(id)) {
+						Repository repo = new Repository(id, name, description, visibility);
+						listModel.addElement(repo);
+						addedIds.add(id);
+					}
+				}
+
+				if (jsonArray.length() == 0) {
+					JOptionPane.showMessageDialog(this, "검색 결과가 없습니다.");
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "저장소 검색 실패");
+		}
 	}
 }
