@@ -10,15 +10,28 @@ public class Style {
 	public static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
 	public static final Color FIELD_BACKGROUND = Color.WHITE;
 
+	public static boolean isDarkMode = false;
+
+	public static final Color DARK_PRIMARY_COLOR = new Color(44, 62, 80);
+	public static final Color DARK_BACKGROUND_COLOR = new Color(34, 34, 34);
+	public static final Color DARK_FIELD_BACKGROUND = new Color(64, 64, 64);
+	public static final Color DARK_TEXT_COLOR = new Color(230, 230, 230);
+
 	public static final Font TITLE_FONT = new Font("Malgun Gothic", Font.BOLD, 26);
 	public static final Font LABEL_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
 	public static final Font BUTTON_FONT = new Font("Malgun Gothic", Font.BOLD, 16);
+
+	// 밝은 테마 전용 텍스트 색상
+	public static final Color TEXT_PRIMARY_COLOR = new Color(52, 152, 219); // 파란색 제목
+	public static final Color TEXT_SECONDARY_COLOR = Color.DARK_GRAY; // 보조 정보
+	public static final Color TEXT_META_COLOR = Color.GRAY; // 부가 정보
 
 	// 공통 텍스트 필드
 	public static JTextField createStyledTextField() {
 		JTextField field = new JTextField(20);
 		field.setFont(LABEL_FONT);
-		field.setBackground(FIELD_BACKGROUND);
+		field.setBackground(isDarkMode ? DARK_FIELD_BACKGROUND : FIELD_BACKGROUND);
+		field.setForeground(isDarkMode ? DARK_TEXT_COLOR : Color.BLACK);
 		field.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)),
 				BorderFactory.createEmptyBorder(8, 10, 8, 10)));
 		return field;
@@ -28,7 +41,8 @@ public class Style {
 	public static JPasswordField createStyledPasswordField() {
 		JPasswordField field = new JPasswordField(20);
 		field.setFont(LABEL_FONT);
-		field.setBackground(FIELD_BACKGROUND);
+		field.setBackground(isDarkMode ? DARK_FIELD_BACKGROUND : FIELD_BACKGROUND);
+		field.setForeground(isDarkMode ? DARK_TEXT_COLOR : Color.BLACK);
 		field.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)),
 				BorderFactory.createEmptyBorder(8, 10, 8, 10)));
 		return field;
@@ -44,7 +58,12 @@ public class Style {
 		button.setBorderPainted(false);
 		button.setContentAreaFilled(false);
 		button.setOpaque(true);
+		button.setForeground(isDarkMode ? DARK_TEXT_COLOR : fgColor);
 		button.setPreferredSize(new Dimension(130, 40));
 		return button;
+	}
+
+	public static void toggleDarkMode() {
+		isDarkMode = !isDarkMode;
 	}
 }

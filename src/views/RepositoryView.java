@@ -96,19 +96,27 @@ public class RepositoryView extends JFrame {
 
 		// 아이콘 제거 설정 (비어있음 표시)
 		fileTree.setCellRenderer(new DefaultTreeCellRenderer() {
-			@Override
-			public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
-					boolean leaf, int row, boolean hasFocus) {
-				Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-				Object obj = node.getUserObject();
+	@Override
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+			boolean leaf, int row, boolean hasFocus) {
+		Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+		Object obj = node.getUserObject();
 
-				if (obj instanceof String && "[비어 있음]".equals(obj)) {
-					setIcon(null);
-				}
-				return c;
-			}
-		});
+		// 다크모드일 경우 텍스트 색상 변경
+		if (Style.isDarkMode) {
+			setForeground(Style.DARK_TEXT_COLOR);
+			setBackgroundNonSelectionColor(Style.DARK_BACKGROUND_COLOR);
+			setBackgroundSelectionColor(new Color(70, 70, 70));
+		}
+
+		// "[비어 있음]" 항목은 아이콘 제거
+		if (obj instanceof String && "[비어 있음]".equals(obj)) {
+			setIcon(null);
+		}
+		return c;
+	}
+});
 
 		JScrollPane scrollPane = new JScrollPane(fileTree);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
@@ -119,6 +127,7 @@ public class RepositoryView extends JFrame {
 		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 		add(mainPanel);
+		applyDarkMode();
 
 		// 버튼 이벤트 등록
 		uploadButton.addActionListener(e -> handleUpload());
@@ -166,6 +175,43 @@ public class RepositoryView extends JFrame {
 			lastSelectedPath = sb.toString();
 		});
 	}
+
+    // 다크 모드 적용
+    private void applyDarkMode() {
+        Color bgColor = Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR;
+        Color fgColor = Style.isDarkMode ? Style.DARK_TEXT_COLOR : Color.BLACK;
+
+        getContentPane().setBackground(bgColor);
+        applyComponentDarkMode(getContentPane(), bgColor, fgColor);
+    }
+
+    private void applyComponentDarkMode(Component comp, Color bg, Color fg) {
+        if (comp instanceof JPanel || comp instanceof JScrollPane || comp instanceof JTree) {
+            comp.setBackground(bg);
+            comp.setForeground(fg);
+        }
+
+        if (comp instanceof JLabel) {
+            comp.setForeground(fg);
+        } else if (comp instanceof JButton) {
+            JButton button = (JButton) comp;
+            button.setBackground(Style.isDarkMode ? Style.DARK_FIELD_BACKGROUND : Style.PRIMARY_COLOR);
+            button.setForeground(Style.isDarkMode ? Style.DARK_TEXT_COLOR : Color.WHITE);
+        } else if (comp instanceof JScrollPane) {
+            JScrollPane scroll = (JScrollPane) comp;
+            scroll.getViewport().setBackground(bg);
+            Component view = scroll.getViewport().getView();
+            if (view != null) {
+                applyComponentDarkMode(view, bg, fg);
+            }
+        }
+
+        if (comp instanceof Container) {
+            for (Component child : ((Container) comp).getComponents()) {
+                applyComponentDarkMode(child, bg, fg);
+            }
+        }
+    }
 
 	// 서버로부터 저장소의 파일 목록을 받아 트리로 구성
 	private void loadFiles() {

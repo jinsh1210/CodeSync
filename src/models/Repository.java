@@ -13,16 +13,9 @@ public class Repository {
     private int userId;
     private Timestamp createdAt;
     private String visibility;
+    // 저장소 용량 받아올 경우 사용
+    // private double size;
     
-    public Repository(int id, String name, String description, int userId, Timestamp createdAt, String visibility) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.userId = userId;
-        this.createdAt = createdAt;
-        this.visibility = visibility;
-    }
-
     public Repository(int id, String name, String description, String visibility) {
         this.id = id;
         this.name = name;
