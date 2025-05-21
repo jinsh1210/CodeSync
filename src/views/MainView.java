@@ -94,6 +94,7 @@ public class MainView extends JFrame {
 
 		// 다크 모드 토글 버튼 생성
 		JToggleButton darkModeToggle = new JToggleButton("🌙");
+		darkModeToggle.setFont(Style.BUTTON_FONT);
 		darkModeToggle.setFocusable(false);
 		darkModeToggle.setSelected(Style.isDarkMode); // 현재 설정 상태 반영
 		darkModeToggle.setBackground(new Color(230, 230, 230));
@@ -174,16 +175,19 @@ public class MainView extends JFrame {
 		JLabel nameLabel = new JLabel();
 		JLabel descLabel = new JLabel();
 		JLabel visibilityLabel = new JLabel();
+		JLabel username = new JLabel();
 		JLabel sizeLabel = new JLabel();
 
 		nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
 		descLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
 		visibilityLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
+		username.setFont(Style.LABEL_FONT.deriveFont(13f));
 		sizeLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
 
 		nameLabel.setForeground(Style.TEXT_PRIMARY_COLOR);
 		descLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
 		visibilityLabel.setForeground(Style.TEXT_META_COLOR);
+		username.setForeground(Style.TEXT_META_COLOR);
 		sizeLabel.setForeground(Style.TEXT_META_COLOR);
 
 		detailPanel.add(nameLabel);
@@ -191,6 +195,8 @@ public class MainView extends JFrame {
 		detailPanel.add(descLabel);
 		detailPanel.add(Box.createVerticalStrut(5));
 		detailPanel.add(visibilityLabel);
+		detailPanel.add(Box.createVerticalStrut(5));
+		detailPanel.add(username);
 		detailPanel.add(Box.createVerticalStrut(5));
 		detailPanel.add(sizeLabel);
 
@@ -214,6 +220,8 @@ public class MainView extends JFrame {
 				nameLabel.setText("이름: " + selected.getName());
 				descLabel.setText("설명: " + description);
 				visibilityLabel.setText("공개 여부: " + selected.getVisibility());
+				// TODO: 유저이름 표시
+				// username.setText("공개 여부: " + selected.getUserId());
 				// TODO: 저장소 용량 받아오면 표시
 				// sizeLabel.setText("저장소 용량: " + selected.getSize() + "MB");
 
@@ -221,6 +229,7 @@ public class MainView extends JFrame {
 				nameLabel.setText("");
 				descLabel.setText("");
 				visibilityLabel.setText("");
+				username.setText("");
 				sizeLabel.setText("");
 			}
 		});
