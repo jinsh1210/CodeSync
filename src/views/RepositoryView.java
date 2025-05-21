@@ -6,6 +6,8 @@ import javax.swing.tree.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import lombok.Setter;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -36,16 +38,17 @@ public class RepositoryView extends JFrame {
 	private JButton uploadButton;
 	private JButton downloadButton;
 	private JButton deleteButton;
-
+	private String targetUser=null;
 	// 자동 새로고침용 타이머
 	private Timer refreshTimer;
 
 	// 생성자 - 저장소 및 사용자 정보 전달받아 UI 초기화
-	public RepositoryView(Repository repository, User currentUser) {
+	public RepositoryView(Repository repository, User currentUser, String targetUser) {
 		this.repository = repository;
 		this.currentUser = currentUser;
+		this.targetUser=targetUser;
 		initializeUI();
-		loadFiles();
+		loadFiles(targetUser);
 	}
 
 	// UI 구성 초기화
@@ -136,7 +139,7 @@ public class RepositoryView extends JFrame {
 		deleteButton.addActionListener(e -> handleDelete());
 
 		// 주기적으로 파일 목록 새로고침
-		refreshTimer = new Timer(3000, e -> loadFiles());
+		refreshTimer = new Timer(3000, e -> loadFiles(targetUser));
 		refreshTimer.start();
 
 		// 창이 닫힐 때 타이머 종료
@@ -215,13 +218,13 @@ public class RepositoryView extends JFrame {
 	}
 
 	// 서버로부터 저장소의 파일 목록을 받아 트리로 구성
-	private void loadFiles() {
+	private void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		rootNode.removeAllChildren();
 
 		try {
-			ClientSock.sendCommand("/repo_content " + repository.getName());
-
+			if(userName==null) ClientSock.sendCommand("/repo_content " + repository.getName());
+			else ClientSock.sendCommand("/repo_content " +userName+" " +repository.getName());
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
@@ -382,7 +385,7 @@ public class RepositoryView extends JFrame {
 					ClientSock.push(selectedFile, selectedPath, repository.getName(), currentUser.getId());
 				}
 
-				loadFiles();
+				loadFiles(targetUser);
 			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "업로드 중 오류가 발생했습니다.");
@@ -465,7 +468,7 @@ public class RepositoryView extends JFrame {
 			String response = ClientSock.receiveResponse();
 			if (response.startsWith("/#/delete_success")) {
 				JOptionPane.showMessageDialog(this, "삭제가 완료되었습니다.");
-				loadFiles();
+				loadFiles(targetUser);
 			} else if (response.startsWith("/#/error")) {
 				JOptionPane.showMessageDialog(this, "❌ " + response.replace("/#/error", "").trim());
 			} else {
