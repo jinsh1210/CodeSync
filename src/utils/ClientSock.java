@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import models.FileInfo;
-import models.Repository;
 
 public class ClientSock {
    private static final String SERVERIP = "sjc07250.iptime.org";
