@@ -20,6 +20,7 @@ public class Style {
 	public static final Font TITLE_FONT = new Font("Malgun Gothic", Font.BOLD, 26);
 	public static final Font LABEL_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
 	public static final Font BUTTON_FONT = new Font("Malgun Gothic", Font.BOLD, 16);
+	public static final Font menuFont = new Font("Malgun Gothic", Font.PLAIN, 16);
 
 	// 밝은 테마 전용 텍스트 색상
 	public static final Color TEXT_PRIMARY_COLOR = new Color(52, 152, 219); // 파란색 제목
