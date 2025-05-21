@@ -10,7 +10,6 @@ public class SignUpView extends JFrame {
 	private JTextField usernameField;
 	private JPasswordField passwordField;
 	private JPasswordField confirmPasswordField;
-	private JTextField emailField;
 	private JButton signUpButton;
 	private JButton cancelButton;
 
@@ -22,7 +21,7 @@ public class SignUpView extends JFrame {
 	// UI 구성 및 이벤트 등록
 	private void initializeUI() {
 		setTitle("J.S.Repo - Sign Up");
-		setSize(500, 580);
+		setSize(400, 480);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -40,7 +39,6 @@ public class SignUpView extends JFrame {
 		usernameField = Style.createStyledTextField();
 		passwordField = Style.createStyledPasswordField();
 		confirmPasswordField = Style.createStyledPasswordField();
-		emailField = Style.createStyledTextField();
 
 		signUpButton = Style.createStyledButton("회원가입", Style.PRIMARY_COLOR, Color.WHITE);
 		cancelButton = Style.createStyledButton("취소", new Color(127, 140, 141), Color.WHITE);
@@ -67,11 +65,6 @@ public class SignUpView extends JFrame {
 		mainPanel.add(Box.createVerticalStrut(5));
 		mainPanel.add(wrapInPanel(confirmPasswordField));
 		mainPanel.add(Box.createVerticalStrut(20));
-
-		mainPanel.add(createLabelPanel("이메일"));
-		mainPanel.add(Box.createVerticalStrut(5));
-		mainPanel.add(wrapInPanel(emailField));
-		mainPanel.add(Box.createVerticalStrut(40));
 
 		mainPanel.add(buttonPanel);
 
@@ -122,9 +115,8 @@ public class SignUpView extends JFrame {
 		String username = usernameField.getText().trim();
 		String password = new String(passwordField.getPassword()).trim();
 		String confirmPassword = new String(confirmPasswordField.getPassword()).trim();
-		String email = emailField.getText().trim();
 
-		if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
+		if (username.isEmpty() || password.isEmpty() ) {
 			showErrorDialog("정보를 입력해주세요.");
 			return;
 		}
@@ -134,10 +126,6 @@ public class SignUpView extends JFrame {
 		}
 		if (!password.equals(confirmPassword)) {
 			showErrorDialog("비밀번호가 일치하지 않습니다.");
-			return;
-		}
-		if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-			showErrorDialog("유효한 이메일 주소를 입력해주세요.");
 			return;
 		}
 
