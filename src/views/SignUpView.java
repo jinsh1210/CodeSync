@@ -128,12 +128,29 @@ public class SignUpView extends JFrame {
 			showErrorDialog("정보를 입력해주세요.");
 			return;
 		}
+		if (!username.matches("^[a-zA-Z0-9]+$")) {
+			showErrorDialog("아이디는 영문자, 숫자만 사용할 수 있습니다.");
+			return;
+		}
 		if (!password.equals(confirmPassword)) {
 			showErrorDialog("비밀번호가 일치하지 않습니다.");
 			return;
 		}
 		if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
 			showErrorDialog("유효한 이메일 주소를 입력해주세요.");
+			return;
+		}
+
+		int count = 0;
+		if (password.matches(".*[A-Z].*"))
+			count++;
+		if (password.matches(".*[a-z].*"))
+			count++;
+		if (password.matches(".*[^a-zA-Z0-9].*"))
+			count++;
+
+		if (password.length() < 8 || count < 2) {
+			showErrorDialog("비밀번호는 8자 이상이며 대문자, 소문자, 특수문자 중 2종류 이상을 포함해야 합니다.");
 			return;
 		}
 
