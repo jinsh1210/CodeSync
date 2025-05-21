@@ -545,42 +545,53 @@ public class MainView extends JFrame {
 	// 저장소 검색 기능
 	private void searchRepositories() {
 		String keyword = JOptionPane.showInputDialog(this, "검색할 키워드를 입력하세요:");
-		if (keyword == null || keyword.trim().isEmpty())
-			return;
+		if (keyword == null || keyword.trim().isEmpty()) return;
 
 		listModel.clear();
 		try {
 			ClientSock.sendCommand("/search_repos " + keyword);
 
-			StringBuilder jsonBuilder = new StringBuilder();
-			String fullResponse = ClientSock.receiveFullResponse(); // ★ 커스텀 함수로 전체 수신
-			int start = fullResponse.indexOf("/#/search_repo_SOL");
-			int end = fullResponse.indexOf("/#/search_repo_EOL");
+			StringBuilder rawBuilder = new StringBuilder();
+			while (true) {
+				String part = ClientSock.receiveResponse();
+				rawBuilder.append(part);
+				if (part.contains("/#/search_repo_EOL")) break;
+			}
 
-			if (start != -1 && end != -1 && end > start) {
-				String jsonPart = fullResponse.substring(start + "/#/search_repo_SOL".length(), end).trim();
-				JSONArray jsonArray = new JSONArray(jsonPart);
-				Set<Integer> addedIds = new HashSet<>();
+			String fullResponse = rawBuilder.toString().trim();
+			System.out.println("[서버 응답]: " + fullResponse);
 
-				for (int i = 0; i < jsonArray.length(); i++) {
-					JSONObject obj = jsonArray.getJSONObject(i);
-					int id = obj.optInt("id", i);
-					String name = obj.getString("name");
-					String description = obj.getString("description");
-					String visibility = obj.getString("visibility");
+			// ✅ JSON 부분 추출
+			int startIdx = fullResponse.indexOf("/#/search_repo_SOL") + "/#/search_repo_SOL".length();
+			int endIdx = fullResponse.indexOf("/#/search_repo_EOL");
 
-					if (!addedIds.contains(id)) {
-						Repository repo = new Repository(id, name, description, visibility);
-						listModel.addElement(repo);
-						addedIds.add(id);
-					}
-				}
+			if (startIdx == -1 || endIdx == -1 || startIdx >= endIdx) {
+				throw new RuntimeException("JSON 응답 파싱 실패: 구분자 오류");
+			}
 
-				if (jsonArray.length() == 0) {
-					JOptionPane.showMessageDialog(this, "검색 결과가 없습니다.");
+			String jsonText = fullResponse.substring(startIdx, endIdx).trim();
+			System.out.println("[추출된 JSON]: " + jsonText);
+
+			JSONArray jsonArray = new JSONArray(jsonText);
+			Set<Integer> addedIds = new HashSet<>();
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				int id = obj.optInt("id", i);
+				String name = obj.getString("name");
+				String description = obj.getString("description");
+				String visibility = obj.getString("visibility");
+
+				if (!addedIds.contains(id)) {
+					Repository repo = new Repository(id, name, description, visibility);
+					listModel.addElement(repo);
+					addedIds.add(id);
 				}
 			}
 
+			if (jsonArray.length() == 0) {
+				JOptionPane.showMessageDialog(this, "검색 결과가 없습니다.");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "저장소 검색 실패");
