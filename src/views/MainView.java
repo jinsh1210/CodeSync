@@ -329,7 +329,8 @@ public class MainView extends JFrame {
 			}
 
 			try {
-				ClientSock.sendCommand("/repo_create " + name + " \"" + description + "\" " + selected);
+				String safeDescription = description.replace("\n", "\\n");
+				ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
 				String response = ClientSock.receiveResponse();
 
 				if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
