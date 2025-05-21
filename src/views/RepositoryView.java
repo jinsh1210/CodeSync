@@ -237,7 +237,6 @@ public class RepositoryView extends JFrame {
 				lastSelectedPath = sb.toString();
 			}
 			if(lastSelectedPath.endsWith("/[비어 있음]")) lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "/[비어 있음]".length());
-			System.out.println("lastSelectedPath :" + lastSelectedPath); //디버그
 		});
 
 		
@@ -446,12 +445,9 @@ public class RepositoryView extends JFrame {
 
 				if (selectedFile.isFile()) {
 					String filename = selectedFile.getName();
-					System.out.println("selectedPath: "+selectedPath);//디버그
 					String serverPath = selectedPath.equals("") ? filename : selectedPath + "/" + filename;
-					System.out.println("servPath: "+serverPath); //디버그
 					ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath);
 				} else if (selectedFile.isDirectory()) {
-					System.out.println("isDirectory: "+selectedPath);//디버그
 					ClientSock.push(selectedFile, selectedPath, repository.getName(), currentUser.getId());
 
 				}
@@ -504,40 +500,27 @@ public class RepositoryView extends JFrame {
 	}
 
 	// 파일 또는 폴더 삭제 처리
-	// TODO: 콜라보 유저만 가능하게 구현 필요
 	private void handleDelete() {
-		TreePath selectedPath = fileTree.getSelectionPath();
-		if (selectedPath == null) {
+		if (lastSelectedPath == null || lastSelectedPath.isBlank()) {
 			JOptionPane.showMessageDialog(this, "삭제할 항목을 먼저 선택해주세요.");
 			return;
 		}
 
-		DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
-		if (selectedNode.getParent() == null) {
-			JOptionPane.showMessageDialog(this, "루트 노드는 삭제할 수 없습니다.");
-			return;
-		}
-
-		// 트리 경로 문자열 조합
-		StringBuilder sb = new StringBuilder();
-		Object[] nodes = selectedPath.getPath();
-		for (int i = 1; i < nodes.length; i++) {
-			sb.append(nodes[i].toString());
-			if (i < nodes.length - 1)
-				sb.append("/");
-		}
-		String targetPath = sb.toString();
-
-		int confirm = JOptionPane.showConfirmDialog(this, "선택한 항목(" + targetPath + ")을 삭제하시겠습니까?", "삭제 확인",
+		int confirm = JOptionPane.showConfirmDialog(this,
+				"선택한 항목(" + lastSelectedPath + ")을 삭제하시겠습니까?",
+				"삭제 확인",
 				JOptionPane.YES_NO_OPTION);
 
 		if (confirm != JOptionPane.YES_OPTION)
 			return;
 
 		try {
-			ClientSock.sendCommand(
-					"/delete_file " + repository.getName() + " " + targetPath + " " + currentUser.getUsername());
+			ClientSock.sendCommand("/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername());
+			System.out.println("/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername()); // 디버그
+
 			String response = ClientSock.receiveResponse();
+			System.out.println(response); // 디버그
+
 			if (response.startsWith("/#/delete_success")) {
 				JOptionPane.showMessageDialog(this, "삭제가 완료되었습니다.");
 				loadFiles(targetUser);
@@ -551,6 +534,7 @@ public class RepositoryView extends JFrame {
 			JOptionPane.showMessageDialog(this, "삭제 중 오류가 발생했습니다.");
 		}
 	}
+
 
 	// 콜라보 조회
 	private void handleViewCollaborators() {
