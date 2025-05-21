@@ -40,7 +40,7 @@ public class MainView extends JFrame {
 		JButton refreshIconButton = new JButton("🔄");
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setFocusable(false);
-		refreshIconButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		refreshIconButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
 		refreshIconButton.setBackground(Color.WHITE); // 다크모드는 applyDarkMode에서 반영
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
@@ -113,7 +113,7 @@ public class MainView extends JFrame {
 		// 메뉴바 전체 크기 조정
 		menuBar.setPreferredSize(new Dimension(0, 36)); // 기존보다 약간 높은 높이
 
-		Font menuFont = new Font("Segoe UI", Font.PLAIN, 16);
+		Font menuFont = new Font("Malgun Gothic", Font.PLAIN, 16);
 
 		// 각 메뉴의 폰트와 마진 확대
 		repoMenu.setFont(menuFont);
@@ -125,14 +125,14 @@ public class MainView extends JFrame {
 		logoutItem.setFont(menuFont);
 
 		// 다크모드 토글 버튼 크기 키우기
-		darkModeToggle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+		darkModeToggle.setFont(new Font("Malgun Gothic", Font.PLAIN, 16));
 		darkModeToggle.setPreferredSize(new Dimension(50, 36));
 
 		listModel = new DefaultListModel<>();
 		repositoryList = new JList<>(listModel);
 		repositoryList.setCellRenderer(new RepositoryListCellRenderer());
 		repositoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		repositoryList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		repositoryList.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
 
 		repositoryList.addMouseListener(new MouseAdapter() {
 			@Override
@@ -169,7 +169,7 @@ public class MainView extends JFrame {
 		detailPanel.setBackground(Style.BACKGROUND_COLOR);
 		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
 		detailPanel.setBorder(BorderFactory.createTitledBorder("저장소 정보"));
-		detailPanel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+		detailPanel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
 
 		// 저장소 정보
 		JLabel nameLabel = new JLabel();
@@ -177,10 +177,10 @@ public class MainView extends JFrame {
 		JLabel visibilityLabel = new JLabel();
 		JLabel sizeLabel = new JLabel();
 
-		nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-		descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-		visibilityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-		sizeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		nameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+		descLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+		visibilityLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+		sizeLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
 
 		nameLabel.setForeground(Style.TEXT_PRIMARY_COLOR);
 		descLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
