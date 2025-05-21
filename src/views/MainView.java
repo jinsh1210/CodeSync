@@ -220,10 +220,8 @@ public class MainView extends JFrame {
 				nameLabel.setText("이름: " + selected.getName());
 				descLabel.setText("설명: " + description);
 				visibilityLabel.setText("공개 여부: " + selected.getVisibility());
-				// TODO: 유저이름 표시
-				// username.setText("공개 여부: " + selected.getUserId());
-				// TODO: 저장소 용량 받아오면 표시
-				// sizeLabel.setText("저장소 용량: " + selected.getSize() + "MB");
+				username.setText("소유자: " + selected.getUsername());
+				sizeLabel.setText("저장소 용량: " + selected.getSize() + "MB");
 
 			} else {
 				nameLabel.setText("");
@@ -283,12 +281,12 @@ public class MainView extends JFrame {
 				String name = obj.getString("name");
 				String description = obj.getString("description");
 				String visibility = obj.getString("visibility");
-				// TODO: 서버에서 저장소 현재 용량 받아와야함
-				int id = i;
+				String username = obj.getString("user");
+				double filesize = obj.getDouble("size");
 
+				int id = i;
 				if (!addedIds.contains(id)) {
-					// 받아오면 생성자에 추가
-					Repository repo = new Repository(id, name, description, visibility);
+					Repository repo = new Repository(id, name, description, visibility, username, filesize);
 					listModel.addElement(repo);
 					addedIds.add(id);
 				}
@@ -425,58 +423,6 @@ public class MainView extends JFrame {
 		}
 	}
 
-	/*
-	 * // 서버에서 공개 저장소 목록 로드
-	 * private void loadPublicRepositories() {
-	 * listModel.clear();
-	 * try {
-	 * ClientSock.sendCommand("/list_public_repos");
-	 * 
-	 * String line;
-	 * StringBuilder jsonBuilder = new StringBuilder();
-	 * boolean inList = false;
-	 * 
-	 * while ((line = ClientSock.receiveResponse()) != null) {
-	 * if (line.equals("/#/list_public_repos_SOL")) {
-	 * inList = true;
-	 * continue;
-	 * } else if (line.equals("/#/list_public_repos_EOL")) {
-	 * break;
-	 * }
-	 * 
-	 * if (inList) {
-	 * jsonBuilder.append(line);
-	 * }
-	 * }
-	 * 
-	 * JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
-	 * Set<Integer> addedIds = new HashSet<>();
-	 * 
-	 * for (int i = 0; i < jsonArray.length(); i++) {
-	 * JSONObject obj = jsonArray.getJSONObject(i);
-	 * int id = obj.optInt("id", i);
-	 * String name = obj.getString("name");
-	 * String description = obj.getString("description");
-	 * String visibility = obj.getString("visibility");
-	 * 
-	 * if (!addedIds.contains(id)) {
-	 * Repository repo = new Repository(id, name, description, visibility);
-	 * listModel.addElement(repo);
-	 * addedIds.add(id);
-	 * }
-	 * }
-	 * 
-	 * if (jsonArray.length() == 0) {
-	 * JOptionPane.showMessageDialog(this, "공개 저장소가 없습니다.");
-	 * }
-	 * 
-	 * } catch (Exception e) {
-	 * e.printStackTrace();
-	 * JOptionPane.showMessageDialog(this, "공개 저장소 로딩 실패");
-	 * }
-	 * }
-	 */
-
 	// 에러 메시지 일괄 처리 팝업
 	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
@@ -554,7 +500,8 @@ public class MainView extends JFrame {
 	// 저장소 검색 기능
 	private void searchRepositories() {
 		String keyword = JOptionPane.showInputDialog(this, "검색할 키워드를 입력하세요:");
-		if (keyword == null || keyword.trim().isEmpty()) return;
+		if (keyword == null || keyword.trim().isEmpty())
+			return;
 
 		listModel.clear();
 		try {
@@ -564,7 +511,8 @@ public class MainView extends JFrame {
 			while (true) {
 				String part = ClientSock.receiveResponse();
 				rawBuilder.append(part);
-				if (part.contains("/#/search_repo_EOL")) break;
+				if (part.contains("/#/search_repo_EOL"))
+					break;
 			}
 
 			String fullResponse = rawBuilder.toString().trim();
@@ -590,9 +538,11 @@ public class MainView extends JFrame {
 				String name = obj.getString("name");
 				String description = obj.getString("description");
 				String visibility = obj.getString("visibility");
+				String username = obj.getString("user");
+				double filesize = obj.getDouble("size");
 
 				if (!addedIds.contains(id)) {
-					Repository repo = new Repository(id, name, description, visibility);
+					Repository repo = new Repository(id, name, description, visibility, username, filesize);
 					listModel.addElement(repo);
 					addedIds.add(id);
 				}

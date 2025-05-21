@@ -1,6 +1,5 @@
 package models;
 
-import java.sql.Timestamp;
 import lombok.*;
 
 @Getter
@@ -10,17 +9,17 @@ public class Repository {
     private int id;
     private String name;
     private String description;
-    private int userId;
-    private Timestamp createdAt;
     private String visibility;
-    // 저장소 용량 받아올 경우 사용
-    // private double size;
+    private String username;
+    private double size;
     
-    public Repository(int id, String name, String description, String visibility) {
+    public Repository(int id, String name, String description, String visibility, String username, double size) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.visibility = visibility;
+        this.username = username;
+        this.size = size;
     }
 
     
