@@ -93,7 +93,8 @@ public class ClientSock {
         while (true) {
             String line = reader.readLine();
             if(line.startsWith("/#/")) System.out.println("[명령어 수신]: " + line);
-            if (line == null) throw new IOException("서버 연결 끊김");
+            //dead code
+            // if (line == null) throw new IOException("서버 연결 끊김");
 
             if (line.equals("/#/pull_dir_EOL")) {
                 System.out.println("[디렉토리 수신 종료]");
@@ -116,8 +117,6 @@ public class ClientSock {
 
         }
     }
-
-
 
     public static void pull(String repoName, String relPath, File targetFolder) {
         try {
@@ -234,7 +233,7 @@ public class ClientSock {
             sendCommand("LIST_FILES|" + repositoryId);
             String response = receiveResponse();
 
-            // TODO: JSON 파싱 필요 시 여기에 파싱 로직 작성
+            // JSON 파싱 필요 시 여기에 파싱 로직 작성
             System.out.println("[파일 목록 수신]: " + response);
         } catch (Exception e) {
             e.printStackTrace();
