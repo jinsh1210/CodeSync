@@ -37,11 +37,12 @@ public class MainView extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
-		JButton refreshIconButton = new JButton("🔄");
+		JButton refreshIconButton = new JButton("");
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setFocusable(false);
-		refreshIconButton.setFont(Style.BUTTON_FONT.deriveFont(14f));
-
+		ImageIcon refreshIcon = new ImageIcon("src/icons/refresh.png");
+		Image scaledrefresh = refreshIcon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+		refreshIconButton.setIcon(new ImageIcon(scaledrefresh));
 		refreshIconButton.setBackground(Color.WHITE); // 다크모드는 applyDarkMode에서 반영
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 		refreshIconButton.setFocusPainted(false); // 포커스 테두리 제거
@@ -101,8 +102,6 @@ public class MainView extends JFrame {
 		ImageIcon moonIcon = new ImageIcon("src/icons/moon.png");
 		Image scaledMoon = moonIcon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
 		darkModeToggle.setIcon(new ImageIcon(scaledMoon));
-		darkModeToggle.setText(""); // 텍스트 제거
-		darkModeToggle.setFont(Style.BUTTON_FONT);
 		darkModeToggle.setFocusable(false);
 		darkModeToggle.setSelected(Style.isDarkMode); // 현재 설정 상태 반영
 		darkModeToggle.setBackground(new Color(230, 230, 230));
