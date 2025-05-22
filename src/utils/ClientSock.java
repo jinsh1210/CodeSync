@@ -1,6 +1,5 @@
 package utils;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
@@ -23,7 +22,7 @@ import javax.swing.SwingUtilities;
 import models.FileInfo;
 
 public class ClientSock {
-   private static final String SERVERIP = "sjc07250.iptime.org";
+    private static final String SERVERIP = "sjc07250.iptime.org";
     private static final int PORT = 9969;
     private static final String VERISION = "v0.0.1b";
     private static final String TOKEN = "fjk123#%k2!lsd!234!%^^f17!@#sdfs!@$3$*s1s56!@#";
@@ -32,7 +31,6 @@ public class ClientSock {
     private static PrintWriter out;
     private static BufferedReader in;
     private static InputStream inputStream;
-    private static OutputStream outputStream;
 
     public static void connect() {
         try {
@@ -40,17 +38,16 @@ public class ClientSock {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             inputStream = socket.getInputStream();
-            outputStream = new BufferedOutputStream(socket.getOutputStream());
 
             // 초기 인증
             out.println(TOKEN);
             out.println(VERISION);
-            
+
             try {
                 byte[] buffer = new byte[1024];
-                int bytesRead=inputStream.read(buffer);
+                int bytesRead = inputStream.read(buffer);
                 if (bytesRead != -1) {
-                	
+
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -69,46 +66,54 @@ public class ClientSock {
         }
     }
 
-    private static void receiveFile(String headerLine, File baseFolder) throws IOException {
+    private static void receiveFile(String headerLine, File baseFolder, JProgressBar bar) throws IOException {
         String[] tokens = headerLine.substring(13).trim().split(" ");
-        if (tokens.length < 2) throw new IOException("pull_file 명령어 파싱 실패: " + headerLine);
+        if (tokens.length < 2)
+            throw new IOException("pull_file 명령어 파싱 실패: " + headerLine);
 
         int size = Integer.parseInt(tokens[tokens.length - 1]);
         String filePath = String.join(" ", Arrays.copyOf(tokens, tokens.length - 1));
 
         File targetFile = new File(baseFolder, filePath);
         File parent = targetFile.getParentFile();
-        if (!parent.exists()) parent.mkdirs();
+        if (!parent.exists())
+            parent.mkdirs();
 
         System.out.println("[파일 수신 시작]: " + filePath + " (" + size + " bytes)");
 
-        byte[] buffer = new byte[size];
-        int offset = 0;
-        while (offset < size) {
-            int read = inputStream.read(buffer, offset, size - offset);
-            if (read == -1) throw new EOFException("파일 수신 도중 스트림 종료됨: " + filePath);
-            offset += read;
+        bar.setVisible(true);
+        SwingUtilities.invokeLater(() -> bar.setValue(0));
+        try (FileOutputStream fileOut = new FileOutputStream(targetFile)) {
+            byte[] buffer = new byte[8192];
+            int offset = 0;
+            int read;
+            while (offset < size) {
+                read = inputStream.read(buffer, 0, Math.min(buffer.length, size - offset));
+                if (read == -1)
+                    throw new EOFException("파일 수신 도중 스트림 종료됨: " + filePath);
+
+                fileOut.write(buffer, 0, read);
+                offset += read;
+
+                int percent = (int) (100.0 * offset / size);
+                SwingUtilities.invokeLater(() -> bar.setValue(percent));
+            }
         }
 
-        try (FileOutputStream fos = new FileOutputStream(targetFile)) {
-            fos.write(buffer);
-        }
-
+        SwingUtilities.invokeLater(() -> bar.setValue(100));
         System.out.println("[파일 저장 완료]: " + targetFile.getPath());
     }
 
-
-
-    private static void handleSingleFilePull(String header, File baseFolder) throws IOException {
-        receiveFile(header, baseFolder);
+    private static void handleSingleFilePull(String header, File baseFolder, JProgressBar bar) throws IOException {
+        receiveFile(header, baseFolder, bar);
     }
 
-    private static void handleDirectoryPull(BufferedReader reader, File baseFolder) throws IOException {
+    private static void handleDirectoryPull(BufferedReader reader, File baseFolder, JProgressBar bar)
+            throws IOException {
         while (true) {
             String line = reader.readLine();
-            if(line.startsWith("/#/")) System.out.println("[명령어 수신]: " + line);
-            //dead code
-            // if (line == null) throw new IOException("서버 연결 끊김");
+            if (line.startsWith("/#/"))
+                System.out.println("[명령어 수신]: " + line);
 
             if (line.equals("/#/pull_dir_EOL")) {
                 System.out.println("[디렉토리 수신 종료]");
@@ -126,16 +131,16 @@ public class ClientSock {
                 continue;
             }
             if (line.startsWith("/#/pull_file ")) {
-                receiveFile(line, baseFolder);
+                receiveFile(line, baseFolder, bar);
             }
 
         }
     }
 
-    public static void pull(String repoName, String relPath, File targetFolder,String Owner) {
+    public static void pull(String repoName, String relPath, File targetFolder, String Owner, JProgressBar bar) {
         try {
             // 우선 서버에 요청 보냄
-            sendCommand("/pull " + repoName + " \"" + relPath+"\" "+Owner);
+            sendCommand("/pull " + repoName + " \"" + relPath + "\" " + Owner);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
@@ -150,9 +155,9 @@ public class ClientSock {
                 return;
             }
             if (line.startsWith("/#/pull_file ")) {
-                handleSingleFilePull(line, targetFolder);
+                handleSingleFilePull(line, targetFolder, bar);
             } else if (line.equals("/#/pull_dir_SOL")) {
-                handleDirectoryPull(reader, targetFolder);
+                handleDirectoryPull(reader, targetFolder, bar);
             } else {
                 System.err.println("[오류] 알 수 없는 응답: " + line);
             }
@@ -165,19 +170,21 @@ public class ClientSock {
         }
     }
 
-    public static void push(File file, String repoName, int userId, String serverPath, String Owner,JProgressBar bar) throws SocketException {
+    public static void push(File file, String repoName, int userId, String serverPath, String Owner, JProgressBar bar)
+            throws SocketException {
         try {
             long fileSize = file.length(); // 파일 크기 측정
 
             sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize + " " + Owner);
-            System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize+" "+Owner); //디버그
-            System.out.println("owner: "+Owner);
+            System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize + " " + Owner); // 디버그
+            System.out.println("owner: " + Owner);
             String response = receiveResponse();
             if (!"/#/push_ready".equals(response.trim())) {
                 System.err.println("[Client] push 실패: 서버 응답 = " + response);
                 return;
             }
             bar.setVisible(true);
+            SwingUtilities.invokeLater(() -> bar.setValue(0));
             // 스트림 방식으로 전송
             try (FileInputStream fis = new FileInputStream(file)) {
                 byte[] buffer = new byte[8192];
@@ -193,6 +200,7 @@ public class ClientSock {
                 }
                 out.flush();
             }
+            SwingUtilities.invokeLater(() -> bar.setValue(100));
             // 결과 수신
             String result = receiveResponse();
             System.out.println("[서버 응답] " + result);
@@ -201,20 +209,20 @@ public class ClientSock {
         }
     }
 
-
-    public static void push(File folder, String basePath, String repository, int userId, String Owner,JProgressBar bar) throws IOException { //폴더 형식 전송 오버로드 메소드
+    public static void push(File folder, String basePath, String repository, int userId, String Owner, JProgressBar bar)
+            throws IOException { // 폴더 형식 전송 오버로드 메소드
         File[] contents = folder.listFiles();
         boolean isEmpty = (contents == null || contents.length == 0);
 
         // 상대 경로 계산
         String relativePath = basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName();
-        System.out.println("폴더 전용 relativePath: "+relativePath+" | basePath: "+basePath+" | owner: "+Owner); //디버그
+        System.out.println("폴더 전용 relativePath: " + relativePath + " | basePath: " + basePath + " | owner: " + Owner); // 디버그
 
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
-            sendCommand("/mkdir " + repository + " \"" + relativePath+"\" "+Owner);
-            System.out.println("owner: "+Owner);
-            System.out.println("/mkdir " + repository + " \"" + relativePath+"\" "+Owner);//디버그
+            sendCommand("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);
+            System.out.println("owner: " + Owner);
+            System.out.println("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);// 디버그
             String response = receiveResponse();
             System.out.println("[서버 mkdir 응답] " + response);
             return;
@@ -224,24 +232,24 @@ public class ClientSock {
         for (File file : contents) {
             if (file.isFile()) {
                 String filePath = relativePath + "/" + file.getName();
-                push(file, repository, userId, filePath,Owner,bar);
+                push(file, repository, userId, filePath, Owner, bar);
             } else if (file.isDirectory()) {
-                push(file, relativePath,repository,userId,Owner,bar);  // 재귀 호출
+                push(file, relativePath, repository, userId, Owner, bar); // 재귀 호출
             }
         }
     }
 
     public static String receiveResponse() {
-    	try {
+        try {
             byte[] buffer = new byte[1024];
-            int bytesRead=inputStream.read(buffer);
+            int bytesRead = inputStream.read(buffer);
             if (bytesRead != -1) {
                 return new String(buffer, 0, bytesRead, "UTF-8");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    	return null;
+        return null;
     }
 
     public static void startReceiver() {
@@ -274,7 +282,8 @@ public class ClientSock {
 
     public static void disconnect() {
         try {
-            if (socket != null) socket.close();
+            if (socket != null)
+                socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

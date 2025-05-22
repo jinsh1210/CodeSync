@@ -8,14 +8,16 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -80,90 +82,95 @@ public class RepositoryView extends JFrame {
 		loadFiles(targetUser);
 	}
 
-	// UI 구성 초기화
+	// 전체 UI를 초기화하고 구성 요소(제목, 설명, 트리, 버튼 등)를 배치함
 	private void initializeUI() {
+		// 프레임 제목, 크기, 닫힘 동작 등 기본 설정
 		setTitle("J.S.Repo - Repository");
 		setSize(550, 600);
 		setMinimumSize(new Dimension(500, 600));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 
-		// 전체 패널 및 제목, 설명
-		JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
+		// 전체 구성요소를 담는 메인 패널 설정 (여백 및 배경색 포함)
+		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBackground(Style.BACKGROUND_COLOR);
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+		// 저장소 이름을 보여주는 제목 라벨 생성
 		JLabel titleLabel = new JLabel("저장소 : " + repository.getName(), SwingConstants.LEFT);
 		titleLabel.setFont(Style.TITLE_FONT);
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
+		// 저장소 설명을 HTML 형식으로 변환하여 표시할 라벨 생성
 		String html = "<html>" + repository.getDescription().replace("\n", "<br>") + "</html>";
 		JLabel descLabel = new JLabel(html);
 		descLabel.setFont(Style.LABEL_FONT);
 		descLabel.setForeground(new Color(80, 80, 80));
 
-		// 상단 제목 및 설명 패널
-		JPanel headerPanel = new JPanel(new BorderLayout());
-		headerPanel.setPreferredSize(new Dimension(100, 80)); // 높이 조절
+		// 제목과 설명을 세로로 배치한 상단 헤더 패널 구성
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 		headerPanel.setBackground(Style.BACKGROUND_COLOR);
-		headerPanel.add(titleLabel, BorderLayout.NORTH);
-		headerPanel.add(descLabel, BorderLayout.SOUTH);
+		headerPanel.add(titleLabel);
+		headerPanel.add(Box.createRigidArea(new Dimension(0, 8))); // 제목과 설명 사이 간격
+		headerPanel.add(descLabel);
 
-		// 진행바
+		// 우측 상단 콜라보레이터 버튼 (본인 저장소일 때만 표시)
+		JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		topRightPanel.setBackground(Style.BACKGROUND_COLOR);
+		if (repository.getUsername().equals(currentUser.getUsername())) {
+			JButton collaborateButton = new JButton("");
+			collaborateButton.setFocusable(false);
+			ImageIcon icon = new ImageIcon("src/icons/collabor.png");
+			Image scaledIcon = icon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+			collaborateButton.setIcon(new ImageIcon(scaledIcon));
+			collaborateButton.setContentAreaFilled(false);
+			collaborateButton.setBorderPainted(false);
+			collaborateButton.setOpaque(false);
+			collaborateButton.addActionListener(e -> handleViewCollaborators());
+			topRightPanel.add(collaborateButton);
+		}
+
+		// 업로드/다운로드 상태를 표시할 진행 바 생성
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setVisible(false);
 		progressBar.setStringPainted(true);
 		progressBar.setPreferredSize(new Dimension(400, 20));
 
+		// 진행 바, 제목/설명, 콜라보 버튼을 포함한 헤더 전체 래퍼 구성
 		JPanel headerWrapper = new JPanel(new BorderLayout());
 		headerWrapper.setBackground(Style.BACKGROUND_COLOR);
-
-		headerWrapper.add(headerPanel, BorderLayout.CENTER); // 제목 + 설명
-		if (repository.getUsername().equals(currentUser.getUsername())) {
-
-			JButton collaborateButton = new JButton("");
-			collaborateButton.setMargin(new Insets(2, 4, 2, 4));
-			collaborateButton.setFocusable(false);
-			ImageIcon refreshIcon = new ImageIcon("src/icons/collabor.png");
-			Image scaledrefresh = refreshIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-			collaborateButton.setIcon(new ImageIcon(scaledrefresh));
-			collaborateButton.setBackground(Color.WHITE); // 다크모드는 applyDarkMode에서 반영
-			collaborateButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-			collaborateButton.setFocusPainted(false); // 포커스 테두리 제거
-			collaborateButton.setBorderPainted(false); // 버튼 테두리 제거
-			collaborateButton.setContentAreaFilled(false); // 배경 채우기 제거
-			collaborateButton.setOpaque(false); // 불투명 설정 해제
-
-			collaborateButton.addActionListener(e -> handleViewCollaborators());
-
-			JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-			topRightPanel.setBackground(Style.BACKGROUND_COLOR);
-			topRightPanel.add(collaborateButton);
-
-			headerWrapper.add(topRightPanel, BorderLayout.EAST);
-		}
+		headerWrapper.add(progressBar, BorderLayout.NORTH);
+		headerWrapper.add(headerPanel, BorderLayout.CENTER);
+		headerWrapper.add(topRightPanel, BorderLayout.EAST);
 		mainPanel.add(headerWrapper, BorderLayout.NORTH);
 
-		// 버튼 초기화 및 스타일 적용
+		// 업로드/다운로드/삭제 버튼 생성 및 색상 설정
 		uploadButton = Style.createStyledButton("업로드", Style.PRIMARY_COLOR, Color.WHITE);
 		downloadButton = Style.createStyledButton("다운로드", new Color(41, 128, 185), Color.WHITE);
 		deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
 
-		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+		// 하단 버튼 영역 패널 구성
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
 		buttonPanel.setBackground(Style.BACKGROUND_COLOR);
 		buttonPanel.add(uploadButton);
 		buttonPanel.add(downloadButton);
 		buttonPanel.add(deleteButton);
 
-		// 파일 트리 구성
+		// 버튼 패널을 포함한 전체 하단 패널 설정
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.setBackground(Style.BACKGROUND_COLOR);
+		bottomPanel.add(buttonPanel, BorderLayout.CENTER);
+		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+		// 파일 트리의 루트 노드 및 모델 구성
 		rootNode = new DefaultMutableTreeNode(repository.getName());
 		treeModel = new DefaultTreeModel(rootNode);
+		// 파일 트리 컴포넌트 생성 및 다크모드 스타일 지정
 		fileTree = new JTree(treeModel);
 		fileTree.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
 		fileTree.setRootVisible(true);
 		fileTree.setShowsRootHandles(true);
-
-		// 아이콘 제거 설정 (비어있음 표시)
 		fileTree.setCellRenderer(new DefaultTreeCellRenderer() {
 			@Override
 			public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
@@ -171,56 +178,36 @@ public class RepositoryView extends JFrame {
 				Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 				Object obj = node.getUserObject();
-
-				// 다크모드일 경우 텍스트 색상 변경
 				if (Style.isDarkMode) {
 					setForeground(Style.DARK_TEXT_COLOR);
 					setBackgroundNonSelectionColor(Style.DARK_BACKGROUND_COLOR);
 					setBackgroundSelectionColor(new Color(70, 70, 70));
 				}
-
-				// "[비어 있음]" 항목은 아이콘 제거
 				if (obj instanceof String && "[비어 있음]".equals(obj)) {
 					setIcon(null);
 				}
 				return c;
 			}
 		});
-
+		// 트리를 감싸는 스크롤 패널 생성 및 테두리 설정
 		JScrollPane scrollPane = new JScrollPane(fileTree);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-
-		// 수정된 패널
-		JPanel bottomPanel = new JPanel();
-		bottomPanel.setLayout(new BorderLayout());
-		bottomPanel.setBackground(Style.BACKGROUND_COLOR);
-
-		// 메인 패널 구성
-		// mainPanel.add(scrollPane, BorderLayout.CENTER);
-		// mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-		// mainPanel.add(progressBar, BorderLayout.NORTH);
-
-		// 스크롤 영역 중앙에 추가
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
-		bottomPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		bottomPanel.add(buttonPanel);
-		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-		// 진행 바는 상단에
-		mainPanel.add(progressBar, BorderLayout.NORTH);
-		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+		// 모든 구성 요소가 담긴 mainPanel을 프레임에 추가
 		add(mainPanel);
+		// 다크 모드 적용
 		applyDarkMode();
 
-		// 버튼 이벤트 등록
+		// 버튼에 업로드/다운로드/삭제 기능 연결
 		uploadButton.addActionListener(e -> handleUpload());
 		downloadButton.addActionListener(e -> handleDownload());
 		deleteButton.addActionListener(e -> handleDelete());
 
-		// 주기적으로 파일 목록 새로고침
+		// 자동 새로고침 타이머 설정 (3초 주기)
 		refreshTimer = new Timer(3000, e -> loadFiles(targetUser));
 		refreshTimer.start();
-
-		// 창이 닫힐 때 타이머 종료
+		// 창이 닫힐 때 타이머 종료 이벤트 설정
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
@@ -230,70 +217,25 @@ public class RepositoryView extends JFrame {
 			}
 		});
 
-		// 파일 트리 항목 선택 시 경로 저장
-		// fileTree.addTreeSelectionListener(e -> {
-		// TreePath path = fileTree.getSelectionPath();
-		// if (path == null || path.getPathCount() <= 1) {
-		// return;
-		// }
-
-		// DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)
-		// path.getLastPathComponent();
-		// String selectedName = selectedNode.getUserObject().toString();
-
-		// if ("[비어 있음]".equals(selectedName)) {
-		// fileTree.clearSelection();
-		// lastSelectedPath = "";
-		// return;
-		// }
-
-		// StringBuilder sb = new StringBuilder();
-		// Object[] nodes = path.getPath();
-		// for (int i = 1; i < nodes.length; i++) {
-		// sb.append(nodes[i].toString());
-		// if (i < nodes.length - 1)
-		// sb.append("/");
-		// }
-		// lastSelectedPath = sb.toString();
-		// System.out.println("lastSelectedPath :"+lastSelectedPath); //디버그
-		// });
+		// 트리 항목 선택 시 선택 경로를 저장하는 이벤트 핸들러
 		fileTree.addTreeSelectionListener(e -> {
 			TreePath path = fileTree.getSelectionPath();
-			if (path == null) {
+			if (path == null)
 				return;
-			}
 
-			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-			String selectedName = selectedNode.getUserObject().toString();
-
-			// if ("[비어 있음]".equals(selectedName)) {
-			// fileTree.clearSelection();
-			// lastSelectedPath = "";
-			// return;
-			// }
-
-			StringBuilder sb = new StringBuilder();
 			Object[] nodes = path.getPath();
+			lastSelectedPath = String.join("/",
+					Arrays.stream(nodes, 1, nodes.length)
+							.map(Object::toString)
+							.toArray(String[]::new));
 
-			// ✅ 루트 노드만 선택된 경우 (예: MyRepo)
-			if (nodes.length == 2) { // [루트, 저장소이름]
-				lastSelectedPath = nodes[1].toString(); // 저장소 이름
-			} else {
-				for (int i = 1; i < nodes.length; i++) {
-					sb.append(nodes[i].toString());
-					if (i < nodes.length - 1)
-						sb.append("/");
-				}
-				lastSelectedPath = sb.toString();
+			if (lastSelectedPath.endsWith("[비어 있음]")) {
+				lastSelectedPath = lastSelectedPath.replace("/[비어 있음]", "");
 			}
-			System.out.println("");
-			if (lastSelectedPath.endsWith("[비어 있음]"))
-				lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "[비어 있음]".length());
 		});
-
 	}
 
-	// 다크 모드 적용
+	// 다크 모드 설정을 UI 전체에 적용함
 	private void applyDarkMode() {
 		Color bgColor = Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR;
 		Color fgColor = Style.isDarkMode ? Style.DARK_TEXT_COLOR : Color.BLACK;
@@ -302,6 +244,7 @@ public class RepositoryView extends JFrame {
 		applyComponentDarkMode(getContentPane(), bgColor, fgColor);
 	}
 
+	// 개별 컴포넌트에 다크 모드 색상 적용 (재귀적 적용 포함)
 	private void applyComponentDarkMode(Component comp, Color bg, Color fg) {
 		if (comp instanceof JPanel || comp instanceof JScrollPane || comp instanceof JTree) {
 			comp.setBackground(bg);
@@ -330,7 +273,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 서버로부터 저장소의 파일 목록을 받아 트리로 구성
+	// 서버로부터 파일 목록을 받아와 트리 형태로 표시함
 	private void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		rootNode.removeAllChildren();
@@ -369,7 +312,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 현재 확장된 폴더의 경로들을 문자열로 저장
+	// 현재 확장된 트리 노드의 경로를 문자열로 저장
 	private List<String> getExpandedPathsAsStrings(JTree tree) {
 		List<String> paths = new ArrayList<>();
 		TreeModel model = tree.getModel();
@@ -380,7 +323,7 @@ public class RepositoryView extends JFrame {
 		return paths;
 	}
 
-	// 트리에서 확장된 경로들을 재귀적으로 수집
+	// 트리에서 확장된 노드들의 경로를 재귀적으로 수집
 	private void collectExpandedStrings(JTree tree, TreePath path, String currentPath, List<String> paths) {
 		if (tree.isExpanded(path)) {
 			Object node = path.getLastPathComponent();
@@ -396,7 +339,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 문자열 경로에 따라 트리 경로를 찾아 확장
+	// 문자열 경로 목록을 바탕으로 트리의 확장 상태를 복원
 	private void restoreExpandedPathsFromStrings(JTree tree, List<String> paths) {
 		for (String fullPath : paths) {
 			TreePath path = findTreePathByString(tree, fullPath);
@@ -406,7 +349,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 문자열 기반 트리 경로 찾기
+	// 문자열로 된 경로를 통해 트리의 TreePath 객체를 찾아 반환
 	private TreePath findTreePathByString(JTree tree, String fullPath) {
 		String[] parts = fullPath.split("/");
 		TreeModel model = tree.getModel();
@@ -447,7 +390,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 트리에 경로를 추가하여 트리 노드 구성
+	// 주어진 경로를 트리에 추가하여 파일/폴더 구조 생성
 	private void addPathToTree(String path, String type) {
 		String[] parts = path.split("/");
 		DefaultMutableTreeNode current = rootNode;
@@ -473,8 +416,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 파일 업로드 처리 (파일 또는 폴더)
-	// TODO: 콜라보 유저만 가능하게 구현 필요
+	// 파일 또는 폴더 업로드 기능 처리 (파일 선택 후 서버에 전송)
 	private void handleUpload() {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -485,9 +427,7 @@ public class RepositoryView extends JFrame {
 			File selectedFile = fileChooser.getSelectedFile();
 
 			try {
-				System.out.println("selectedPath 대입전 lastselectedpath: " + lastSelectedPath);
 				final String selectedPath = lastSelectedPath;
-				System.out.println("if 전 selectedPath: " + selectedPath);
 				String adjustedSelectedPath = selectedPath;
 				if (adjustedSelectedPath.contains(".") && !adjustedSelectedPath.endsWith("/")) {
 					int lastSlash = adjustedSelectedPath.lastIndexOf("/");
@@ -518,7 +458,6 @@ public class RepositoryView extends JFrame {
 					new Thread(() -> {
 						try {
 							refreshTimer.stop();
-							System.out.println("RepoOwner: " + repository.getUsername());// 디버그
 							ClientSock.push(selectedFile, dirPath, repository.getName(), currentUser.getId(),
 									repository.getUsername(), progressBar);
 							refreshTimer.start();
@@ -566,17 +505,34 @@ public class RepositoryView extends JFrame {
 			return;
 		File targetFolder = folderChooser.getSelectedFile();
 
-		try {
-			new Thread(() -> {
+		new Thread(() -> {
+			try {
+				SwingUtilities.invokeLater(() -> progressBar.setVisible(true)); // 시작 시 보이게
 				refreshTimer.stop();
-				ClientSock.pull(repository.getName(), selectedPath, targetFolder, repository.getUsername());
-				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다."));
+
+				ClientSock.pull(
+						repository.getName(),
+						selectedPath,
+						targetFolder,
+						repository.getUsername(),
+						progressBar);
+
+				SwingUtilities.invokeLater(() -> {
+					JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다.");
+					progressBar.setVisible(false);
+					loadFiles(targetUser);
+				});
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				SwingUtilities.invokeLater(() -> {
+					JOptionPane.showMessageDialog(this, "다운로드 중 오류 발생");
+					progressBar.setVisible(false);
+				});
+			} finally {
 				refreshTimer.start();
-			}).start();
-		} catch (Exception e) {
-			e.printStackTrace();
-			SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "다운로드 중 오류가 발생했습니다."));
-		}
+			}
+		}).start();
 	}
 
 	// 파일 또는 폴더 삭제 처리
@@ -597,12 +553,8 @@ public class RepositoryView extends JFrame {
 		try {
 			ClientSock.sendCommand("/delete_file " + repository.getName() + " \"" + lastSelectedPath + "\" "
 					+ repository.getUsername());
-			System.out.println(
-					"/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername()); // 디버그
 
 			String response = ClientSock.receiveResponse();
-			System.out.println(response); // 디버그
-
 			if (response.startsWith("/#/delete_success")) {
 				JOptionPane.showMessageDialog(this, "삭제가 완료되었습니다.");
 				loadFiles(targetUser);
@@ -617,7 +569,7 @@ public class RepositoryView extends JFrame {
 		}
 	}
 
-	// 콜라보 조회
+	// 저장소의 콜라보레이터 목록을 표시하고 추가/삭제 기능 제공
 	private void handleViewCollaborators() {
 		try {
 			ClientSock.sendCommand("/list_collaborators " + repository.getName());
