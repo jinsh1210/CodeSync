@@ -1,12 +1,20 @@
 package utils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import models.FileInfo;
 
 public class ClientSock {
@@ -122,7 +130,7 @@ public class ClientSock {
     public static void pull(String repoName, String relPath, File targetFolder,String Owner) {
         try {
             // 우선 서버에 요청 보냄
-            sendCommand("/pull " + repoName + " " + relPath+" "+Owner);
+            sendCommand("/pull " + repoName + " \"" + relPath+"\" "+Owner);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
@@ -186,7 +194,7 @@ public class ClientSock {
 
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
-            sendCommand("/mkdir " + repository + " " + relativePath+" "+Owner);
+            sendCommand("/mkdir " + repository + " \"" + relativePath+"\" "+Owner);
             String response = receiveResponse();
             System.out.println("[서버 mkdir 응답] " + response);
             return;
