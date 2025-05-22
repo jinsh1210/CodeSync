@@ -60,8 +60,8 @@ public class RepositoryView extends JFrame {
 	private JTree fileTree;
 	private DefaultMutableTreeNode rootNode;
 	private DefaultTreeModel treeModel;
-	//진행율
-	private JProgressBar progressBar;  // 선언 위치는 클래스 상단 필드에 추가
+	// 진행율
+	private JProgressBar progressBar; // 선언 위치는 클래스 상단 필드에 추가
 	// 상단 버튼들
 	private JButton uploadButton;
 	private JButton downloadButton;
@@ -70,7 +70,6 @@ public class RepositoryView extends JFrame {
 
 	// 자동 새로고침용 타이머
 	private Timer refreshTimer;
-	private JButton collaborateButton;
 
 	// 생성자 - 저장소 및 사용자 정보 전달받아 UI 초기화
 	public RepositoryView(Repository repository, User currentUser, String targetUser) {
@@ -105,16 +104,17 @@ public class RepositoryView extends JFrame {
 
 		// 상단 제목 및 설명 패널
 		JPanel headerPanel = new JPanel(new BorderLayout());
+		headerPanel.setPreferredSize(new Dimension(100, 80)); // 높이 조절
 		headerPanel.setBackground(Style.BACKGROUND_COLOR);
 		headerPanel.add(titleLabel, BorderLayout.NORTH);
 		headerPanel.add(descLabel, BorderLayout.SOUTH);
 
-		//진행바
+		// 진행바
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setVisible(false);
 		progressBar.setStringPainted(true);
 		progressBar.setPreferredSize(new Dimension(400, 20));
-		
+
 		JPanel headerWrapper = new JPanel(new BorderLayout());
 		headerWrapper.setBackground(Style.BACKGROUND_COLOR);
 
@@ -133,7 +133,7 @@ public class RepositoryView extends JFrame {
 			collaborateButton.setBorderPainted(false); // 버튼 테두리 제거
 			collaborateButton.setContentAreaFilled(false); // 배경 채우기 제거
 			collaborateButton.setOpaque(false); // 불투명 설정 해제
-			
+
 			collaborateButton.addActionListener(e -> handleViewCollaborators());
 
 			JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -189,7 +189,8 @@ public class RepositoryView extends JFrame {
 
 		JScrollPane scrollPane = new JScrollPane(fileTree);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-		//수정된 패널
+
+		// 수정된 패널
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.setLayout(new BorderLayout());
 		bottomPanel.setBackground(Style.BACKGROUND_COLOR);
@@ -198,9 +199,14 @@ public class RepositoryView extends JFrame {
 		// mainPanel.add(scrollPane, BorderLayout.CENTER);
 		// mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 		// mainPanel.add(progressBar, BorderLayout.NORTH);
-		bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
-		bottomPanel.add(scrollPane,BorderLayout.CENTER);
-		bottomPanel.add(progressBar, BorderLayout.NORTH);
+
+		// 스크롤 영역 중앙에 추가
+		mainPanel.add(scrollPane, BorderLayout.CENTER);
+		bottomPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		bottomPanel.add(buttonPanel);
+		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+		// 진행 바는 상단에
+		mainPanel.add(progressBar, BorderLayout.NORTH);
 		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 		add(mainPanel);
 		applyDarkMode();
@@ -226,29 +232,30 @@ public class RepositoryView extends JFrame {
 
 		// 파일 트리 항목 선택 시 경로 저장
 		// fileTree.addTreeSelectionListener(e -> {
-		// 	TreePath path = fileTree.getSelectionPath();
-		// 	if (path == null || path.getPathCount() <= 1) {
-		// 		return;
-		// 	}
+		// TreePath path = fileTree.getSelectionPath();
+		// if (path == null || path.getPathCount() <= 1) {
+		// return;
+		// }
 
-		// 	DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-		// 	String selectedName = selectedNode.getUserObject().toString();
+		// DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)
+		// path.getLastPathComponent();
+		// String selectedName = selectedNode.getUserObject().toString();
 
-		// 	if ("[비어 있음]".equals(selectedName)) {
-		// 		fileTree.clearSelection();
-		// 		lastSelectedPath = "";
-		// 		return;
-		// 	}
+		// if ("[비어 있음]".equals(selectedName)) {
+		// fileTree.clearSelection();
+		// lastSelectedPath = "";
+		// return;
+		// }
 
-		// 	StringBuilder sb = new StringBuilder();
-		// 	Object[] nodes = path.getPath();
-		// 	for (int i = 1; i < nodes.length; i++) {
-		// 		sb.append(nodes[i].toString());
-		// 		if (i < nodes.length - 1)
-		// 			sb.append("/");
-		// 	}
-		// 	lastSelectedPath = sb.toString();
-		// 	System.out.println("lastSelectedPath :"+lastSelectedPath); //디버그
+		// StringBuilder sb = new StringBuilder();
+		// Object[] nodes = path.getPath();
+		// for (int i = 1; i < nodes.length; i++) {
+		// sb.append(nodes[i].toString());
+		// if (i < nodes.length - 1)
+		// sb.append("/");
+		// }
+		// lastSelectedPath = sb.toString();
+		// System.out.println("lastSelectedPath :"+lastSelectedPath); //디버그
 		// });
 		fileTree.addTreeSelectionListener(e -> {
 			TreePath path = fileTree.getSelectionPath();
@@ -260,9 +267,9 @@ public class RepositoryView extends JFrame {
 			String selectedName = selectedNode.getUserObject().toString();
 
 			// if ("[비어 있음]".equals(selectedName)) {
-			// 	fileTree.clearSelection();
-			// 	lastSelectedPath = "";
-			// 	return;
+			// fileTree.clearSelection();
+			// lastSelectedPath = "";
+			// return;
 			// }
 
 			StringBuilder sb = new StringBuilder();
@@ -270,7 +277,7 @@ public class RepositoryView extends JFrame {
 
 			// ✅ 루트 노드만 선택된 경우 (예: MyRepo)
 			if (nodes.length == 2) { // [루트, 저장소이름]
-				lastSelectedPath = nodes[1].toString();  // 저장소 이름
+				lastSelectedPath = nodes[1].toString(); // 저장소 이름
 			} else {
 				for (int i = 1; i < nodes.length; i++) {
 					sb.append(nodes[i].toString());
@@ -280,10 +287,10 @@ public class RepositoryView extends JFrame {
 				lastSelectedPath = sb.toString();
 			}
 			System.out.println("");
-			if(lastSelectedPath.endsWith("[비어 있음]")) lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "[비어 있음]".length());
+			if (lastSelectedPath.endsWith("[비어 있음]"))
+				lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "[비어 있음]".length());
 		});
 
-		
 	}
 
 	// 다크 모드 적용
@@ -342,7 +349,6 @@ public class RepositoryView extends JFrame {
 				if (line.contains("/#/repo_content_EOL"))
 					break;
 			}
-
 			int start = response.indexOf("/#/repo_content_SOL") + "/#/repo_content_SOL".length();
 			int end = response.indexOf("/#/repo_content_EOL");
 			response = response.substring(start, end).trim();
@@ -479,9 +485,9 @@ public class RepositoryView extends JFrame {
 			File selectedFile = fileChooser.getSelectedFile();
 
 			try {
-				System.out.println("selectedPath 대입전 lastselectedpath: "+lastSelectedPath);
+				System.out.println("selectedPath 대입전 lastselectedpath: " + lastSelectedPath);
 				final String selectedPath = lastSelectedPath;
-				System.out.println("if 전 selectedPath: "+selectedPath);
+				System.out.println("if 전 selectedPath: " + selectedPath);
 				String adjustedSelectedPath = selectedPath;
 				if (adjustedSelectedPath.contains(".") && !adjustedSelectedPath.endsWith("/")) {
 					int lastSlash = adjustedSelectedPath.lastIndexOf("/");
@@ -490,12 +496,14 @@ public class RepositoryView extends JFrame {
 
 				if (selectedFile.isFile()) {
 					String filename = selectedFile.getName();
-					String serverPath = adjustedSelectedPath.equals("") ? filename : adjustedSelectedPath + "/" + filename;
+					String serverPath = adjustedSelectedPath.equals("") ? filename
+							: adjustedSelectedPath + "/" + filename;
 					new Thread(() -> {
 						try {
 							refreshTimer.stop();
-							
-							ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath, repository.getUsername(), progressBar);
+
+							ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath,
+									repository.getUsername(), progressBar);
 							refreshTimer.start();
 						} catch (Exception ex) {
 							ex.printStackTrace();
@@ -510,8 +518,9 @@ public class RepositoryView extends JFrame {
 					new Thread(() -> {
 						try {
 							refreshTimer.stop();
-							System.out.println("RepoOwner: "+repository.getUsername());//디버그
-							ClientSock.push(selectedFile, dirPath, repository.getName(), currentUser.getId(), repository.getUsername(), progressBar);
+							System.out.println("RepoOwner: " + repository.getUsername());// 디버그
+							ClientSock.push(selectedFile, dirPath, repository.getName(), currentUser.getId(),
+									repository.getUsername(), progressBar);
 							refreshTimer.start();
 						} catch (Exception ex) {
 							ex.printStackTrace();
@@ -524,8 +533,7 @@ public class RepositoryView extends JFrame {
 				}
 
 				// loadFiles(targetUser);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "업로드 중 오류가 발생했습니다.");
 			}
@@ -561,7 +569,7 @@ public class RepositoryView extends JFrame {
 		try {
 			new Thread(() -> {
 				refreshTimer.stop();
-				ClientSock.pull(repository.getName(), selectedPath, targetFolder,repository.getUsername());
+				ClientSock.pull(repository.getName(), selectedPath, targetFolder, repository.getUsername());
 				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다."));
 				refreshTimer.start();
 			}).start();
@@ -587,8 +595,10 @@ public class RepositoryView extends JFrame {
 			return;
 
 		try {
-			ClientSock.sendCommand("/delete_file " + repository.getName() + " \"" + lastSelectedPath + "\" " + repository.getUsername());
-			System.out.println("/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername()); // 디버그
+			ClientSock.sendCommand("/delete_file " + repository.getName() + " \"" + lastSelectedPath + "\" "
+					+ repository.getUsername());
+			System.out.println(
+					"/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername()); // 디버그
 
 			String response = ClientSock.receiveResponse();
 			System.out.println(response); // 디버그
@@ -606,7 +616,6 @@ public class RepositoryView extends JFrame {
 			JOptionPane.showMessageDialog(this, "삭제 중 오류가 발생했습니다.");
 		}
 	}
-
 
 	// 콜라보 조회
 	private void handleViewCollaborators() {

@@ -364,7 +364,6 @@ public class MainView extends JFrame {
 	// 저장소를 더블클릭했을 때 RepositoryView 창 열기
 	private void openRepository(Repository repository) {
 		try {
-
 			String user = repository.getUsername();
 			RepositoryView repoView;
 			if (currentUser.getUsername().equals(user))
