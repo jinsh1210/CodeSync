@@ -1,8 +1,10 @@
 package utils;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,10 +12,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.file.Files;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 
 import models.FileInfo;
 
@@ -35,7 +40,7 @@ public class ClientSock {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             inputStream = socket.getInputStream();
-            outputStream = socket.getOutputStream();
+            outputStream = new BufferedOutputStream(socket.getOutputStream());
 
             // 초기 인증
             out.println(TOKEN);
@@ -160,41 +165,56 @@ public class ClientSock {
         }
     }
 
-    public static void push(File file, String repoName, int userId, String serverPath,String Owner) { //파일형식 오버로드된 메소드
+    public static void push(File file, String repoName, int userId, String serverPath, String Owner,JProgressBar bar) throws SocketException {
         try {
-            byte[] data = Files.readAllBytes(file.toPath());
-            int fileSize = data.length;
+            long fileSize = file.length(); // 파일 크기 측정
 
-            sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize+" "+Owner);
-            System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize); //디버그
+            sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize + " " + Owner);
+            System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize+" "+Owner); //디버그
+            System.out.println("owner: "+Owner);
             String response = receiveResponse();
             if (!"/#/push_ready".equals(response.trim())) {
                 System.err.println("[Client] push 실패: 서버 응답 = " + response);
                 return;
             }
+            bar.setVisible(true);
+            // 스트림 방식으로 전송
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] buffer = new byte[8192];
+                long sent = 0;
+                int read;
+                OutputStream out = socket.getOutputStream();
 
-            outputStream.write(data);
-            outputStream.flush();
+                while ((read = fis.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                    sent += read;
+                    int percent = (int) (100 * sent / fileSize);
+                    SwingUtilities.invokeLater(() -> bar.setValue(percent));
+                }
+                out.flush();
+            }
+            // 결과 수신
             String result = receiveResponse();
             System.out.println("[서버 응답] " + result);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-    public static void push(File folder, String basePath, String repository, int userId, String Owner) throws IOException { //폴더 형식 전송 오버로드 메소드
+    public static void push(File folder, String basePath, String repository, int userId, String Owner,JProgressBar bar) throws IOException { //폴더 형식 전송 오버로드 메소드
         File[] contents = folder.listFiles();
         boolean isEmpty = (contents == null || contents.length == 0);
 
         // 상대 경로 계산
         String relativePath = basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName();
-        System.out.println("폴더 전용 relativePath: "+relativePath+" | basePath: "+basePath); //디버그
+        System.out.println("폴더 전용 relativePath: "+relativePath+" | basePath: "+basePath+" | owner: "+Owner); //디버그
 
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
             sendCommand("/mkdir " + repository + " \"" + relativePath+"\" "+Owner);
+            System.out.println("owner: "+Owner);
+            System.out.println("/mkdir " + repository + " \"" + relativePath+"\" "+Owner);//디버그
             String response = receiveResponse();
             System.out.println("[서버 mkdir 응답] " + response);
             return;
@@ -204,9 +224,9 @@ public class ClientSock {
         for (File file : contents) {
             if (file.isFile()) {
                 String filePath = relativePath + "/" + file.getName();
-                push(file, repository, userId, filePath,Owner);
+                push(file, repository, userId, filePath,Owner,bar);
             } else if (file.isDirectory()) {
-                push(file, relativePath,repository,userId,Owner);  // 재귀 호출
+                push(file, relativePath,repository,userId,Owner,bar);  // 재귀 호출
             }
         }
     }

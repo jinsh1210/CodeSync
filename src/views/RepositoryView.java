@@ -1,21 +1,49 @@
 package views;
 
-import javax.swing.*;
-import javax.swing.tree.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-import models.User;
 import models.Repository;
+import models.User;
 import utils.ClientSock;
 import utils.Style;
 
@@ -32,7 +60,8 @@ public class RepositoryView extends JFrame {
 	private JTree fileTree;
 	private DefaultMutableTreeNode rootNode;
 	private DefaultTreeModel treeModel;
-
+	//진행율
+	private JProgressBar progressBar;  // 선언 위치는 클래스 상단 필드에 추가
 	// 상단 버튼들
 	private JButton uploadButton;
 	private JButton downloadButton;
@@ -80,6 +109,12 @@ public class RepositoryView extends JFrame {
 		headerPanel.add(titleLabel, BorderLayout.NORTH);
 		headerPanel.add(descLabel, BorderLayout.SOUTH);
 
+		//진행바
+		progressBar = new JProgressBar(0, 100);
+		progressBar.setVisible(false);
+		progressBar.setStringPainted(true);
+		progressBar.setPreferredSize(new Dimension(400, 20));
+		
 		JPanel headerWrapper = new JPanel(new BorderLayout());
 		headerWrapper.setBackground(Style.BACKGROUND_COLOR);
 
@@ -154,11 +189,19 @@ public class RepositoryView extends JFrame {
 
 		JScrollPane scrollPane = new JScrollPane(fileTree);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+		//수정된 패널
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.setLayout(new BorderLayout());
+		bottomPanel.setBackground(Style.BACKGROUND_COLOR);
 
 		// 메인 패널 구성
-		mainPanel.add(scrollPane, BorderLayout.CENTER);
-		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
+		// mainPanel.add(scrollPane, BorderLayout.CENTER);
+		// mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+		// mainPanel.add(progressBar, BorderLayout.NORTH);
+		bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+		bottomPanel.add(scrollPane,BorderLayout.CENTER);
+		bottomPanel.add(progressBar, BorderLayout.NORTH);
+		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 		add(mainPanel);
 		applyDarkMode();
 
@@ -437,24 +480,52 @@ public class RepositoryView extends JFrame {
 
 			try {
 				System.out.println("selectedPath 대입전 lastselectedpath: "+lastSelectedPath);
-				String selectedPath = lastSelectedPath;
+				final String selectedPath = lastSelectedPath;
 				System.out.println("if 전 selectedPath: "+selectedPath);
-				if (selectedPath.contains(".") && !selectedPath.endsWith("/")) {
-					int lastSlash = selectedPath.lastIndexOf("/");
-					selectedPath = (lastSlash != -1) ? selectedPath.substring(0, lastSlash) : "";
+				String adjustedSelectedPath = selectedPath;
+				if (adjustedSelectedPath.contains(".") && !adjustedSelectedPath.endsWith("/")) {
+					int lastSlash = adjustedSelectedPath.lastIndexOf("/");
+					adjustedSelectedPath = (lastSlash != -1) ? adjustedSelectedPath.substring(0, lastSlash) : "";
 				}
 
 				if (selectedFile.isFile()) {
 					String filename = selectedFile.getName();
-					String serverPath = selectedPath.equals("") ? filename : selectedPath + "/" + filename;
-					ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath,repository.getUsername());
+					String serverPath = adjustedSelectedPath.equals("") ? filename : adjustedSelectedPath + "/" + filename;
+					new Thread(() -> {
+						try {
+							refreshTimer.stop();
+							
+							ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath, repository.getUsername(), progressBar);
+							refreshTimer.start();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							JOptionPane.showMessageDialog(this, "업로드 중 오류 발생");
+						} finally {
+							SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
+							loadFiles(targetUser);
+						}
+					}).start();
 				} else if (selectedFile.isDirectory()) {
-					ClientSock.push(selectedFile, selectedPath, repository.getName(), currentUser.getId(),repository.getName());
-
+					final String dirPath = adjustedSelectedPath;
+					new Thread(() -> {
+						try {
+							refreshTimer.stop();
+							System.out.println("RepoOwner: "+repository.getUsername());//디버그
+							ClientSock.push(selectedFile, dirPath, repository.getName(), currentUser.getId(), repository.getUsername(), progressBar);
+							refreshTimer.start();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							JOptionPane.showMessageDialog(this, "업로드 중 오류 발생");
+						} finally {
+							SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
+							loadFiles(targetUser);
+						}
+					}).start();
 				}
 
-				loadFiles(targetUser);
-			} catch (Exception e) {
+				// loadFiles(targetUser);
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "업로드 중 오류가 발생했습니다.");
 			}
