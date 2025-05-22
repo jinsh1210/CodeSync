@@ -236,7 +236,8 @@ public class RepositoryView extends JFrame {
 				}
 				lastSelectedPath = sb.toString();
 			}
-			if(lastSelectedPath.endsWith("/[비어 있음]")) lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "/[비어 있음]".length());
+			System.out.println("");
+			if(lastSelectedPath.endsWith("[비어 있음]")) lastSelectedPath = lastSelectedPath.substring(0, lastSelectedPath.length() - "[비어 있음]".length());
 		});
 
 		
@@ -446,9 +447,9 @@ public class RepositoryView extends JFrame {
 				if (selectedFile.isFile()) {
 					String filename = selectedFile.getName();
 					String serverPath = selectedPath.equals("") ? filename : selectedPath + "/" + filename;
-					ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath);
+					ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath,repository.getUsername());
 				} else if (selectedFile.isDirectory()) {
-					ClientSock.push(selectedFile, selectedPath, repository.getName(), currentUser.getId());
+					ClientSock.push(selectedFile, selectedPath, repository.getName(), currentUser.getId(),repository.getName());
 
 				}
 
@@ -489,7 +490,7 @@ public class RepositoryView extends JFrame {
 		try {
 			new Thread(() -> {
 				refreshTimer.stop();
-				ClientSock.pull(repository.getName(), selectedPath, targetFolder);
+				ClientSock.pull(repository.getName(), selectedPath, targetFolder,repository.getUsername());
 				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다."));
 				refreshTimer.start();
 			}).start();
@@ -515,7 +516,7 @@ public class RepositoryView extends JFrame {
 			return;
 
 		try {
-			ClientSock.sendCommand("/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername());
+			ClientSock.sendCommand("/delete_file " + repository.getName() + " \"" + lastSelectedPath + "\" " + repository.getUsername());
 			System.out.println("/delete_file " + repository.getName() + " " + lastSelectedPath + " " + repository.getUsername()); // 디버그
 
 			String response = ClientSock.receiveResponse();

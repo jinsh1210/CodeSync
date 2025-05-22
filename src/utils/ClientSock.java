@@ -119,10 +119,10 @@ public class ClientSock {
         }
     }
 
-    public static void pull(String repoName, String relPath, File targetFolder) {
+    public static void pull(String repoName, String relPath, File targetFolder,String Owner) {
         try {
             // 우선 서버에 요청 보냄
-            sendCommand("/pull " + repoName + " " + relPath);
+            sendCommand("/pull " + repoName + " " + relPath+" "+Owner);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
@@ -152,12 +152,12 @@ public class ClientSock {
         }
     }
 
-    public static void push(File file, String repoName, int userId, String serverPath) { //파일형식 오버로드된 메소드
+    public static void push(File file, String repoName, int userId, String serverPath,String Owner) { //파일형식 오버로드된 메소드
         try {
             byte[] data = Files.readAllBytes(file.toPath());
             int fileSize = data.length;
 
-            sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize);
+            sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize+" "+Owner);
             System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize); //디버그
             String response = receiveResponse();
             if (!"/#/push_ready".equals(response.trim())) {
@@ -176,7 +176,7 @@ public class ClientSock {
     }
 
 
-    public static void push(File folder, String basePath, String repository, int userId) throws IOException { //폴더 형식 전송 오버로드 메소드
+    public static void push(File folder, String basePath, String repository, int userId, String Owner) throws IOException { //폴더 형식 전송 오버로드 메소드
         File[] contents = folder.listFiles();
         boolean isEmpty = (contents == null || contents.length == 0);
 
@@ -186,7 +186,7 @@ public class ClientSock {
 
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
-            sendCommand("/mkdir " + repository + " " + relativePath);
+            sendCommand("/mkdir " + repository + " " + relativePath+" "+Owner);
             String response = receiveResponse();
             System.out.println("[서버 mkdir 응답] " + response);
             return;
@@ -196,9 +196,9 @@ public class ClientSock {
         for (File file : contents) {
             if (file.isFile()) {
                 String filePath = relativePath + "/" + file.getName();
-                push(file, repository, userId, filePath);
+                push(file, repository, userId, filePath,Owner);
             } else if (file.isDirectory()) {
-                push(file, relativePath,repository,userId);  // 재귀 호출
+                push(file, relativePath,repository,userId,Owner);  // 재귀 호출
             }
         }
     }
