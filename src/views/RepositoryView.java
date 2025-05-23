@@ -35,6 +35,7 @@ import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -90,6 +91,12 @@ public class RepositoryView extends JFrame {
 		setMinimumSize(new Dimension(500, 600));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
+		//파일탐색기 디자인변경
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace(); // 실패해도 앱은 정상 작동함
+		}
 
 		// 전체 구성요소를 담는 메인 패널 설정 (여백 및 배경색 포함)
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
