@@ -21,7 +21,7 @@ public class SignUpView extends JFrame {
 	// UI 구성 및 이벤트 등록
 	private void initializeUI() {
 		setTitle("J.S.Repo - Sign Up");
-		setSize(400, 480);
+		setSize(400, 500);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
