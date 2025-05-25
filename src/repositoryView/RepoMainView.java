@@ -737,6 +737,7 @@ public class RepoMainView extends JFrame {
 			JOptionPane.showMessageDialog(this, "콜라보레이터 목록을 불러오는 중 오류 발생");
 		}
 	}
+
 	private void setLocalFolder(){
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -744,8 +745,13 @@ public class RepoMainView extends JFrame {
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File selected = chooser.getSelectedFile();
 			if (selected != null && selected.isDirectory()) {
-				// 정상적으로 선택된 폴더만 처리
-				SavedPath = selected.getAbsolutePath();
+				File fullPath = new File(selected, repository.getName());
+				SavedPath = fullPath.getAbsolutePath();
+
+				// 디렉토리가 존재하지 않으면 생성
+				if (!fullPath.exists()) {
+					fullPath.mkdirs();
+				}
 				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
 				System.out.println("저장된 경로: " + SavedPath);
 			} else {
