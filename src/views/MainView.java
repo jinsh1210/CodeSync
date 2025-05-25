@@ -1,7 +1,6 @@
 package views;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -13,6 +12,8 @@ import views.repositoryView.RepoMainView;
 import utils.Style;
 import models.Repository;
 import utils.ClientSock;
+import utils.DarkModeManager;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -44,12 +45,12 @@ public class MainView extends JFrame {
 		ImageIcon refreshIcon = new ImageIcon("src/icons/refresh.png");
 		Image scaledrefresh = refreshIcon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
 		refreshIconButton.setIcon(new ImageIcon(scaledrefresh));
-		refreshIconButton.setBackground(Color.WHITE); // 다크모드는 applyDarkMode에서 반영
+		refreshIconButton.setBackground(Color.WHITE);
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-		refreshIconButton.setFocusPainted(false); // 포커스 테두리 제거
-		refreshIconButton.setBorderPainted(false); // 버튼 테두리 제거
-		refreshIconButton.setContentAreaFilled(false); // 배경 채우기 제거
-		refreshIconButton.setOpaque(false); // 불투명 설정 해제
+		refreshIconButton.setFocusPainted(false);
+		refreshIconButton.setBorderPainted(false);
+		refreshIconButton.setContentAreaFilled(false);
+		refreshIconButton.setOpaque(false);
 
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -75,8 +76,8 @@ public class MainView extends JFrame {
 		JSeparator separator = new JSeparator(SwingConstants.VERTICAL);
 		separator.setPreferredSize(new Dimension(2, 20));
 		separator.setMaximumSize(new Dimension(2, 20));
-		separator.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5)); // 좌우 여백
-		separator.setForeground(Color.GRAY); // 색상은 어둡게
+		separator.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+		separator.setForeground(Color.GRAY);
 		separator.setBackground(Color.GRAY);
 
 		JMenu repoMenu = new JMenu("저장소");
@@ -113,15 +114,15 @@ public class MainView extends JFrame {
 		searchReposItem.addActionListener(e -> searchRepositories());
 		logoutItem.addActionListener(e -> handleLogout());
 		darkModeToggle.addItemListener(e -> {
-			Style.toggleDarkMode();
-			applyDarkMode();
+			DarkModeManager.toggle(); // 상태 전환
+			DarkModeManager.apply(getContentPane()); // 다크모드 적용
 		});
 
 		menuBar.add(darkModeToggle);
 		setJMenuBar(menuBar);
 
 		// 메뉴바 전체 크기 조정
-		menuBar.setPreferredSize(new Dimension(0, 36)); // 기존보다 약간 높은 높이
+		menuBar.setPreferredSize(new Dimension(0, 36));
 
 		// 각 메뉴의 폰트와 마진 확대
 		repoMenu.setFont(Style.menuFont);
@@ -438,54 +439,6 @@ public class MainView extends JFrame {
 	// 에러 메시지 일괄 처리 팝업
 	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
-	}
-
-	// 다크 모드 적용 메서드
-	private void applyDarkMode() {
-		Color bgColor = Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR;
-		Color fgColor = Style.isDarkMode ? Style.DARK_TEXT_COLOR : Style.TEXT_SECONDARY_COLOR;
-
-		getContentPane().setBackground(bgColor);
-
-		for (Component c : getContentPane().getComponents()) {
-			applyComponentDarkMode(c, bgColor, fgColor);
-		}
-	}
-
-	// 다크모드 적용
-	private void applyComponentDarkMode(Component comp, Color bg, Color fg) {
-		comp.setBackground(bg);
-		comp.setForeground(fg);
-
-		if (comp instanceof JPanel && ((JPanel) comp).getBorder() instanceof TitledBorder) {
-			TitledBorder border = (TitledBorder) ((JPanel) comp).getBorder();
-			border.setTitleColor(fg); // 제목 텍스트 색상 강제 적용
-		}
-
-		if (comp instanceof JPanel) {
-			// ⭐ JPanel은 항상 수동 배경 설정 필요
-			comp.setBackground(bg);
-			for (Component child : ((JPanel) comp).getComponents()) {
-				applyComponentDarkMode(child, bg, fg);
-			}
-		} else if (comp instanceof JScrollPane) {
-			JScrollPane scroll = (JScrollPane) comp;
-			scroll.setBackground(bg);
-			scroll.getViewport().setBackground(bg);
-			Component view = scroll.getViewport().getView();
-			if (view != null) {
-				applyComponentDarkMode(view, bg, fg);
-			}
-		} else if (comp instanceof JSplitPane) {
-			JSplitPane split = (JSplitPane) comp;
-			applyComponentDarkMode(split.getLeftComponent(), bg, fg);
-			applyComponentDarkMode(split.getRightComponent(), bg, fg);
-		} else if (comp instanceof JLabel || comp instanceof JButton || comp instanceof JToggleButton) {
-			comp.setForeground(fg); // 텍스트 요소 색상 적용
-		} else if (comp instanceof JButton) {
-			comp.setForeground(fg);
-			comp.setBackground(bg);
-		}
 	}
 
 	// Public | Private 이미지 추가

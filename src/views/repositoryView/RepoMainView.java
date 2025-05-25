@@ -3,7 +3,6 @@ package views.repositoryView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -33,42 +32,46 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Repository;
 import models.User;
+
 import utils.Style;
+
 @Getter
 @Setter
 
 public class RepoMainView extends JFrame {
-    private Repository repository;
-    private User currentUser;
-    private String targetUser;
-    private String lastSelectedPath = "";
+	private Repository repository;
+	private User currentUser;
+	private String targetUser;
+	private String lastSelectedPath = "";
 
-    private JTree fileTree;
-    private DefaultMutableTreeNode rootNode;
-    private DefaultTreeModel treeModel;
-    private JProgressBar progressBar;
+	private JTree fileTree;
+	private DefaultMutableTreeNode rootNode;
+	private DefaultTreeModel treeModel;
+	private JProgressBar progressBar;
 
-    private JButton uploadButton, downloadButton, deleteButton, localButton;
+	private JButton uploadButton, downloadButton, deleteButton, localButton;
 
-    private Timer refreshTimer;
+	private Timer refreshTimer;
 
 	private CollaboratorListView collaboratorListView;
 	private RepoFunc repoFunc;
 
-    public RepoMainView(Repository repository, User currentUser, String targetUser) {
-        this.repository = repository;
-        this.currentUser = currentUser;
-        this.targetUser = targetUser;
+	public RepoMainView(Repository repository, User currentUser, String targetUser) {
+		this.repository = repository;
+		this.currentUser = currentUser;
+		this.targetUser = targetUser;
 
-        initializeUI();
+		initializeUI();
 
 		this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
 		this.collaboratorListView = new CollaboratorListView(repository);
-        repoFunc.loadFiles(targetUser);
-    }
+		repoFunc.loadFiles(targetUser);
 
-    private void initializeUI() {
-        // 프레임 제목, 크기, 닫힘 동작 등 기본 설정
+		utils.DarkModeManager.apply(getContentPane());
+	}
+
+	private void initializeUI() {
+		// 프레임 제목, 크기, 닫힘 동작 등 기본 설정
 		setTitle("J.S.Repo - Repository");
 		setSize(650, 600);
 		setMinimumSize(new Dimension(650, 600));
@@ -89,7 +92,7 @@ public class RepoMainView extends JFrame {
 		String html = "<html>" + repository.getDescription().replace("\n", "<br>") + "</html>";
 		JLabel descLabel = new JLabel(html);
 		descLabel.setFont(Style.LABEL_FONT);
-		descLabel.setForeground(new Color(80, 80, 80));
+		descLabel.setForeground(Color.BLACK);
 
 		// 제목과 설명을 세로로 배치한 상단 헤더 패널 구성
 		JPanel headerPanel = new JPanel();
@@ -131,17 +134,17 @@ public class RepoMainView extends JFrame {
 
 		// 업로드/다운로드/삭제 버튼 생성 및 색상 설정
 		uploadButton = Style.createStyledButton("푸쉬", Style.PRIMARY_COLOR, Color.WHITE);
-		downloadButton = Style.createStyledButton("풀", new Color(41, 128, 185), Color.WHITE);
+		downloadButton = Style.createStyledButton("풀", Style.PRIMARY_COLOR, Color.WHITE);
+		localButton = Style.createStyledButton("로컬 저장소", Style.PRIMARY_COLOR, Color.WHITE);
 		deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
-		localButton = Style.createStyledButton("로컬 저장소", new Color(231, 76, 60), Color.WHITE);
 
 		// 하단 버튼 영역 패널 구성
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
 		buttonPanel.setBackground(Style.BACKGROUND_COLOR);
 		buttonPanel.add(uploadButton);
 		buttonPanel.add(downloadButton);
-		buttonPanel.add(deleteButton);
 		buttonPanel.add(localButton);
+		buttonPanel.add(deleteButton);
 
 		// 버튼 패널을 포함한 전체 하단 패널 설정
 		JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -154,7 +157,7 @@ public class RepoMainView extends JFrame {
 		treeModel = new DefaultTreeModel(rootNode);
 		// 파일 트리 컴포넌트 생성 및 다크모드 스타일 지정
 		fileTree = new JTree(treeModel);
-		//
+
 		DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
 		renderer.setOpenIcon(UIManager.getIcon("FileView.directoryIcon"));
 		renderer.setClosedIcon(UIManager.getIcon("FileView.directoryIcon"));
@@ -175,6 +178,12 @@ public class RepoMainView extends JFrame {
 					setForeground(Style.DARK_TEXT_COLOR);
 					setBackgroundNonSelectionColor(Style.DARK_BACKGROUND_COLOR);
 					setBackgroundSelectionColor(new Color(70, 70, 70));
+					setOpaque(false);
+				} else {
+					setForeground(Color.BLACK);
+					setBackgroundNonSelectionColor(Style.BACKGROUND_COLOR);
+					setBackgroundSelectionColor(UIManager.getColor("Tree.selectionBackground"));
+					setOpaque(false);
 				}
 				if (obj instanceof String && "[비어 있음]".equals(obj)) {
 					setIcon(null);
@@ -185,12 +194,12 @@ public class RepoMainView extends JFrame {
 		// 트리를 감싸는 스크롤 패널 생성 및 테두리 설정
 		JScrollPane scrollPane = new JScrollPane(fileTree);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+		scrollPane.getViewport().setOpaque(false);
+		scrollPane.setOpaque(false);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
 
 		// 모든 구성 요소가 담긴 mainPanel을 프레임에 추가
 		add(mainPanel);
-		// 다크 모드 적용
-		applyDarkMode();
 
 		// 버튼에 업로드/다운로드/삭제 기능 연결
 		uploadButton.addActionListener(e -> repoFunc.handleUpload());
@@ -211,21 +220,4 @@ public class RepoMainView extends JFrame {
 			}
 		});
 	}
-
-    private void applyDarkMode() {
-        Color bg = Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR;
-        Color fg = Style.isDarkMode ? Style.DARK_TEXT_COLOR : Style.TEXT_PRIMARY_COLOR;
-        getContentPane().setBackground(bg);
-        applyComponentDarkMode(getContentPane(), bg, fg);
-    }
-
-    private void applyComponentDarkMode(Component comp, Color bg, Color fg) {
-        if (comp instanceof Container) {
-            comp.setBackground(bg);
-            comp.setForeground(fg);
-            for (Component child : ((Container) comp).getComponents()) {
-                applyComponentDarkMode(child, bg, fg);
-            }
-        }
-    }
 }

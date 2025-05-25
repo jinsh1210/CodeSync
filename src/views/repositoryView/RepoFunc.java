@@ -152,6 +152,7 @@ public class RepoFunc {
 					String nodeText = value.toString();
 					if ("[비어 있음]".equals(nodeText)) {
 						label.setIcon(null); // 아이콘 제거
+						
 					}
 
 					label.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 4)); // 마진도 적용

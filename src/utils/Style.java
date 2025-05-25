@@ -60,7 +60,6 @@ public class Style {
 		button.setBorderPainted(false);
 		button.setContentAreaFilled(false);
 		button.setOpaque(true);
-		button.setForeground(isDarkMode ? DARK_TEXT_COLOR : fgColor);
 		button.setPreferredSize(new Dimension(130, 40));
 		return button;
 	}
