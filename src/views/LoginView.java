@@ -113,7 +113,6 @@ public class LoginView extends JFrame {
                 Style.isDarkMode = userDarkMode;
                 DarkModeManager.setDarkMode(userDarkMode); */
 
-                JOptionPane.showMessageDialog(this, "로그인 성공");
                 new MainView(user).setVisible(true);
                 this.dispose();
 

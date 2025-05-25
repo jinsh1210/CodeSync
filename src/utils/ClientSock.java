@@ -40,7 +40,6 @@ public class ClientSock {
     private static InputStream inputStream;
 
     private static void loadConfig() {
-        // TODO: Allow user-defined config path, currently still hardcoded.
         File configFile = new File("TeamProject/" + CONFIG_PATH);
         if (!configFile.exists()) {
             try {

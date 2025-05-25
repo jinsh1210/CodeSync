@@ -37,7 +37,6 @@ public class RepoMainView extends JFrame {
 		this.targetUser = targetUser;
 
 		initializeUI();
-		initializeUI();
 
 		this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
 		this.collaboratorListView = new CollaboratorListView(repository);
