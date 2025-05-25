@@ -16,6 +16,7 @@ public class Style {
 	public static final Color DARK_BACKGROUND_COLOR = new Color(34, 34, 34);
 	public static final Color DARK_FIELD_BACKGROUND = new Color(64, 64, 64);
 	public static final Color DARK_TEXT_COLOR = new Color(230, 230, 230);
+	public static final Color DARK_BUTTON_COLOR = new Color(70, 70, 70);
 
 	public static final Font TITLE_FONT = new Font("Malgun Gothic", Font.BOLD, 26);
 	public static final Font LABEL_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);

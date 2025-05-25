@@ -21,6 +21,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -31,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -250,7 +252,7 @@ public class RepositoryView extends JFrame {
 				lastSelectedPath = lastSelectedPath.replace("/[비어 있음]", "");
 			}
 		});
-		System.out.println(lastSelectedPath); //디버그
+		System.out.println(lastSelectedPath); // 디버그
 	}
 
 	// 다크 모드 설정을 UI 전체에 적용함
@@ -331,21 +333,31 @@ public class RepositoryView extends JFrame {
 				@Override
 				public Component getTreeCellRendererComponent(JTree tree, Object value,
 						boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-					
+
 					JLabel label = (JLabel) super.getTreeCellRendererComponent(
-						tree, value, sel, expanded, leaf, row, hasFocus);
+							tree, value, sel, expanded, leaf, row, hasFocus);
 
 					String nodeText = value.toString();
 					if ("[비어 있음]".equals(nodeText)) {
-						label.setIcon(null);  // 아이콘 제거
+						label.setIcon(null); // 아이콘 제거
 					}
 
 					label.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 4)); // 마진도 적용
+
+					if (Style.isDarkMode) {
+						label.setBackground(sel ? new Color(70, 70, 70) : Style.DARK_BACKGROUND_COLOR);
+						label.setForeground(Style.DARK_TEXT_COLOR);
+					} else {
+						label.setBackground(sel ? getBackgroundSelectionColor() : getBackgroundNonSelectionColor());
+						label.setForeground(sel ? getTextSelectionColor() : getTextNonSelectionColor());
+					}
+					label.setOpaque(true); // 배경 적용
+
 					return label;
 				}
 			};
 
-			renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon"));  // ✅ 파일 아이콘 지정
+			renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon")); // ✅ 파일 아이콘 지정
 			fileTree.setCellRenderer(renderer);
 
 		} catch (Exception e) {
@@ -580,11 +592,11 @@ public class RepositoryView extends JFrame {
 
 	// 파일 또는 폴더 삭제 처리
 	private void handleDelete() {
-		if (lastSelectedPath == null || lastSelectedPath.isBlank()||lastSelectedPath.endsWith("[비어 있음]")) {
+		if (lastSelectedPath == null || lastSelectedPath.isBlank() || lastSelectedPath.endsWith("[비어 있음]")) {
 			JOptionPane.showMessageDialog(this, "삭제할 항목을 먼저 선택해주세요.");
 			return;
 		}
-		System.out.println(lastSelectedPath);//디버그
+		System.out.println(lastSelectedPath);// 디버그
 		int confirm = JOptionPane.showConfirmDialog(this,
 				"선택한 항목(" + lastSelectedPath + ")을 삭제하시겠습니까?",
 				"삭제 확인",
@@ -654,6 +666,10 @@ public class RepositoryView extends JFrame {
 			JScrollPane scrollPane = new JScrollPane(collaboratorList);
 			scrollPane.setPreferredSize(new Dimension(300, 200));
 
+
+
+			
+
 			// 삭제 우클릭 메뉴
 			JPopupMenu menu = new JPopupMenu();
 			JMenuItem removeItem = new JMenuItem("삭제");
@@ -684,9 +700,10 @@ public class RepositoryView extends JFrame {
 			collaboratorList.setComponentPopupMenu(menu);
 
 			// 추가 버튼
-			JButton addButton = new JButton("추가");
+			JButton addButton = Style.createStyledButton("추가", Style.PRIMARY_COLOR, Color.WHITE);
+			addButton.setPreferredSize(new Dimension(80, 30));
 			addButton.addActionListener(e -> {
-				String newUser = JOptionPane.showInputDialog(null, "추가할 사용자 아이디 입력:");
+				String newUser = showCustomInputDialog("추가할 사용자 아이디 입력:");
 				if (newUser != null && !newUser.trim().isEmpty()) {
 					try {
 						ClientSock.sendCommand("/add_collaborator " + repository.getName() + " " + newUser.trim());
@@ -703,6 +720,12 @@ public class RepositoryView extends JFrame {
 				}
 			});
 
+			if (Style.isDarkMode) {
+				UIManager.put("OptionPane.background", Style.DARK_BACKGROUND_COLOR);
+				UIManager.put("Panel.background", Style.DARK_BACKGROUND_COLOR);
+				UIManager.put("OptionPane.messageForeground", Style.DARK_TEXT_COLOR);
+			}
+
 			JPanel panel = new JPanel(new BorderLayout());
 			panel.add(scrollPane, BorderLayout.CENTER);
 
@@ -710,11 +733,103 @@ public class RepositoryView extends JFrame {
 			controlPanel.add(addButton);
 			panel.add(controlPanel, BorderLayout.SOUTH);
 
-			JOptionPane.showMessageDialog(this, panel, "콜라보레이터 목록", JOptionPane.PLAIN_MESSAGE);
+			// JDialog 생성
+			JDialog dialog = new JDialog(this, "콜라보레이터 목록", true);
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.getContentPane().add(panel, BorderLayout.CENTER);
+
+			// 확인 버튼 추가
+			JButton okButton = Style.createStyledButton("확인", Style.PRIMARY_COLOR, Color.WHITE);
+			okButton.setPreferredSize(new Dimension(80, 30));
+			okButton.addActionListener(e -> dialog.dispose());
+			JPanel okPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+			okPanel.add(okButton);
+
+
+
+			if (Style.isDarkMode)
+				okPanel.setBackground(Style.DARK_BACKGROUND_COLOR);
+			dialog.getContentPane().add(okPanel, BorderLayout.SOUTH);
+
+			if (Style.isDarkMode) {
+				panel.setBackground(Style.DARK_BACKGROUND_COLOR);
+				controlPanel.setBackground(Style.DARK_BACKGROUND_COLOR);
+				scrollPane.setBackground(Style.DARK_BACKGROUND_COLOR);
+				scrollPane.getViewport().setBackground(Style.DARK_BACKGROUND_COLOR);
+				collaboratorList.setBackground(Style.DARK_BACKGROUND_COLOR);
+				collaboratorList.setForeground(Style.DARK_TEXT_COLOR);
+				dialog.getContentPane().setBackground(Style.DARK_BACKGROUND_COLOR);
+
+				addButton.setBackground(Style.DARK_BUTTON_COLOR);
+				addButton.setForeground(Style.DARK_TEXT_COLOR);
+				okButton.setBackground(Style.DARK_BUTTON_COLOR);
+				okButton.setForeground(Style.DARK_TEXT_COLOR);
+			}
+
+			dialog.getContentPane().add(panel, BorderLayout.CENTER);
+			dialog.getContentPane().add(okPanel, BorderLayout.SOUTH);
+			dialog.pack();
+			dialog.setLocationRelativeTo(this);
+			dialog.setVisible(true);
+
+			// JOptionPane.showMessageDialog(this, panel, "콜라보레이터 목록",
+			// JOptionPane.PLAIN_MESSAGE);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "콜라보레이터 목록을 불러오는 중 오류 발생");
 		}
 	}
+
+	private String showCustomInputDialog(String message) {
+		JPanel panel = new JPanel(new BorderLayout(5, 5));
+		panel.setBackground(Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR);
+
+		JLabel label = new JLabel(message);
+		label.setFont(Style.LABEL_FONT);
+		label.setForeground(Style.isDarkMode ? Style.DARK_TEXT_COLOR : Color.BLACK);
+		panel.add(label, BorderLayout.NORTH);
+
+		JTextField textField = Style.createStyledTextField();
+		textField.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createLineBorder(new Color(200, 200, 200)),
+				BorderFactory.createEmptyBorder(10, 15, 10, 15) // 상좌하우 패딩
+		));
+
+		JPanel marginPanel = new JPanel(new BorderLayout());
+		marginPanel.setBackground(Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR);
+		marginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // 상좌하우 마진
+		marginPanel.add(textField, BorderLayout.CENTER);
+
+		panel.add(marginPanel, BorderLayout.CENTER);
+
+		Color okButtonColor = Style.isDarkMode ? Style.DARK_BUTTON_COLOR : Style.PRIMARY_COLOR;
+		Color cancelButtonColor = Style.isDarkMode ? new Color(120, 0, 0) : new Color(192, 57, 43);
+		Color textColor = Style.isDarkMode ? Style.DARK_TEXT_COLOR : Color.WHITE;
+
+		JButton okButton = Style.createStyledButton("확인", okButtonColor, textColor);
+		JButton cancelButton = Style.createStyledButton("취소", cancelButtonColor, textColor);
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		buttonPanel.setBackground(panel.getBackground());
+		buttonPanel.add(okButton);
+		buttonPanel.add(cancelButton);
+
+		panel.add(buttonPanel, BorderLayout.SOUTH);
+
+		JDialog dialog = new JDialog((JFrame) null, "입력", true);
+		dialog.setContentPane(panel);
+		dialog.pack();
+		dialog.setLocationRelativeTo(null);
+
+		okButton.addActionListener(e -> dialog.dispose());
+		cancelButton.addActionListener(e -> {
+			textField.setText(null);
+			dialog.dispose();
+		});
+
+		dialog.setVisible(true);
+		return textField.getText().isEmpty() ? null : textField.getText().trim();
+	}
+
 }
