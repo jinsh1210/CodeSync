@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
 import models.User;
+import repositoryView.RepoMainView;
 import utils.Style;
 import models.Repository;
 import utils.ClientSock;
@@ -363,11 +364,11 @@ public class MainView extends JFrame {
 	private void openRepository(Repository repository) {
 		try {
 			String user = repository.getUsername();
-			RepositoryView repoView;
+			RepoMainView repoView;
 			if (currentUser.getUsername().equals(user))
-				repoView = new RepositoryView(repository, currentUser, null);
+				repoView = new RepoMainView(repository, currentUser, null);
 			else
-				repoView = new RepositoryView(repository, currentUser, user);
+				repoView = new RepoMainView(repository, currentUser, user);
 
 			repoView.setVisible(true);
 		} catch (Exception e) {

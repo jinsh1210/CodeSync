@@ -1,4 +1,4 @@
-package views;
+package repositoryView;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -53,7 +53,7 @@ import utils.ClientSock;
 import utils.Style;
 
 //저장소 내부 파일 목록을 보여주는 뷰
-public class RepositoryView extends JFrame {
+public class RepoMainView extends JFrame {
 	// 저장소 정보 및 사용자 정보
 	private Repository repository;
 	private User currentUser;
@@ -71,6 +71,7 @@ public class RepositoryView extends JFrame {
 	private JButton uploadButton;
 	private JButton downloadButton;
 	private JButton deleteButton;
+	private JButton localButton;
 	private String targetUser = null;
 	private String SavedPath=null;
 
@@ -78,7 +79,7 @@ public class RepositoryView extends JFrame {
 	private Timer refreshTimer;
 
 	// 생성자 - 저장소 및 사용자 정보 전달받아 UI 초기화
-	public RepositoryView(Repository repository, User currentUser, String targetUser) {
+	public RepoMainView(Repository repository, User currentUser, String targetUser) {
 		this.repository = repository;
 		this.currentUser = currentUser;
 		this.targetUser = targetUser;
@@ -91,8 +92,8 @@ public class RepositoryView extends JFrame {
 	private void initializeUI() {
 		// 프레임 제목, 크기, 닫힘 동작 등 기본 설정
 		setTitle("J.S.Repo - Repository");
-		setSize(550, 600);
-		setMinimumSize(new Dimension(500, 600));
+		setSize(650, 600);
+		setMinimumSize(new Dimension(650, 600));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 		// //파일탐색기 디자인변경
@@ -160,6 +161,7 @@ public class RepositoryView extends JFrame {
 		uploadButton = Style.createStyledButton("업로드", Style.PRIMARY_COLOR, Color.WHITE);
 		downloadButton = Style.createStyledButton("다운로드", new Color(41, 128, 185), Color.WHITE);
 		deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
+		localButton = Style.createStyledButton("로컬 저장소", new Color(231, 76, 60), Color.WHITE);
 
 		// 하단 버튼 영역 패널 구성
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
@@ -167,6 +169,7 @@ public class RepositoryView extends JFrame {
 		buttonPanel.add(uploadButton);
 		buttonPanel.add(downloadButton);
 		buttonPanel.add(deleteButton);
+		buttonPanel.add(localButton);
 
 		// 버튼 패널을 포함한 전체 하단 패널 설정
 		JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -665,10 +668,6 @@ public class RepositoryView extends JFrame {
 			collaboratorList.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
 			JScrollPane scrollPane = new JScrollPane(collaboratorList);
 			scrollPane.setPreferredSize(new Dimension(300, 200));
-
-
-
-			
 
 			// 삭제 우클릭 메뉴
 			JPopupMenu menu = new JPopupMenu();
