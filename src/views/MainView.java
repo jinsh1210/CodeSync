@@ -243,8 +243,6 @@ public class MainView extends JFrame {
 
 		add(mainPanel);
 
-		// (이전 버튼 이벤트 연결 제거됨, 메뉴 아이템에 연결됨)
-
 		popupMenu = new JPopupMenu();
 		JMenuItem deleteItem = new JMenuItem("삭제");
 		popupMenu.add(deleteItem);
