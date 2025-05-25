@@ -131,6 +131,7 @@ public class ClientSock {
                 continue;
             }
             if (line.startsWith("/#/pull_file ")) {
+                sendCommand("/ACK");
                 receiveFile(line, baseFolder, bar);
             }
 
@@ -141,7 +142,7 @@ public class ClientSock {
         try {
             // 우선 서버에 요청 보냄
             sendCommand("/pull " + repoName + " \"" + relPath + "\" " + Owner);
-
+            System.out.println("/pull " + repoName + " \"" + relPath + "\" " + Owner);//디버그
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
             String line = reader.readLine();

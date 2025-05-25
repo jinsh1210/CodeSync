@@ -240,6 +240,7 @@ public class RepositoryView extends JFrame {
 				lastSelectedPath = lastSelectedPath.replace("/[비어 있음]", "");
 			}
 		});
+		System.out.println(lastSelectedPath); //디버그
 	}
 
 	// 다크 모드 설정을 UI 전체에 적용함
@@ -425,6 +426,11 @@ public class RepositoryView extends JFrame {
 
 	// 파일 또는 폴더 업로드 기능 처리 (파일 선택 후 서버에 전송)
 	private void handleUpload() {
+		System.out.println(lastSelectedPath);//디버그
+		if (lastSelectedPath == null || lastSelectedPath.endsWith("[비어 있음]")) {
+			JOptionPane.showMessageDialog(this, "항목을 먼저 선택해주세요.");
+			return;
+		}
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
@@ -488,20 +494,11 @@ public class RepositoryView extends JFrame {
 
 	// 파일 다운로드 처리
 	private void handleDownload() {
-		TreePath path = fileTree.getSelectionPath();
-		if (path == null) {
-			JOptionPane.showMessageDialog(this, "다운로드할 항목을 선택해주세요.");
+		if (lastSelectedPath == null || lastSelectedPath.endsWith("[비어 있음]")) {
+			JOptionPane.showMessageDialog(this, "항목을 먼저 선택해주세요.");
 			return;
 		}
-
-		StringBuilder sb = new StringBuilder();
-		Object[] nodes = path.getPath();
-		for (int i = 1; i < nodes.length; i++) {
-			sb.append(nodes[i].toString());
-			if (i < nodes.length - 1)
-				sb.append("/");
-		}
-		String selectedPath = sb.toString();
+		String selectedPath = lastSelectedPath;
 
 		JFileChooser folderChooser = new JFileChooser();
 		folderChooser.setDialogTitle("다운로드 경로 선택");
@@ -527,7 +524,6 @@ public class RepositoryView extends JFrame {
 				SwingUtilities.invokeLater(() -> {
 					JOptionPane.showMessageDialog(this, "다운로드가 완료되었습니다.");
 					progressBar.setVisible(false);
-					loadFiles(targetUser);
 				});
 
 			} catch (Exception e) {
@@ -544,11 +540,11 @@ public class RepositoryView extends JFrame {
 
 	// 파일 또는 폴더 삭제 처리
 	private void handleDelete() {
-		if (lastSelectedPath == null || lastSelectedPath.isBlank()) {
+		if (lastSelectedPath == null || lastSelectedPath.isBlank()||lastSelectedPath.endsWith("[비어 있음]")) {
 			JOptionPane.showMessageDialog(this, "삭제할 항목을 먼저 선택해주세요.");
 			return;
 		}
-
+		System.out.println(lastSelectedPath);//디버그
 		int confirm = JOptionPane.showConfirmDialog(this,
 				"선택한 항목(" + lastSelectedPath + ")을 삭제하시겠습니까?",
 				"삭제 확인",
