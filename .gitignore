@@ -16,7 +16,7 @@
 
 # Logs
 *.log
-
+config.json
 # Temporary files
 *.tmp
 *.bak

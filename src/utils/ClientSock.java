@@ -5,6 +5,8 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +21,8 @@ import java.util.List;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import org.json.JSONObject;
+
 import models.FileInfo;
 
 public class ClientSock {
@@ -26,11 +30,41 @@ public class ClientSock {
     private static final int PORT = 9969;
     private static final String VERISION = "v0.0.1b";
     private static final String TOKEN = "fjk123#%k2!lsd!234!%^^f17!@#sdfs!@$3$*s1s56!@#";
+    private static final String CONFIG_PATH = "config.json";
+    private static JSONObject config;
 
     private static Socket socket;
     private static PrintWriter out;
     private static BufferedReader in;
     private static InputStream inputStream;
+
+    private static void loadConfig() {
+        // TODO: Allow user-defined config path, currently still hardcoded.
+        File configFile = new File("TeamProject/" + CONFIG_PATH);
+        if (!configFile.exists()) {
+            try {
+                configFile.getParentFile().mkdirs();
+                try (FileWriter writer = new FileWriter(configFile)) {
+                    writer.write("[]"); // 빈 JSON 배열로 초기화
+                }
+                System.out.println("[config.json] 설정 파일이 없어서 새로 생성했습니다.");
+            } catch (IOException e) {
+                System.err.println("[config.json] 파일 생성 실패");
+                e.printStackTrace();
+            }
+        }
+
+        try (FileReader reader = new FileReader(configFile)) {
+            char[] buffer = new char[(int) configFile.length()];
+            reader.read(buffer);
+            // 기존 구조에 맞게, 배열을 감싸는 객체로 변환
+            config = new JSONObject("{\"entries\":" + new String(buffer) + "}");
+            System.out.println("[config.json] 설정 파일 로드 완료");
+        } catch (IOException e) {
+            System.err.println("[config.json] 로드 실패");
+            e.printStackTrace();
+        }
+    }
 
     public static void connect() {
         try {
@@ -288,5 +322,49 @@ public class ClientSock {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void setPath(String user, String repoName, String path) {
+        loadConfig(); // Ensure config is loaded
+
+        boolean updated = false;
+        for (int i = 0; i < config.getJSONArray("entries").length(); i++) {
+            org.json.JSONObject obj = config.getJSONArray("entries").getJSONObject(i);
+            if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
+                obj.put("path", path); // Update path
+                updated = true;
+                break;
+            }
+        }
+
+        if (!updated) {
+            org.json.JSONObject newEntry = new org.json.JSONObject();
+            newEntry.put("user", user);
+            newEntry.put("repoName", repoName);
+            newEntry.put("path", path);
+            config.getJSONArray("entries").put(newEntry);
+        }
+
+        // Save back to file
+        try (FileWriter writer = new FileWriter("TeamProject/" + CONFIG_PATH)) {
+            writer.write(config.getJSONArray("entries").toString(2)); // pretty print
+            System.out.println("[config.json] 저장 완료");
+        } catch (IOException e) {
+            System.err.println("[config.json] 저장 실패");
+            e.printStackTrace();
+        }
+    }
+
+    public static String getPath(String user, String repoName) {
+        loadConfig(); // Ensure config is loaded
+
+        for (int i = 0; i < config.getJSONArray("entries").length(); i++) {
+            org.json.JSONObject obj = config.getJSONArray("entries").getJSONObject(i);
+            if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
+                return obj.getString("path");
+            }
+        }
+
+        return null; // Not found
     }
 }

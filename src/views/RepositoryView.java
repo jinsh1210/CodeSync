@@ -70,6 +70,7 @@ public class RepositoryView extends JFrame {
 	private JButton downloadButton;
 	private JButton deleteButton;
 	private String targetUser = null;
+	private String SavedPath=null;
 
 	// 자동 새로고침용 타이머
 	private Timer refreshTimer;
@@ -79,6 +80,7 @@ public class RepositoryView extends JFrame {
 		this.repository = repository;
 		this.currentUser = currentUser;
 		this.targetUser = targetUser;
+		this.SavedPath=ClientSock.getPath(currentUser.getUsername(), repository.getName());
 		initializeUI();
 		loadFiles(targetUser);
 	}
@@ -91,12 +93,12 @@ public class RepositoryView extends JFrame {
 		setMinimumSize(new Dimension(500, 600));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
-		//파일탐색기 디자인변경
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace(); // 실패해도 앱은 정상 작동함
-		}
+		// //파일탐색기 디자인변경
+		// try {
+		// 	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		// } catch (Exception e) {
+		// 	e.printStackTrace(); // 실패해도 앱은 정상 작동함
+		// }
 
 		// 전체 구성요소를 담는 메인 패널 설정 (여백 및 배경색 포함)
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -458,88 +460,94 @@ public class RepositoryView extends JFrame {
 
 	// 파일 또는 폴더 업로드 기능 처리 (파일 선택 후 서버에 전송)
 	private void handleUpload() {
-		System.out.println(lastSelectedPath);//디버그
-		if (lastSelectedPath == null || lastSelectedPath.endsWith("[비어 있음]")) {
-			JOptionPane.showMessageDialog(this, "항목을 먼저 선택해주세요.");
-			return;
-		}
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
-		int result = fileChooser.showOpenDialog(this);
-
-		if (result == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = fileChooser.getSelectedFile();
-
-			try {
-				final String selectedPath = lastSelectedPath;
-				String adjustedSelectedPath = selectedPath;
-				if (adjustedSelectedPath.contains(".") && !adjustedSelectedPath.endsWith("/")) {
-					int lastSlash = adjustedSelectedPath.lastIndexOf("/");
-					adjustedSelectedPath = (lastSlash != -1) ? adjustedSelectedPath.substring(0, lastSlash) : "";
+	    // SavedPath 체크 및 지정
+	    if (SavedPath == null || SavedPath.isEmpty()) {
+	        JFileChooser chooser = new JFileChooser();
+	        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	        int result = chooser.showDialog(this, "로컬 저장소 경로 선택");
+	        if (result == JFileChooser.APPROVE_OPTION) {
+	            File selected = chooser.getSelectedFile();
+				if (selected != null && selected.isDirectory()) {
+					// 정상적으로 선택된 폴더만 처리
+					SavedPath = selected.getAbsolutePath();
+					ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
+					System.out.println("저장된 경로: " + SavedPath);
+				} else {
+					JOptionPane.showMessageDialog(this, "유효한 폴더를 선택해주세요.");
+					return;
 				}
+	        } else {
+	            return;
+	        }
+	    }
 
-				if (selectedFile.isFile()) {
-					String filename = selectedFile.getName();
-					String serverPath = adjustedSelectedPath.equals("") ? filename
-							: adjustedSelectedPath + "/" + filename;
-					new Thread(() -> {
-						try {
-							refreshTimer.stop();
+	    boolean isEmpty = false;
+	    if (rootNode.getChildCount() == 1) {
+	        DefaultMutableTreeNode onlyChild = (DefaultMutableTreeNode) rootNode.getChildAt(0);
+	        if ("[비어 있음]".equals(onlyChild.getUserObject().toString())) {
+	            isEmpty = true;
+	        }
+	    }
 
-							ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), serverPath,
-									repository.getUsername(), progressBar);
-							refreshTimer.start();
-						} catch (Exception ex) {
-							ex.printStackTrace();
-							JOptionPane.showMessageDialog(this, "업로드 중 오류 발생");
-						} finally {
-							SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
-							loadFiles(targetUser);
-						}
-					}).start();
-				} else if (selectedFile.isDirectory()) {
-					final String dirPath = adjustedSelectedPath;
-					new Thread(() -> {
-						try {
-							refreshTimer.stop();
-							ClientSock.push(selectedFile, dirPath, repository.getName(), currentUser.getId(),
-									repository.getUsername(), progressBar);
-							refreshTimer.start();
-						} catch (Exception ex) {
-							ex.printStackTrace();
-							JOptionPane.showMessageDialog(this, "업로드 중 오류 발생");
-						} finally {
-							SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
-							loadFiles(targetUser);
-						}
-					}).start();
-				}
+	    File selectedFile;
+	    if (isEmpty) {
+	        // 저장소가 비어있으면 파일/폴더 선택
+	        JFileChooser fileChooser = new JFileChooser();
+	        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+	        int result = fileChooser.showOpenDialog(this);
+	        if (result != JFileChooser.APPROVE_OPTION) return;
+	        selectedFile = fileChooser.getSelectedFile();
+	    } else {
+	        // 저장소가 비어있지 않으면 SavedPath만 사용
+	        selectedFile = new File(SavedPath);
+	    }
 
-				// loadFiles(targetUser);
-			} catch (Exception e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this, "업로드 중 오류가 발생했습니다.");
-			}
-		}
+	    if (!selectedFile.exists()) {
+	        JOptionPane.showMessageDialog(this, "지정한 경로가 존재하지 않습니다.");
+	        return;
+	    }
+
+	    String targetPath = selectedFile.getName();
+
+	    new Thread(() -> {
+	        try {
+	            refreshTimer.stop();
+	            if (selectedFile.isFile()) {
+	                ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), targetPath,
+	                        repository.getUsername(), progressBar);
+	            } else {
+	                ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
+	                        repository.getUsername(), progressBar);
+	            }
+	        } catch (Exception ex) {
+	            ex.printStackTrace();
+	            JOptionPane.showMessageDialog(this, "업로드 중 오류 발생");
+	        } finally {
+	            SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
+	            refreshTimer.start();
+	            loadFiles(targetUser);
+	        }
+	    }).start();
 	}
 
 	// 파일 다운로드 처리
 	private void handleDownload() {
-		if (lastSelectedPath == null || lastSelectedPath.endsWith("[비어 있음]")) {
-			JOptionPane.showMessageDialog(this, "항목을 먼저 선택해주세요.");
-			return;
+		// SavedPath 체크 및 지정
+		if (SavedPath == null || SavedPath.isEmpty()) {
+			JFileChooser chooser = new JFileChooser();
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int result = chooser.showDialog(this, "로컬 저장소 경로 선택");
+			if (result == JFileChooser.APPROVE_OPTION) {
+				File selected = chooser.getSelectedFile();
+				SavedPath = selected.getAbsolutePath();
+				System.out.println(SavedPath); //디버그
+				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
+			} else {
+				return;
+			}
 		}
-		String selectedPath = lastSelectedPath;
-
-		JFileChooser folderChooser = new JFileChooser();
-		folderChooser.setDialogTitle("다운로드 경로 선택");
-		folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = folderChooser.showDialog(this, "선택");
-
-		if (result != JFileChooser.APPROVE_OPTION)
-			return;
-		File targetFolder = folderChooser.getSelectedFile();
+		
+		File targetFolder = new File(SavedPath);
 
 		new Thread(() -> {
 			try {
@@ -548,7 +556,7 @@ public class RepositoryView extends JFrame {
 
 				ClientSock.pull(
 						repository.getName(),
-						selectedPath,
+						"",
 						targetFolder,
 						repository.getUsername(),
 						progressBar);
