@@ -162,7 +162,7 @@ public class RepoMainView extends JFrame {
 		downloadButton = Style.createStyledButton("다운로드", new Color(41, 128, 185), Color.WHITE);
 		deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
 		localButton = Style.createStyledButton("로컬 저장소", new Color(231, 76, 60), Color.WHITE);
-
+		
 		// 하단 버튼 영역 패널 구성
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
 		buttonPanel.setBackground(Style.BACKGROUND_COLOR);
@@ -225,7 +225,7 @@ public class RepoMainView extends JFrame {
 		uploadButton.addActionListener(e -> handleUpload());
 		downloadButton.addActionListener(e -> handleDownload());
 		deleteButton.addActionListener(e -> handleDelete());
-
+		localButton.addActionListener(e -> setLocalFolder());
 		// 자동 새로고침 타이머 설정 (3초 주기)
 		refreshTimer = new Timer(3000, e -> loadFiles(targetUser));
 		refreshTimer.start();
@@ -331,7 +331,6 @@ public class RepoMainView extends JFrame {
 			restoreExpandedPathsFromStrings(fileTree, expandedPaths);
 			restoreExpandedPathsFromStrings(fileTree, expandedPaths);
 			fileTree.setRowHeight(24);
-			// ⬇ 여기에 추가
 			DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
 				@Override
 				public Component getTreeCellRendererComponent(JTree tree, Object value,
@@ -477,46 +476,14 @@ public class RepoMainView extends JFrame {
 	private void handleUpload() {
 	    // SavedPath 체크 및 지정
 	    if (SavedPath == null || SavedPath.isEmpty()) {
-	        JFileChooser chooser = new JFileChooser();
-	        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	        int result = chooser.showDialog(this, "로컬 저장소 경로 선택");
-	        if (result == JFileChooser.APPROVE_OPTION) {
-	            File selected = chooser.getSelectedFile();
-				if (selected != null && selected.isDirectory()) {
-					// 정상적으로 선택된 폴더만 처리
-					SavedPath = selected.getAbsolutePath();
-					ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
-					System.out.println("저장된 경로: " + SavedPath);
-				} else {
-					JOptionPane.showMessageDialog(this, "유효한 폴더를 선택해주세요.");
-					return;
-				}
-	        } else {
-	            return;
-	        }
+			JOptionPane.showMessageDialog(this, "로컬 저장소를 지정해주세요");
+			return;
 	    }
 
-	    boolean isEmpty = false;
-	    if (rootNode.getChildCount() == 1) {
-	        DefaultMutableTreeNode onlyChild = (DefaultMutableTreeNode) rootNode.getChildAt(0);
-	        if ("[비어 있음]".equals(onlyChild.getUserObject().toString())) {
-	            isEmpty = true;
-	        }
-	    }
+	    
 
-	    File selectedFile;
-	    if (isEmpty) {
-	        // 저장소가 비어있으면 파일/폴더 선택
-	        JFileChooser fileChooser = new JFileChooser();
-	        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-	        int result = fileChooser.showOpenDialog(this);
-	        if (result != JFileChooser.APPROVE_OPTION) return;
-	        selectedFile = fileChooser.getSelectedFile();
-	    } else {
-	        // 저장소가 비어있지 않으면 SavedPath만 사용
-	        selectedFile = new File(SavedPath);
-	    }
-
+	    File selectedFile=new File(SavedPath);
+	    
 	    if (!selectedFile.exists()) {
 	        JOptionPane.showMessageDialog(this, "지정한 경로가 존재하지 않습니다.");
 	        return;
@@ -549,18 +516,9 @@ public class RepoMainView extends JFrame {
 	private void handleDownload() {
 		// SavedPath 체크 및 지정
 		if (SavedPath == null || SavedPath.isEmpty()) {
-			JFileChooser chooser = new JFileChooser();
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			int result = chooser.showDialog(this, "로컬 저장소 경로 선택");
-			if (result == JFileChooser.APPROVE_OPTION) {
-				File selected = chooser.getSelectedFile();
-				SavedPath = selected.getAbsolutePath();
-				System.out.println(SavedPath); //디버그
-				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
-			} else {
-				return;
-			}
-		}
+			JOptionPane.showMessageDialog(this, "로컬 저장소를 지정해주세요");
+			return;
+	    }
 		
 		File targetFolder = new File(SavedPath);
 
@@ -779,7 +737,25 @@ public class RepoMainView extends JFrame {
 			JOptionPane.showMessageDialog(this, "콜라보레이터 목록을 불러오는 중 오류 발생");
 		}
 	}
-
+	private void setLocalFolder(){
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		int result = chooser.showDialog(this, "로컬 저장소 경로 선택");
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File selected = chooser.getSelectedFile();
+			if (selected != null && selected.isDirectory()) {
+				// 정상적으로 선택된 폴더만 처리
+				SavedPath = selected.getAbsolutePath();
+				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
+				System.out.println("저장된 경로: " + SavedPath);
+			} else {
+				JOptionPane.showMessageDialog(this, "유효한 폴더를 선택해주세요.");
+				return;
+			}
+		} else {
+			return;
+		}
+	}
 	private String showCustomInputDialog(String message) {
 		JPanel panel = new JPanel(new BorderLayout(5, 5));
 		panel.setBackground(Style.isDarkMode ? Style.DARK_BACKGROUND_COLOR : Style.BACKGROUND_COLOR);
