@@ -61,6 +61,23 @@ public class Style {
 		button.setContentAreaFilled(false);
 		button.setOpaque(true);
 		button.setPreferredSize(new Dimension(130, 40));
+
+		// Hover 색상 (배경색을 약간 어둡게)
+		Color hoverColor = bgColor.darker();
+
+		// MouseListener 추가
+		button.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
+			public void mouseEntered(java.awt.event.MouseEvent e) {
+				button.setBackground(hoverColor);
+			}
+
+			@Override
+			public void mouseExited(java.awt.event.MouseEvent e) {
+				button.setBackground(bgColor);
+			}
+		});
+
 		return button;
 	}
 

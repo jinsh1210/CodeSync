@@ -17,7 +17,6 @@ public class LoginView extends JFrame {
     public LoginView() {
         ClientSock.connect();
         initializeUI();
-        // 🌙 다크모드 적용
         DarkModeManager.apply(getContentPane());
     }
 
@@ -50,7 +49,7 @@ public class LoginView extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setBackground(Style.BACKGROUND_COLOR);
         loginButton = Style.createStyledButton("로그인", Style.PRIMARY_COLOR, Color.WHITE);
-        signUpButton = Style.createStyledButton("회원가입", new Color(127, 140, 141), Color.WHITE);
+        signUpButton = Style.createStyledButton("회원가입", Style.PRIMARY_COLOR, Color.WHITE);
         buttonPanel.add(loginButton);
         buttonPanel.add(signUpButton);
         mainPanel.add(buttonPanel, gbc);
