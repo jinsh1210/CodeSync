@@ -175,6 +175,14 @@ public class RepositoryView extends JFrame {
 		treeModel = new DefaultTreeModel(rootNode);
 		// 파일 트리 컴포넌트 생성 및 다크모드 스타일 지정
 		fileTree = new JTree(treeModel);
+		//
+		DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+		renderer.setOpenIcon(UIManager.getIcon("FileView.directoryIcon"));
+		renderer.setClosedIcon(UIManager.getIcon("FileView.directoryIcon"));
+		renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon")); // ✅ 핵심
+		fileTree.setCellRenderer(renderer); // ✅ 꼭 호출
+
+		//
 		fileTree.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
 		fileTree.setRootVisible(true);
 		fileTree.setShowsRootHandles(true);
@@ -314,6 +322,30 @@ public class RepositoryView extends JFrame {
 			treeModel.reload();
 			markEmptyFolders(rootNode);
 			restoreExpandedPathsFromStrings(fileTree, expandedPaths);
+			restoreExpandedPathsFromStrings(fileTree, expandedPaths);
+			fileTree.setRowHeight(24);
+			// ⬇ 여기에 추가
+			DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
+				@Override
+				public Component getTreeCellRendererComponent(JTree tree, Object value,
+						boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+					
+					JLabel label = (JLabel) super.getTreeCellRendererComponent(
+						tree, value, sel, expanded, leaf, row, hasFocus);
+
+					String nodeText = value.toString();
+					if ("[비어 있음]".equals(nodeText)) {
+						label.setIcon(null);  // 아이콘 제거
+					}
+
+					label.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 4)); // 마진도 적용
+					return label;
+				}
+			};
+
+			renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon"));  // ✅ 파일 아이콘 지정
+			fileTree.setCellRenderer(renderer);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "파일 목록을 불러오는 데 실패했습니다.");
