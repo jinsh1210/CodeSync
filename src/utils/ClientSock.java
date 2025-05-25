@@ -261,7 +261,7 @@ public class ClientSock {
             relativePath = relativePath.substring(repository.length() + 1);
         } else if (relativePath.equals(repository)) {
             relativePath = "";  // repoName만 있을 경우 완전 제거
-        }
+        } 
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
 
@@ -277,7 +277,7 @@ public class ClientSock {
         // 폴더 안에 내용이 있을 경우
         for (File file : contents) {
             if (file.isFile()) {
-                String filePath = relativePath + "/" + file.getName();
+                String filePath = relativePath.equals("")? file.getName():relativePath + "/" + file.getName();
                 push(file, repository, userId, filePath, Owner, bar);
             } else if (file.isDirectory()) {
                 push(file, relativePath, repository, userId, Owner, bar); // 재귀 호출
@@ -358,7 +358,7 @@ public class ClientSock {
             if (!configDir.exists()) {
                 configDir.mkdirs(); // 디렉토리 없으면 생성
             }
-                
+
             newEntry.put("user", user);
             newEntry.put("repoName", repoName);
             newEntry.put("path", path);
