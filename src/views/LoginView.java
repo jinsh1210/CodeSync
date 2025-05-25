@@ -4,7 +4,9 @@ import java.awt.*;
 import javax.swing.*;
 import models.User;
 import utils.Style;
+// import utils.UserSettings;
 import utils.ClientSock;
+import utils.DarkModeManager;
 
 public class LoginView extends JFrame {
     private JTextField usernameField;
@@ -15,6 +17,8 @@ public class LoginView extends JFrame {
     public LoginView() {
         ClientSock.connect();
         initializeUI();
+        // 🌙 다크모드 적용
+        DarkModeManager.apply(getContentPane());
     }
 
     private void initializeUI() {
@@ -103,9 +107,16 @@ public class LoginView extends JFrame {
             if (response != null && response.startsWith("/#/info")) {
                 User user = new User();
                 user.setUsername(username);
+                
+                //TODO: 서버에서 저장(DB가 나을 듯)
+                /* boolean userDarkMode = UserSettings.loadDarkMode(username);
+                Style.isDarkMode = userDarkMode;
+                DarkModeManager.setDarkMode(userDarkMode); */
+
                 JOptionPane.showMessageDialog(this, "로그인 성공");
                 new MainView(user).setVisible(true);
                 this.dispose();
+
             } else if (response != null && response.startsWith("/#/error")) {
                 String msg = response.replace("/#/error", "").trim();
                 showErrorDialog(msg + ": 사용자 이름 또는 비밀번호가 일치하지 않습니다.");

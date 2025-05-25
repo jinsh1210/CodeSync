@@ -10,6 +10,7 @@ import java.util.Set;
 import models.User;
 import views.repositoryView.RepoMainView;
 import utils.Style;
+// import utils.UserSettings;
 import models.Repository;
 import utils.ClientSock;
 import utils.DarkModeManager;
@@ -114,8 +115,11 @@ public class MainView extends JFrame {
 		searchReposItem.addActionListener(e -> searchRepositories());
 		logoutItem.addActionListener(e -> handleLogout());
 		darkModeToggle.addItemListener(e -> {
-			DarkModeManager.toggle(); // 상태 전환
-			DarkModeManager.apply(getContentPane()); // 다크모드 적용
+			boolean newMode = !DarkModeManager.isDarkMode();
+			DarkModeManager.toggle();
+			DarkModeManager.apply(getContentPane());
+			//TODO: 서버에서 저장(DB가 나을 듯)
+			// UserSettings.saveDarkMode(currentUser.getUsername(), newMode); // 저장
 		});
 
 		menuBar.add(darkModeToggle);

@@ -244,6 +244,7 @@ public class ClientSock {
             // 결과 수신
             String result = receiveResponse();
             System.out.println("[서버 응답] " + result);
+            sendCommand("/ACK");
         } catch (IOException e) {
             e.printStackTrace();
         }

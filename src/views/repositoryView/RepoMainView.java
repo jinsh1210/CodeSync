@@ -1,39 +1,14 @@
 package views.repositoryView;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.SwingConstants;
-import javax.swing.Timer;
-import javax.swing.UIManager;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-
-import lombok.Getter;
-import lombok.Setter;
-import models.Repository;
-import models.User;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.tree.*;
+import lombok.*;
 
 import utils.Style;
+import models.Repository;
+import models.User;
 
 @Getter
 @Setter
@@ -62,6 +37,7 @@ public class RepoMainView extends JFrame {
 		this.targetUser = targetUser;
 
 		initializeUI();
+		initializeUI();
 
 		this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
 		this.collaboratorListView = new CollaboratorListView(repository);
@@ -69,7 +45,6 @@ public class RepoMainView extends JFrame {
 
 		utils.DarkModeManager.apply(getContentPane());
 	}
-
 	private void initializeUI() {
 		// 프레임 제목, 크기, 닫힘 동작 등 기본 설정
 		setTitle("J.S.Repo - Repository");
