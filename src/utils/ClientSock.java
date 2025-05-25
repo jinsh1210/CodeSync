@@ -17,6 +17,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
@@ -100,13 +101,15 @@ public class ClientSock {
         }
     }
 
-    private static void receiveFile(String headerLine, File baseFolder, JProgressBar bar) throws IOException {
+    private static void receiveFile(String headerLine, File baseFolder, JProgressBar bar,String repoName) throws IOException {
         String[] tokens = headerLine.substring(13).trim().split(" ");
         if (tokens.length < 2)
             throw new IOException("pull_file 명령어 파싱 실패: " + headerLine);
 
         int size = Integer.parseInt(tokens[tokens.length - 1]);
         String filePath = String.join(" ", Arrays.copyOf(tokens, tokens.length - 1));
+        if (filePath.startsWith(repoName + "/")) 
+            filePath = filePath.replaceFirst(Pattern.quote(repoName + "/"), "");
 
         File targetFile = new File(baseFolder, filePath);
         File parent = targetFile.getParentFile();
@@ -138,11 +141,11 @@ public class ClientSock {
         System.out.println("[파일 저장 완료]: " + targetFile.getPath());
     }
 
-    private static void handleSingleFilePull(String header, File baseFolder, JProgressBar bar) throws IOException {
-        receiveFile(header, baseFolder, bar);
+    private static void handleSingleFilePull(String header, File baseFolder, JProgressBar bar,String repoName) throws IOException {
+        receiveFile(header, baseFolder, bar,repoName);
     }
 
-    private static void handleDirectoryPull(BufferedReader reader, File baseFolder, JProgressBar bar)
+    private static void handleDirectoryPull(BufferedReader reader, File baseFolder, JProgressBar bar,String repoName)
             throws IOException {
         while (true) {
             String line = reader.readLine();
@@ -157,6 +160,9 @@ public class ClientSock {
             if (line.startsWith("/#/pull_dir ")) {
                 System.out.println("디렉토리 생성요청");
                 String dirPath = line.substring(12).trim();
+                if (dirPath.startsWith(repoName + "/")) {
+                    dirPath = dirPath.replaceFirst(Pattern.quote(repoName + "/"), "");
+                }
                 File dir = new File(baseFolder, dirPath);
                 if (!dir.exists()) {
                     dir.mkdirs();
@@ -166,9 +172,8 @@ public class ClientSock {
             }
             if (line.startsWith("/#/pull_file ")) {
                 sendCommand("/ACK");
-                receiveFile(line, baseFolder, bar);
+                receiveFile(line, baseFolder, bar,repoName);
             }
-
         }
     }
 
@@ -190,9 +195,9 @@ public class ClientSock {
                 return;
             }
             if (line.startsWith("/#/pull_file ")) {
-                handleSingleFilePull(line, targetFolder, bar);
+                handleSingleFilePull(line, targetFolder, bar,repoName);
             } else if (line.equals("/#/pull_dir_SOL")) {
-                handleDirectoryPull(reader, targetFolder, bar);
+                handleDirectoryPull(reader, targetFolder, bar,repoName);
             } else {
                 System.err.println("[오류] 알 수 없는 응답: " + line);
             }
@@ -250,12 +255,18 @@ public class ClientSock {
         boolean isEmpty = (contents == null || contents.length == 0);
 
         // 상대 경로 계산
-        String relativePath = basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName();
+        String relativePath = (basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName());
         System.out.println("폴더 전용 relativePath: " + relativePath + " | basePath: " + basePath + " | owner: " + Owner); // 디버그
-
+        if (relativePath.startsWith(repository + "/")) {
+            relativePath = relativePath.substring(repository.length() + 1);
+        } else if (relativePath.equals(repository)) {
+            relativePath = "";  // repoName만 있을 경우 완전 제거
+        }
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
+
             sendCommand("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);
+            
             System.out.println("owner: " + Owner);
             System.out.println("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);// 디버그
             String response = receiveResponse();

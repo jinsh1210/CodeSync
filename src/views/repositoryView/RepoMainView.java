@@ -1,19 +1,39 @@
 package views.repositoryView;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.tree.*;
+import javax.swing.UIManager;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-
-import utils.Style;
 import models.Repository;
 import models.User;
+import utils.Style;
 @Getter
 @Setter
 
@@ -110,8 +130,8 @@ public class RepoMainView extends JFrame {
 		mainPanel.add(headerWrapper, BorderLayout.NORTH);
 
 		// 업로드/다운로드/삭제 버튼 생성 및 색상 설정
-		uploadButton = Style.createStyledButton("업로드", Style.PRIMARY_COLOR, Color.WHITE);
-		downloadButton = Style.createStyledButton("다운로드", new Color(41, 128, 185), Color.WHITE);
+		uploadButton = Style.createStyledButton("푸쉬", Style.PRIMARY_COLOR, Color.WHITE);
+		downloadButton = Style.createStyledButton("풀", new Color(41, 128, 185), Color.WHITE);
 		deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
 		localButton = Style.createStyledButton("로컬 저장소", new Color(231, 76, 60), Color.WHITE);
 

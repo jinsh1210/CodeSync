@@ -1,10 +1,5 @@
 package views.repositoryView;
 
-import models.Repository;
-import models.User;
-import utils.ClientSock;
-import utils.Style;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -36,6 +31,10 @@ import org.json.JSONObject;
 
 import lombok.Getter;
 import lombok.Setter;
+import models.Repository;
+import models.User;
+import utils.ClientSock;
+import utils.Style;
 
 @Getter
 @Setter
@@ -322,7 +321,7 @@ public class RepoFunc {
 		}
 
 		File targetFolder = new File(SavedPath);
-
+		
 		new Thread(() -> {
 			try {
 				SwingUtilities.invokeLater(() -> progressBar.setVisible(true)); // 시작 시 보이게
@@ -359,7 +358,7 @@ public class RepoFunc {
 			JOptionPane.showMessageDialog(null, "삭제할 항목을 먼저 선택해주세요.");
 			return;
 		}
-
+		
 		Object[] nodes = selectedPath.getPath();
 
 		// 루트 노드 선택 시 이름으로 처리
@@ -417,7 +416,7 @@ public class RepoFunc {
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File selected = chooser.getSelectedFile();
 			if (selected != null && selected.isDirectory()) {
-				SavedPath = selected.getAbsolutePath();
+				SavedPath = selected.getAbsolutePath()+ File.separator + repository.getName();
 				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
 				System.out.println("저장된 경로: " + SavedPath);
 			} else {
