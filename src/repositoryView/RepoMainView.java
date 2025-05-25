@@ -472,35 +472,24 @@ public class RepoMainView extends JFrame {
 		}
 	}
 
-	// 파일 또는 폴더 업로드 기능 처리 (파일 선택 후 서버에 전송)
+	// 파일 또는 폴더 업로드 기능 처리 (폴더 전체를 업로드)
 	private void handleUpload() {
 	    // SavedPath 체크 및 지정
 	    if (SavedPath == null || SavedPath.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "로컬 저장소를 지정해주세요");
-			return;
+	        JOptionPane.showMessageDialog(this, "로컬 저장소를 지정해주세요");
+	        return;
 	    }
 
-	    
-
-	    File selectedFile=new File(SavedPath);
-	    
+	    File selectedFile = new File(SavedPath);
 	    if (!selectedFile.exists()) {
 	        JOptionPane.showMessageDialog(this, "지정한 경로가 존재하지 않습니다.");
 	        return;
 	    }
 
-	    String targetPath = selectedFile.getName();
-
 	    new Thread(() -> {
 	        try {
 	            refreshTimer.stop();
-	            if (selectedFile.isFile()) {
-	                ClientSock.push(selectedFile, repository.getName(), currentUser.getId(), targetPath,
-	                        repository.getUsername(), progressBar);
-	            } else {
-	                ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
-	                        repository.getUsername(), progressBar);
-	            }
+	            ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(), repository.getUsername(), progressBar);
 	        } catch (Exception ex) {
 	            ex.printStackTrace();
 	            JOptionPane.showMessageDialog(this, "업로드 중 오류 발생");
@@ -745,13 +734,6 @@ public class RepoMainView extends JFrame {
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File selected = chooser.getSelectedFile();
 			if (selected != null && selected.isDirectory()) {
-				File fullPath = new File(selected, repository.getName());
-				SavedPath = fullPath.getAbsolutePath();
-
-				// 디렉토리가 존재하지 않으면 생성
-				if (!fullPath.exists()) {
-					fullPath.mkdirs();
-				}
 				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
 				System.out.println("저장된 경로: " + SavedPath);
 			} else {
