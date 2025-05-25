@@ -342,6 +342,10 @@ public class ClientSock {
         for (int i = 0; i < config.getJSONArray("entries").length(); i++) {
             org.json.JSONObject obj = config.getJSONArray("entries").getJSONObject(i);
             if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
+                File configDir = new File(path);
+                if (!configDir.exists()) {
+                    configDir.mkdirs(); // 디렉토리 없으면 생성
+                }
                 obj.put("path", path); // Update path
                 updated = true;
                 break;
@@ -350,6 +354,11 @@ public class ClientSock {
 
         if (!updated) {
             org.json.JSONObject newEntry = new org.json.JSONObject();
+            File configDir = new File(path);
+            if (!configDir.exists()) {
+                configDir.mkdirs(); // 디렉토리 없으면 생성
+            }
+                
             newEntry.put("user", user);
             newEntry.put("repoName", repoName);
             newEntry.put("path", path);
