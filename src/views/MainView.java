@@ -9,7 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
 import models.User;
-import repositoryView.RepoMainView;
+import views.repositoryView.RepoMainView;
 import utils.Style;
 import models.Repository;
 import utils.ClientSock;
