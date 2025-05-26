@@ -393,11 +393,27 @@ public class RepoFunc {
 				SavedPath = selected.getAbsolutePath() + File.separator + repository.getName();
 				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
 				System.out.println("저장된 경로: " + SavedPath);
+				int option = JOptionPane.showOptionDialog(null,
+							"로컬 저장소가 지정되었습니다.\n어떤 작업을 수행하시겠습니까?", "병합 충돌",
+							JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+							new String[] { "풀", "푸시", "하지 않음" }, "풀");
+
+					switch (option) {
+						case 0: // 풀
+							handleDownload();
+							break;
+						case 1: // 푸시
+							handleUpload();
+							break;
+						case 2: // 취소
+							// 아무것도 하지 않음
+							break;
+						default:
+							break;
+					}
 			} else {
 				JOptionPane.showMessageDialog(null, "유효한 폴더를 선택해주세요.");
 			}
-		} else {
-			JOptionPane.showMessageDialog(null, "폴더 선택을 취소했습니다.");
 		}
 	}
 }
