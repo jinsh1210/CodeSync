@@ -183,7 +183,7 @@ public class ClientSock {
         }
     }
 
-    public static void pull(String repoName, String relPath, File targetFolder, String Owner, JProgressBar bar) {
+    public static void pull(String repoName, String relPath, File targetFolder, String Owner, JProgressBar bar, JSONArray pathAll) {
         try {
             // 우선 서버에 요청 보냄
             sendCommand("/pull " + repoName + " \"" + relPath + "\" " + Owner);
@@ -203,29 +203,57 @@ public class ClientSock {
             System.out.println(line);
             if (line.startsWith("/#/pull_hashes_SOL")) {
                 StringBuilder jsonBuilder = new StringBuilder();
-                String hashLine="";
+                String hashLine = "";
                 System.out.println(hashLine);
-                do{
-                    hashLine+=reader.readLine();
+                do {
+                    hashLine += reader.readLine();
                     if (hashLine == null || hashLine.endsWith("/#/pull_hashes_EOL\n")) break;
                     jsonBuilder.append(hashLine);
-                }while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
+                } while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
                 try {
                     org.json.JSONArray hashList = new org.json.JSONArray(jsonBuilder.toString());
-                    System.out.println("hashList: "+hashList);
+                    System.out.println("hashList: " + hashList);
                     saveHashSnapshot(currentUser, repoName, hashList);
                 } catch (Exception e) {
                     System.err.println("[클라이언트] 해시 JSON 파싱 오류");
                     e.printStackTrace();
                 }
-                // 다음 명령 줄 읽기
-                
+                // --- [로컬에만 있는 파일/폴더 제거] ---
+                // 서버 repo_content 결과(pathAll) 기준으로 로컬에만 있는 파일/폴더 제거
+                String basePath = getPath(currentUser, repoName);
+                if (basePath != null) {
+                    File localRoot = new File(basePath);
+                    java.util.Set<String> serverPaths = new java.util.HashSet<>();
+                    for (int i = 0; i < pathAll.length(); i++) {
+                        serverPaths.add(pathAll.getJSONObject(i).getString("path"));
+                    }
+                    try {
+                        java.nio.file.Files.walk(localRoot.toPath())
+                            .map(java.nio.file.Path::toFile)
+                            .filter(f -> {
+                                if (f.getName().equals(".jsRepohashed.json")) return false;
+                                String rel = localRoot.toPath().relativize(f.toPath()).toString().replace("\\", "/");
+                                if (f.isDirectory()) rel += "/";
+                                return !serverPaths.contains(rel);
+                            })
+                            .sorted((a, b) -> b.getAbsolutePath().length() - a.getAbsolutePath().length())
+                            .forEach(f -> {
+                                if (f.delete()) {
+                                    System.out.println("[로컬 제거됨] " + f.getPath());
+                                }
+                            });
+                    } catch (Exception e) {
+                        System.err.println("[로컬 파일/폴더 정리 중 오류]");
+                        e.printStackTrace();
+                    }
+                }
+                // --- [로컬에만 있는 파일/폴더 제거 끝] ---
             }
-            line=reader.readLine();
+            line = reader.readLine();
             if (line != null && line.startsWith("/#/pull_file ")) {
-                handleSingleFilePull(line, targetFolder, bar,repoName);
+                handleSingleFilePull(line, targetFolder, bar, repoName);
             } else if (line != null && line.equals("/#/pull_dir_SOL")) {
-                handleDirectoryPull(reader, targetFolder, bar,repoName);
+                handleDirectoryPull(reader, targetFolder, bar, repoName);
             } else if (line != null) {
                 System.err.println("[오류] 알 수 없는 응답: " + line);
             }

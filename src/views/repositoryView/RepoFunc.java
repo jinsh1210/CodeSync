@@ -329,7 +329,7 @@ public class RepoFunc {
 			try {
 				SwingUtilities.invokeLater(() -> progressBar.setVisible(true));
 				refreshTimer.stop();
-				ClientSock.pull(repository.getName(), "", targetFolder, repository.getUsername(), progressBar);
+				ClientSock.pull(repository.getName(), "", targetFolder, repository.getUsername(), progressBar,array);
 				SwingUtilities.invokeLater(() -> {
 					progressBar.setVisible(false);
 				});
