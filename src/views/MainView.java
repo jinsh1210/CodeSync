@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
 import models.User;
+import views.login_register.LRMain;
 import views.repositoryView.RepoMainView;
 import utils.Style;
 // import utils.UserSettings;
@@ -115,11 +116,8 @@ public class MainView extends JFrame {
 		searchReposItem.addActionListener(e -> searchRepositories());
 		logoutItem.addActionListener(e -> handleLogout());
 		darkModeToggle.addItemListener(e -> {
-			boolean newMode = !DarkModeManager.isDarkMode();
 			DarkModeManager.toggle();
 			DarkModeManager.apply(getContentPane());
-			//TODO: 서버에서 저장(DB가 나을 듯)
-			// UserSettings.saveDarkMode(currentUser.getUsername(), newMode); // 저장
 		});
 
 		menuBar.add(darkModeToggle);
@@ -129,13 +127,13 @@ public class MainView extends JFrame {
 		menuBar.setPreferredSize(new Dimension(0, 36));
 
 		// 각 메뉴의 폰트와 마진 확대
-		repoMenu.setFont(Style.menuFont);
-		accountMenu.setFont(Style.menuFont);
+		repoMenu.setFont(Style.MENU_FONT);
+		accountMenu.setFont(Style.MENU_FONT);
 
 		// 메뉴 아이템 폰트 확대
-		createRepoItem.setFont(Style.menuFont);
-		searchReposItem.setFont(Style.menuFont);
-		logoutItem.setFont(Style.menuFont);
+		createRepoItem.setFont(Style.MENU_FONT);
+		searchReposItem.setFont(Style.MENU_FONT);
+		logoutItem.setFont(Style.MENU_FONT);
 
 		// 다크모드 토글 버튼 크기 키우기
 		darkModeToggle.setFont(Style.BUTTON_FONT);
@@ -386,7 +384,7 @@ public class MainView extends JFrame {
 	private void handleLogout() {
 		int confirm = JOptionPane.showConfirmDialog(this, "정말 로그아웃 하시겠습니까?", "로그아웃", JOptionPane.YES_NO_OPTION);
 		if (confirm == JOptionPane.YES_OPTION) {
-			new LoginView().setVisible(true);
+			new LRMain().setVisible(true);
 			this.dispose();
 		}
 	}

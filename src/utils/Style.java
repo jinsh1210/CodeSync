@@ -1,6 +1,9 @@
 package utils;
 
 import javax.swing.*;
+
+import utils.Rounded.*;
+
 import java.awt.*;
 
 //기본 스타일
@@ -21,7 +24,8 @@ public class Style {
 	public static final Font TITLE_FONT = new Font("Malgun Gothic", Font.BOLD, 26);
 	public static final Font LABEL_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
 	public static final Font BUTTON_FONT = new Font("Malgun Gothic", Font.BOLD, 16);
-	public static final Font menuFont = new Font("Malgun Gothic", Font.PLAIN, 16);
+	public static final Font MENU_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
+	public static final Font DESC_FONT = new Font("Malgun Gothic", Font.PLAIN, 13);
 
 	// 밝은 테마 전용 텍스트 색상
 	public static final Color TEXT_PRIMARY_COLOR = new Color(52, 152, 219); // 파란색 제목
@@ -34,8 +38,13 @@ public class Style {
 		field.setFont(LABEL_FONT);
 		field.setBackground(isDarkMode ? DARK_FIELD_BACKGROUND : FIELD_BACKGROUND);
 		field.setForeground(isDarkMode ? DARK_TEXT_COLOR : Color.BLACK);
-		field.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)),
-				BorderFactory.createEmptyBorder(8, 10, 8, 10)));
+
+		int borderRadius = 15; // 둥근 정도 조절
+		Color borderColor = new Color(200, 200, 200);
+		field.setBorder(BorderFactory.createCompoundBorder(
+				new RoundedBorder(borderRadius, borderColor),
+				BorderFactory.createEmptyBorder(4, 10, 4, 10)));
+
 		return field;
 	}
 
@@ -45,36 +54,40 @@ public class Style {
 		field.setFont(LABEL_FONT);
 		field.setBackground(isDarkMode ? DARK_FIELD_BACKGROUND : FIELD_BACKGROUND);
 		field.setForeground(isDarkMode ? DARK_TEXT_COLOR : Color.BLACK);
-		field.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)),
-				BorderFactory.createEmptyBorder(8, 10, 8, 10)));
+
+		int borderRadius = 15;
+		Color borderColor = new Color(200, 200, 200);
+		field.setBorder(BorderFactory.createCompoundBorder(
+				new RoundedBorder(borderRadius, borderColor),
+				BorderFactory.createEmptyBorder(4, 10, 4, 10)));
 		return field;
 	}
 
 	// 공통 버튼
 	public static JButton createStyledButton(String text, Color bgColor, Color fgColor) {
-		JButton button = new JButton(text);
-		button.setFont(BUTTON_FONT);
+		RoundedButton button = new RoundedButton(text, 30);
 		button.setBackground(bgColor);
 		button.setForeground(fgColor);
-		button.setFocusPainted(false);
-		button.setBorderPainted(false);
-		button.setContentAreaFilled(false);
-		button.setOpaque(true);
+		button.setFont(BUTTON_FONT);
 		button.setPreferredSize(new Dimension(130, 40));
 
-		// Hover 색상 (배경색을 약간 어둡게)
-		Color hoverColor = bgColor.darker();
-
-		// MouseListener 추가
 		button.addMouseListener(new java.awt.event.MouseAdapter() {
 			@Override
 			public void mouseEntered(java.awt.event.MouseEvent e) {
-				button.setBackground(hoverColor);
+				if (DarkModeManager.isDarkMode()) {
+					button.setBackground(Style.DARK_BUTTON_COLOR.darker());
+				} else {
+					button.setBackground(bgColor.darker());
+				}
 			}
 
 			@Override
 			public void mouseExited(java.awt.event.MouseEvent e) {
-				button.setBackground(bgColor);
+				if (DarkModeManager.isDarkMode()) {
+					button.setBackground(Style.DARK_BUTTON_COLOR);
+				} else {
+					button.setBackground(bgColor);
+				}
 			}
 		});
 

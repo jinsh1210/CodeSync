@@ -27,11 +27,11 @@ import utils.ClientSock;
 import utils.Style;
 import utils.DarkModeManager;
 
-public class CollaboratorListView extends JDialog {
+public class ColView extends JDialog {
 
     private Repository repository;
 
-    public CollaboratorListView(Repository repository){
+    public ColView(Repository repository){
         this.repository = repository;
     }
 

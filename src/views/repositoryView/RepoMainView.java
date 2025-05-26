@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.tree.*;
+
 import lombok.*;
 
 import utils.Style;
@@ -28,7 +29,7 @@ public class RepoMainView extends JFrame {
 
 	private Timer refreshTimer;
 
-	private CollaboratorListView collaboratorListView;
+	private ColView collaboratorListView;
 	private RepoFunc repoFunc;
 
 	public RepoMainView(Repository repository, User currentUser, String targetUser) {
@@ -39,7 +40,7 @@ public class RepoMainView extends JFrame {
 		initializeUI();
 
 		this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
-		this.collaboratorListView = new CollaboratorListView(repository);
+		this.collaboratorListView = new ColView(repository);
 		repoFunc.loadFiles(targetUser);
 
 		utils.DarkModeManager.apply(getContentPane());

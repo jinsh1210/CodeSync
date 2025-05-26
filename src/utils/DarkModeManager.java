@@ -11,10 +11,6 @@ public class DarkModeManager {
     public static boolean isDarkMode() {
         return isDarkMode;
     }
-    //TODO: 서버에서 저장(DB가 나을 듯)
-    /* public static void setDarkMode(boolean darkMode) {
-        isDarkMode = darkMode;
-    } */
 
     public static void toggle() {
         isDarkMode = !isDarkMode;
