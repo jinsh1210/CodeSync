@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.Set;
 import models.User;
 import views.login_register.LRMain;
-import views.repositoryView.RepoMainView;
+import views.repositoryView.RepoMainPanel;
+// import views.repositoryView.RepoMainView;
 import utils.Style;
-// import utils.UserSettings;
 import models.Repository;
 import utils.ClientSock;
 import utils.DarkModeManager;
@@ -19,12 +19,18 @@ import utils.DarkModeManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import org.jdesktop.animation.timing.*;
+
 //MainView 클래스 - 로그인된 사용자의 저장소를 보여주고 관리하는 메인 UI
 public class MainView extends JFrame {
 	private User currentUser;
 	private JList<Repository> repositoryList;
 	private DefaultListModel<Repository> listModel;
 	private JPopupMenu popupMenu;
+	private JPanel detailPanel;
+
+	private JSplitPane splitPane;
+	// private boolean isExpanded = false; // 상태를 추적하는 변수
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
@@ -36,8 +42,8 @@ public class MainView extends JFrame {
 	// 메인 화면 UI 구성 및 이벤트 바인딩
 	private void initializeUI() {
 		setTitle("J.S.Repo - Main");
-		setSize(650, 500);
-		setMinimumSize(new Dimension(600, 400));
+		setSize(1200, 800);
+		setMinimumSize(new Dimension(1200, 800));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
@@ -112,7 +118,17 @@ public class MainView extends JFrame {
 		darkModeToggle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
 		createRepoItem.addActionListener(e -> showCreateRepositoryDialog());
-		refreshIconButton.addActionListener(e -> loadRepositories());
+		// TODO: 아직 테스트 안 함.
+		/*현재 상황: 더블 클릭 이후 refresh 하고 한 번 눌렀을 때
+		저장소 정보가 detailPanel에 안 뜨는 중*/
+		refreshIconButton.addActionListener(e -> {
+			toggleSplitPaneDivider(splitPane, 800);
+			detailPanel.removeAll();
+			detailPanel.revalidate();
+			detailPanel.repaint();
+			loadRepositories(); // 먼저 리스트를 새로 로드
+			SwingUtilities.invokeLater(() -> repositoryList.clearSelection()); // 로드 후 clearSelection 호출
+		});
 		searchReposItem.addActionListener(e -> searchRepositories());
 		logoutItem.addActionListener(e -> handleLogout());
 		darkModeToggle.addItemListener(e -> {
@@ -157,7 +173,9 @@ public class MainView extends JFrame {
 						if (SwingUtilities.isRightMouseButton(e)) {
 							popupMenu.show(repositoryList, e.getX(), e.getY());
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-							openRepository(listModel.get(index));
+							// openRepository(listModel.get(index));
+							toggleSplitPaneDivider(splitPane, 200);
+							openRepositoryInDetailPanel(listModel.get(index));
 						}
 					}
 				}
@@ -176,7 +194,7 @@ public class MainView extends JFrame {
 		mainPanel.add(topPanel, BorderLayout.NORTH);
 
 		// 저장소 상세 정보 패널 생성
-		JPanel detailPanel = new JPanel();
+		detailPanel = new JPanel();
 		detailPanel.setBackground(Style.BACKGROUND_COLOR);
 		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
 		detailPanel.setBorder(BorderFactory.createTitledBorder("저장소 정보"));
@@ -211,8 +229,8 @@ public class MainView extends JFrame {
 		detailPanel.add(Box.createVerticalStrut(5));
 		detailPanel.add(sizeLabel);
 
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, detailPanel);
-		splitPane.setDividerLocation(450);
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, detailPanel);
+		splitPane.setDividerLocation(800);
 		splitPane.setResizeWeight(0.7);
 		splitPane.setBorder(null);
 		// 크기 조절 비활성화
@@ -221,25 +239,25 @@ public class MainView extends JFrame {
 
 		// 리스트 항목 선택 시 상세 패널 갱신
 		repositoryList.addListSelectionListener(e -> {
-			Repository selected = repositoryList.getSelectedValue();
-			if (selected != null) {
-				// 저장소 설명 너무 길면 ...으로 대체
-				String description = selected.getDescription();
-				if (description.length() > 5) {
-					description = description.substring(0, 5) + "...";
+			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
+				Repository selected = repositoryList.getSelectedValue();
+				if (selected != null) {
+					String description = selected.getDescription();
+					if (description.length() > 5) {
+						description = description.substring(0, 5) + "...";
+					}
+					nameLabel.setText("이름: " + selected.getName());
+					descLabel.setText("설명: " + description);
+					visibilityLabel.setText("공개 여부: " + selected.getVisibility());
+					username.setText("소유자: " + selected.getUsername());
+					sizeLabel.setText("저장소 용량: " + selected.getSize() + "MB");
+				} else {
+					nameLabel.setText("");
+					descLabel.setText("");
+					visibilityLabel.setText("");
+					username.setText("");
+					sizeLabel.setText("");
 				}
-				nameLabel.setText("이름: " + selected.getName());
-				descLabel.setText("설명: " + description);
-				visibilityLabel.setText("공개 여부: " + selected.getVisibility());
-				username.setText("소유자: " + selected.getUsername());
-				sizeLabel.setText("저장소 용량: " + selected.getSize() + "MB");
-
-			} else {
-				nameLabel.setText("");
-				descLabel.setText("");
-				visibilityLabel.setText("");
-				username.setText("");
-				sizeLabel.setText("");
 			}
 		});
 
@@ -363,20 +381,19 @@ public class MainView extends JFrame {
 		}
 	}
 
-	// 저장소를 더블클릭했을 때 RepositoryView 창 열기
-	private void openRepository(Repository repository) {
+	private void openRepositoryInDetailPanel(Repository repository) {
 		try {
-			String user = repository.getUsername();
-			RepoMainView repoView;
-			if (currentUser.getUsername().equals(user))
-				repoView = new RepoMainView(repository, currentUser, null);
-			else
-				repoView = new RepoMainView(repository, currentUser, user);
-
-			repoView.setVisible(true);
+			if (detailPanel.getComponentCount() > 0 && detailPanel.getComponent(0) instanceof RepoMainPanel) {
+				((RepoMainPanel) detailPanel.getComponent(0)).stopRefreshTimer();
+			}
+			detailPanel.removeAll();
+			String targetUser = repository.getVisibility().equals("private") ? null : repository.getUsername();
+			detailPanel.add(new views.repositoryView.RepoMainPanel(repository, currentUser, targetUser));
+			detailPanel.revalidate();
+			detailPanel.repaint();
 		} catch (Exception e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "저장소 열기 실패: " + e.getMessage());
+			JOptionPane.showMessageDialog(this, "저장소 상세 패널 로딩 실패: " + e.getMessage());
 		}
 	}
 
@@ -522,5 +539,24 @@ public class MainView extends JFrame {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "저장소 검색 실패");
 		}
+	}
+
+	private void toggleSplitPaneDivider(JSplitPane splitPane, int targetLocation) {
+		int start = splitPane.getDividerLocation();
+		int end = targetLocation;
+
+		// TODO: 부드럽게 해야함
+		Animator animator = new Animator(1000);
+		animator.setAcceleration(0.5f);
+		animator.setDeceleration(0.5f);
+		animator.setResolution(0); // 부드러운 애니메이션
+		animator.addTarget(new TimingTargetAdapter() {
+			@Override
+			public void timingEvent(float fraction) {
+				int newLocation = (int) (start + (end - start) * fraction);
+				splitPane.setDividerLocation(newLocation);
+			}
+		});
+		animator.start();
 	}
 }

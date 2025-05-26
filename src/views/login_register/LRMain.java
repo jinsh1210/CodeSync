@@ -70,6 +70,7 @@ public class LRMain extends javax.swing.JFrame {
                 isLogin = !isLogin;
             }
         };
+
         Animator animator = new Animator(800, target);
         animator.setAcceleration(0.5f);
         animator.setDeceleration(0.5f);

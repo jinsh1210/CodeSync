@@ -37,7 +37,7 @@ public class LRCover extends javax.swing.JPanel {
 
         // 로그인 회원가입 전환 버튼
         button = Style.createStyledButton("회원가입", Style.PRIMARY_COLOR, Color.WHITE);
-        add(button);
+        add(button, "w 45%, h 40");
         button.addActionListener(e -> {
             buttonActionPerformed(e);
         });
@@ -50,7 +50,7 @@ public class LRCover extends javax.swing.JPanel {
     @Override
     protected void paintComponent(Graphics grphcs) {
         Graphics2D g2 = (Graphics2D) grphcs;
-        GradientPaint gra = new GradientPaint(0, 0, new Color(145, 243, 255), 0, getHeight(), new Color(38, 178, 195));
+        GradientPaint gra = new GradientPaint(0, 0, new Color(187, 187, 187), 0, getHeight(), new Color(77, 77, 77));
         g2.setPaint(gra);
         g2.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(grphcs);
