@@ -51,11 +51,11 @@ public class RepoFunc {
 	private String targetUser = null;
 	private String SavedPath = null;
 	private Timer refreshTimer;
-	private JSONArray array=null;
+	private JSONArray array = null;
 
 	public RepoFunc(Repository repository, User currentUser, JTree fileTree,
-					DefaultMutableTreeNode rootNode, DefaultTreeModel treeModel,
-					JProgressBar progressBar, Timer refreshTimer) {
+			DefaultMutableTreeNode rootNode, DefaultTreeModel treeModel,
+			JProgressBar progressBar, Timer refreshTimer) {
 		this.repository = repository;
 		this.currentUser = currentUser;
 		this.fileTree = fileTree;
@@ -92,7 +92,7 @@ public class RepoFunc {
 			}
 		}
 	}
-	
+
 	public void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		rootNode.removeAllChildren();
@@ -104,9 +104,11 @@ public class RepoFunc {
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
-				if (line == null) break;
+				if (line == null)
+					break;
 				response += line;
-				if (line.contains("/#/repo_content_EOL")) break;
+				if (line.contains("/#/repo_content_EOL"))
+					break;
 			}
 			int start = response.indexOf("/#/repo_content_SOL") + "/#/repo_content_SOL".length();
 			int end = response.indexOf("/#/repo_content_EOL");
@@ -126,8 +128,9 @@ public class RepoFunc {
 			DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
 				@Override
 				public Component getTreeCellRendererComponent(JTree tree, Object value,
-															  boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-					JLabel label = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+						boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+					JLabel label = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
+							hasFocus);
 					String nodeText = value.toString();
 					if ("[비어 있음]".equals(nodeText)) {
 						label.setIcon(null);
@@ -183,7 +186,8 @@ public class RepoFunc {
 	private void restoreExpandedPathsFromStrings(JTree tree, List<String> paths) {
 		for (String fullPath : paths) {
 			TreePath path = findTreePathByString(tree, fullPath);
-			if (path != null) tree.expandPath(path);
+			if (path != null)
+				tree.expandPath(path);
 		}
 	}
 
@@ -204,7 +208,8 @@ public class RepoFunc {
 					break;
 				}
 			}
-			if (!found) return null;
+			if (!found)
+				return null;
 		}
 		return path;
 	}
@@ -227,7 +232,8 @@ public class RepoFunc {
 		String[] parts = path.split("/");
 		DefaultMutableTreeNode current = rootNode;
 		for (String part : parts) {
-			if (part == null || part.isBlank()) continue;
+			if (part == null || part.isBlank())
+				continue;
 			DefaultMutableTreeNode child = null;
 			for (int j = 0; j < current.getChildCount(); j++) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) current.getChildAt(j);
@@ -268,10 +274,41 @@ public class RepoFunc {
 						e.printStackTrace();
 					}
 				}
-				if(!ClientSock.mergeCheck(repository.getName(), repository.getUsername()))
-					JOptionPane.showMessageDialog(null,"병합 충돌!\n"+(ClientSock.mergeFailed==null?"알수 없는 사유":ClientSock.mergeFailed));
-				else
-					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(), repository.getUsername(), progressBar,array);
+				if (!ClientSock.mergeCheck(repository.getName(), repository.getUsername())) {
+
+					JSONArray errorArray = ClientSock.mergeFailed;
+					StringBuilder fileNames = new StringBuilder();
+					for (int i = 0; i < errorArray.length(); i++) {
+						String errorPath = errorArray.getString(i);
+						String fileName = errorPath.substring(errorPath.lastIndexOf("/") + 1);
+						fileNames.append(fileName);
+						if (i < errorArray.length() - 1) {
+							fileNames.append(", ");
+						}
+					}
+					int option = JOptionPane.showOptionDialog(null,
+							"병합 충돌 발생!\n파일 이름: " + fileNames.toString(), "병합 충돌",
+							JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null,
+							new String[] { "풀", "강제 푸시", "취소" }, "풀");
+
+					switch (option) {
+						case 0: // 풀
+							handleDownload();
+							break;
+						case 1: // 강제 푸시
+							ClientSock.push(new File(SavedPath), "", repository.getName(), currentUser.getId(),
+									repository.getUsername(), progressBar, array);
+							handleDownload();
+							break;
+						case 2: // 취소
+							// 아무것도 하지 않음
+							break;
+						default:
+							break;
+					}
+				} else
+					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
+							repository.getUsername(), progressBar, array);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(null, "업로드 중 오류 발생");
@@ -294,7 +331,6 @@ public class RepoFunc {
 				refreshTimer.stop();
 				ClientSock.pull(repository.getName(), "", targetFolder, repository.getUsername(), progressBar);
 				SwingUtilities.invokeLater(() -> {
-					JOptionPane.showMessageDialog(null, "다운로드가 완료되었습니다.");
 					progressBar.setVisible(false);
 				});
 			} catch (Exception e) {
@@ -316,8 +352,8 @@ public class RepoFunc {
 			return;
 		}
 		Object[] nodes = selectedPath.getPath();
-		String selectedPathStr = (nodes.length == 1) ? repository.getName() :
-				String.join("/", Arrays.stream(nodes, 1, nodes.length).map(Object::toString).toArray(String[]::new));
+		String selectedPathStr = (nodes.length == 1) ? repository.getName()
+				: String.join("/", Arrays.stream(nodes, 1, nodes.length).map(Object::toString).toArray(String[]::new));
 		if (selectedPathStr.endsWith("[비어 있음]")) {
 			selectedPathStr = selectedPathStr.replace("/[비어 있음]", "");
 		}
@@ -325,10 +361,13 @@ public class RepoFunc {
 			JOptionPane.showMessageDialog(null, "삭제할 항목을 먼저 선택해주세요.");
 			return;
 		}
-		int confirm = JOptionPane.showConfirmDialog(null, "선택한 항목(" + selectedPathStr + ")을 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
-		if (confirm != JOptionPane.YES_OPTION) return;
+		int confirm = JOptionPane.showConfirmDialog(null, "선택한 항목(" + selectedPathStr + ")을 삭제하시겠습니까?", "삭제 확인",
+				JOptionPane.YES_NO_OPTION);
+		if (confirm != JOptionPane.YES_OPTION)
+			return;
 		try {
-			ClientSock.sendCommand("/delete_file " + repository.getName() + " \"" + selectedPathStr + "\" " + repository.getUsername());
+			ClientSock.sendCommand("/delete_file " + repository.getName() + " \"" + selectedPathStr + "\" "
+					+ repository.getUsername());
 			String response = ClientSock.receiveResponse();
 			if (response.startsWith("/#/delete_success")) {
 				JOptionPane.showMessageDialog(null, "삭제가 완료되었습니다.");
