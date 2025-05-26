@@ -8,7 +8,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -23,8 +34,8 @@ import lombok.Setter;
 import models.Repository;
 import models.User;
 import utils.ClientSock;
-import utils.Style;
 import utils.DarkModeManager;
+import utils.Style;
 
 @Getter
 @Setter
@@ -40,6 +51,7 @@ public class RepoFunc {
 	private String targetUser = null;
 	private String SavedPath = null;
 	private Timer refreshTimer;
+	private JSONArray array=null;
 
 	public RepoFunc(Repository repository, User currentUser, JTree fileTree,
 					DefaultMutableTreeNode rootNode, DefaultTreeModel treeModel,
@@ -80,7 +92,7 @@ public class RepoFunc {
 			}
 		}
 	}
-
+	
 	public void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		rootNode.removeAllChildren();
@@ -99,7 +111,7 @@ public class RepoFunc {
 			int start = response.indexOf("/#/repo_content_SOL") + "/#/repo_content_SOL".length();
 			int end = response.indexOf("/#/repo_content_EOL");
 			response = response.substring(start, end).trim();
-			JSONArray array = new JSONArray(response);
+			array = new JSONArray(response);
 			for (int i = 0; i < array.length(); i++) {
 				JSONObject obj = array.getJSONObject(i);
 				String path = obj.getString("path");
@@ -245,14 +257,27 @@ public class RepoFunc {
 		new Thread(() -> {
 			try {
 				refreshTimer.stop();
-				ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(), repository.getUsername(), progressBar);
+				// Ensure .jsRepohashed.json exists
+				File hashFile = new File(SavedPath, ".jsRepohashed.json");
+				if (!hashFile.exists()) {
+					try (java.io.FileWriter writer = new java.io.FileWriter(hashFile)) {
+						writer.write("[]");
+						System.out.println("[handleUpload] 초기 해시파일 생성 완료");
+					} catch (java.io.IOException e) {
+						System.err.println("[handleUpload] 초기 해시파일 생성 실패");
+						e.printStackTrace();
+					}
+				}
+				if(!ClientSock.mergeCheck(repository.getName(), repository.getUsername()))
+					JOptionPane.showMessageDialog(null,"병합 충돌!\n"+(ClientSock.mergeFailed==null?"알수 없는 사유":ClientSock.mergeFailed));
+				else
+					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(), repository.getUsername(), progressBar,array);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(null, "업로드 중 오류 발생");
 			} finally {
 				SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
 				refreshTimer.start();
-				loadFiles(targetUser);
 			}
 		}).start();
 	}

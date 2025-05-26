@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import models.FileInfo;
@@ -38,6 +40,11 @@ public class ClientSock {
     private static PrintWriter out;
     private static BufferedReader in;
     private static InputStream inputStream;
+    private static String currentUser;
+
+    public static void setUser(String user){
+        currentUser=user;
+    }
 
     private static void loadConfig() {
         File configFile = new File("TeamProject/" + CONFIG_PATH);
@@ -193,11 +200,33 @@ public class ClientSock {
                 System.err.println("[서버 오류]: " + line);
                 return;
             }
-            if (line.startsWith("/#/pull_file ")) {
+            System.out.println(line);
+            if (line.startsWith("/#/pull_hashes_SOL")) {
+                StringBuilder jsonBuilder = new StringBuilder();
+                String hashLine="";
+                System.out.println(hashLine);
+                do{
+                    hashLine+=reader.readLine();
+                    if (hashLine == null || hashLine.endsWith("/#/pull_hashes_EOL\n")) break;
+                    jsonBuilder.append(hashLine);
+                }while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
+                try {
+                    org.json.JSONArray hashList = new org.json.JSONArray(jsonBuilder.toString());
+                    System.out.println("hashList: "+hashList);
+                    saveHashSnapshot(currentUser, repoName, hashList);
+                } catch (Exception e) {
+                    System.err.println("[클라이언트] 해시 JSON 파싱 오류");
+                    e.printStackTrace();
+                }
+                // 다음 명령 줄 읽기
+                
+            }
+            line=reader.readLine();
+            if (line != null && line.startsWith("/#/pull_file ")) {
                 handleSingleFilePull(line, targetFolder, bar,repoName);
-            } else if (line.equals("/#/pull_dir_SOL")) {
+            } else if (line != null && line.equals("/#/pull_dir_SOL")) {
                 handleDirectoryPull(reader, targetFolder, bar,repoName);
-            } else {
+            } else if (line != null) {
                 System.err.println("[오류] 알 수 없는 응답: " + line);
             }
 
@@ -249,7 +278,7 @@ public class ClientSock {
         }
     }
 
-    public static void push(File folder, String basePath, String repository, int userId, String Owner, JProgressBar bar)
+    public static void push(File folder, String basePath, String repository, int userId, String Owner, JProgressBar bar,JSONArray pathall)
             throws IOException { // 폴더 형식 전송 오버로드 메소드
         File[] contents = folder.listFiles();
         boolean isEmpty = (contents == null || contents.length == 0);
@@ -276,12 +305,25 @@ public class ClientSock {
 
         // 폴더 안에 내용이 있을 경우
         for (File file : contents) {
+            // Skip .jsRepohashed.json file
+            if (file.getName().equals(".jsRepohashed.json")) continue;
+            if(file.getName().equals(".DS_Store")) continue;
             if (file.isFile()) {
                 String filePath = relativePath.equals("")? file.getName():relativePath + "/" + file.getName();
                 push(file, repository, userId, filePath, Owner, bar);
             } else if (file.isDirectory()) {
-                push(file, relativePath, repository, userId, Owner, bar); // 재귀 호출
+                push(file, relativePath, repository, userId, Owner, bar, pathall); // 재귀 호출
             }
+        }
+
+        System.out.println("currentUser:" +currentUser);
+        List<String> deletedPaths = getDeletedPaths(pathall, currentUser, repository);
+        for (String path : deletedPaths) {
+            sendCommand("/delete_file " + repository + " \"" + path + "\" " + Owner);
+            String response = receiveResponse();
+            if (!response.startsWith("/#/delete_success")) {
+                System.err.println("[삭제 실패] " + path + ": " + response);
+            }else System.out.println("[삭제 성공] " + path + ": " + response);
         }
     }
 
@@ -345,6 +387,7 @@ public class ClientSock {
                 File configDir = new File(path);
                 if (!configDir.exists()) {
                     configDir.mkdirs(); // 디렉토리 없으면 생성
+                    
                 }
                 obj.put("path", path); // Update path
                 updated = true;
@@ -377,14 +420,95 @@ public class ClientSock {
 
     public static String getPath(String user, String repoName) {
         loadConfig(); // Ensure config is loaded
-
         for (int i = 0; i < config.getJSONArray("entries").length(); i++) {
             org.json.JSONObject obj = config.getJSONArray("entries").getJSONObject(i);
             if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
                 return obj.getString("path");
             }
         }
-
         return null; // Not found
+    }
+    // --- 해시 스냅샷 저장 메서드 ---
+    public static void saveHashSnapshot(String user, String repoName, org.json.JSONArray hashList) {
+        try {
+            String localRepoPath = getPath(user, repoName);
+            if (localRepoPath != null) {
+                java.nio.file.Path jsonPath = java.nio.file.Paths.get(localRepoPath, ".jsRepohashed.json");
+                java.nio.file.Files.writeString(jsonPath, hashList.toString(2));
+                System.out.println("[해시 스냅샷 저장 완료 - 로컬]");
+            } else {
+                System.err.println("[해시 스냅샷 저장 실패: 로컬 경로를 찾을 수 없음]");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getDeletedPaths(JSONArray pathAll, String user, String repoName) {
+        List<String> deletedPaths = new ArrayList<>();
+        String basePath = getPath(user, repoName);
+        System.out.println("getPath: "+basePath);
+        if (basePath == null) {
+            System.err.println("[경고] 로컬 경로를 찾을 수 없습니다.");
+            return deletedPaths;
+        }
+
+        for (int i = 0; i < pathAll.length(); i++) {
+            String jtreePath = pathAll.getJSONObject(i).getString("path");
+            File file = new File(basePath, jtreePath);
+            if (!file.exists()) {
+                deletedPaths.add(jtreePath);
+            }
+        }
+        // Sort deletedPaths by depth (deepest first)
+        deletedPaths.sort((a, b) -> Integer.compare(b.split("/").length, a.split("/").length));
+        return deletedPaths;
+    }
+
+    public static JSONArray mergeFailed=null;
+    
+    // --- /merge 병합 체크 메서드 ---
+    public static boolean mergeCheck(String repoName, String owner) {
+        mergeFailed=null;
+        try {
+            String localRepoPath = getPath(currentUser, repoName);
+            if (localRepoPath == null) {
+                System.err.println("[mergeCheck] 로컬 경로를 찾을 수 없습니다.");
+                return false;
+            }
+    
+            File hashFile = new File(localRepoPath, ".jsRepohashed.json");
+            if (!hashFile.exists()) {
+                System.err.println("[mergeCheck] .jsRepohashed.json 파일이 존재하지 않습니다.");
+                return false;
+            }
+    
+            String hashContent = Files.readString(hashFile.toPath());
+            sendCommand("/merge " + repoName + " " + owner);
+            out.println("/#/merge_hashes_SOL");
+            out.println(hashContent);
+            out.println("/#/merge_hashes_EOL");
+            System.out.println("merge 전송완료");
+            String response = receiveResponse();
+            System.out.println("merge 응답: "+response);
+            if (response != null && response.trim().equals("/#/merge_success")) {
+                System.out.println("[클라이언트] 병합 가능: 모든 해시 일치");
+                return true;
+            } else if (response != null && response.trim().equals("/#/merge_fail")) {
+                String mismatchJson = receiveResponse();
+                mergeFailed = new JSONArray(mismatchJson);
+                System.out.println("[클라이언트] 병합 실패: 일치하지 않는 파일 목록");
+                for (int i = 0; i < mergeFailed.length(); i++) {
+                    System.out.println(" - " + mergeFailed.getString(i));
+                }
+            } else {
+                System.err.println("[클라이언트] 예기치 못한 응답: " + response);
+            }
+        } catch (Exception e) {
+            System.err.println("[mergeCheck 예외]");
+            e.printStackTrace();
+            return false;
+        }
+        return false;
     }
 }

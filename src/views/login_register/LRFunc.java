@@ -1,6 +1,7 @@
 package views.login_register;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import models.User;
 import utils.ClientSock;
@@ -88,6 +89,7 @@ public class LRFunc {
             String response = ClientSock.receiveResponse();
 
             if (response != null && response.startsWith("/#/info")) {
+                ClientSock.setUser(username);
                 User user = new User();
                 user.setUsername(username);
 
