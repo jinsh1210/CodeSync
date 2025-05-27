@@ -3,7 +3,9 @@ package views.MainView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Image;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -13,7 +15,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,8 +38,7 @@ import org.jdesktop.animation.timing.TimingTargetAdapter;
 
 import models.Repository;
 import models.User;
-import utils.ClientSock;
-import utils.Style;
+import utils.*;
 import views.MainView.MainFunc.RepositoryListCellRenderer;
 import views.login_register.LRMain;
 
@@ -52,7 +52,8 @@ public class MainView extends JFrame {
 
 	private JSplitPane splitPane;
 	private MainFunc mainFunc;
-	private Timer timer=null;
+	private Timer timer = null;
+	private IconConv ic = new IconConv();
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
@@ -72,20 +73,21 @@ public class MainView extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
-		JButton refreshIconButton = new JButton("");
+		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침");
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
-		refreshIconButton.setFocusable(false);
-		ImageIcon refreshIcon = new ImageIcon("src/icons/refresh.png");
-		Image scaledrefresh = refreshIcon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
-		refreshIconButton.setIcon(new ImageIcon(scaledrefresh));
-		refreshIconButton.setBackground(Color.WHITE);
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-		refreshIconButton.setFocusPainted(false);
-		refreshIconButton.setBorderPainted(false);
-		refreshIconButton.setContentAreaFilled(false);
-		refreshIconButton.setOpaque(false);
 
-		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+		JPanel mainPanel = new JPanel(new BorderLayout(10, 10)) {
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				Graphics2D g2 = (Graphics2D) g;
+				GradientPaint gra = new GradientPaint(0, 0, new Color(35, 116, 225),
+						getWidth(), getHeight(), new Color(255, 255, 225));
+				g2.setPaint(gra);
+				g2.fillRect(0, 0, getWidth(), getHeight());
+			}
+		};
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 		mainPanel.setBackground(Style.BACKGROUND_COLOR);
 
@@ -198,7 +200,7 @@ public class MainView extends JFrame {
 							}
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
 							toggleSplitPaneDivider(splitPane, 200);
-							timer=mainFunc.openRepositoryPanel(listModel.get(index));
+							timer = mainFunc.openRepositoryPanel(listModel.get(index));
 						}
 					}
 				}
@@ -348,7 +350,8 @@ public class MainView extends JFrame {
 		if (confirm == JOptionPane.YES_OPTION) {
 			new LRMain().setVisible(true);
 			this.dispose();
-			if(timer!=null) timer.stop();
+			if (timer != null)
+				timer.stop();
 			ClientSock.disconnect();
 			ClientSock.connect();
 		}

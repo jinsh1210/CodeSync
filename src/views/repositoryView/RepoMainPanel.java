@@ -6,12 +6,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Image;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,8 +27,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Repository;
 import models.User;
-import utils.ClientSock;
-import utils.Style;
+import utils.*;
 
 @Getter
 @Setter
@@ -38,7 +35,7 @@ import utils.Style;
 public class RepoMainPanel extends JPanel {
     private Repository repository;
     private User currentUser;
-    
+
     private String lastSelectedPath = "";
 
     private JTree fileTree;
@@ -52,17 +49,18 @@ public class RepoMainPanel extends JPanel {
 
     private ColView collaboratorListView;
     private RepoFunc repoFunc;
+    private IconConv ic = new IconConv();
 
     public RepoMainPanel(Repository repository, User currentUser) {
         this.repository = repository;
         this.currentUser = currentUser;
-        
 
         initializeUI();
 
         this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
         this.collaboratorListView = new ColView(repository);
-        repoFunc.loadFiles(repository.getUsername().equals(currentUser.getUsername())?null:repository.getUsername());
+        repoFunc.loadFiles(
+                repository.getUsername().equals(currentUser.getUsername()) ? null : repository.getUsername());
     }
 
     private void initializeUI() {
@@ -93,14 +91,7 @@ public class RepoMainPanel extends JPanel {
         JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         topRightPanel.setBackground(Style.BACKGROUND_COLOR);
         if (repository.getUsername().equals(currentUser.getUsername())) {
-            JButton collaborateButton = new JButton("");
-            collaborateButton.setFocusable(false);
-            ImageIcon icon = new ImageIcon("src/icons/collabor.png");
-            Image scaledIcon = icon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-            collaborateButton.setIcon(new ImageIcon(scaledIcon));
-            collaborateButton.setContentAreaFilled(false);
-            collaborateButton.setBorderPainted(false);
-            collaborateButton.setOpaque(false);
+            JButton collaborateButton = ic.createImageButton("src/icons/col.png", null, 50, 50, null,"콜라보");
             collaborateButton.addActionListener(e -> collaboratorListView.handleViewCollaborators());
             topRightPanel.add(collaborateButton);
         }
@@ -120,11 +111,16 @@ public class RepoMainPanel extends JPanel {
         add(headerWrapper, BorderLayout.NORTH);
 
         // 업로드/다운로드/삭제 버튼 생성 및 색상 설정
-        uploadButton = Style.createStyledButton("푸쉬", Style.PRIMARY_COLOR, Color.WHITE);
-        downloadButton = Style.createStyledButton("풀", Style.PRIMARY_COLOR, Color.WHITE);
-        freezingButton = Style.createStyledButton("파일프리징", Style.PRIMARY_COLOR, Color.WHITE);
-        localButton = Style.createStyledButton("로컬 저장소", Style.PRIMARY_COLOR, Color.WHITE);
-        deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
+        int btn_width = 90;
+        int btn_height = 70;
+        uploadButton = ic.createImageButton("src/icons/upload.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,"푸시");
+        downloadButton = ic.createImageButton("src/icons/download.png", Style.PRIMARY_COLOR, btn_width, btn_height,
+                null,"풀");
+        freezingButton = ic.createImageButton("src/icons/freeze.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,"파일프리징");
+        localButton = ic.createImageButton("src/icons/local.png", Style.PRIMARY_COLOR, btn_width - 10, btn_height - 10,
+                null,"로컬저장소 설정");
+        deleteButton = ic.createImageButton("src/icons/delete.png", Style.WARNING_COLOR, btn_width - 5, btn_height - 15,
+                null,"삭제");
 
         // 하단 버튼 영역 패널 구성
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
@@ -185,9 +181,12 @@ public class RepoMainPanel extends JPanel {
         downloadButton.addActionListener(e -> repoFunc.handleDownload());
         deleteButton.addActionListener(e -> repoFunc.handleDelete());
         localButton.addActionListener(e -> repoFunc.handlesetLocalFolder());
-        freezingButton.addActionListener(e-> new FreezingView(ClientSock.getFrozenPaths(currentUser.getUsername(), repository.getName(),repository.getUsername()),repository,currentUser.getUsername()).setVisible(true));
+        freezingButton.addActionListener(e -> new FreezingView(
+                ClientSock.getFrozenPaths(currentUser.getUsername(), repository.getName(), repository.getUsername()),
+                repository, currentUser.getUsername()).setVisible(true));
 
-        refreshTimer = new Timer(3000, e -> repoFunc.loadFiles(repository.getUsername().equals(currentUser.getUsername())?null:repository.getUsername()));
+        refreshTimer = new Timer(3000, e -> repoFunc.loadFiles(
+                repository.getUsername().equals(currentUser.getUsername()) ? null : repository.getUsername()));
         refreshTimer.start();
     }
 

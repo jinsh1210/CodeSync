@@ -23,12 +23,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import models.Repository;
-import utils.ClientSock;
-import utils.Style;
+import utils.*;
 
 public class ColView extends JDialog {
 
     private Repository repository;
+    private IconConv ic = new IconConv();
 
     public ColView(Repository repository){
         this.repository = repository;
@@ -102,8 +102,7 @@ public class ColView extends JDialog {
             menu.add(removeItem);
             collaboratorList.setComponentPopupMenu(menu);
 
-            JButton addButton = Style.createStyledButton("추가", Style.PRIMARY_COLOR, Color.WHITE);
-            addButton.setPreferredSize(new Dimension(80, 30));
+            JButton addButton = ic.createImageButton("src/icons/coladd.png", Style.PRIMARY_COLOR, 40, 40, "", "콜라보 추가");
             addButton.addActionListener(e -> {
                 String newUser = showCustomInputDialog("추가할 사용자 아이디 입력:");
                 if (newUser != null && !newUser.trim().isEmpty()) {

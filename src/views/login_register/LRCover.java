@@ -3,16 +3,12 @@ package views.login_register;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import net.miginfocom.swing.MigLayout;
-import utils.Style;
+import utils.*;
 
 public class LRCover extends javax.swing.JPanel {
 
@@ -22,6 +18,7 @@ public class LRCover extends javax.swing.JPanel {
     private JButton button;
     private boolean isLogin;
     private LRView lrView;
+    private IconConv iC = new IconConv();
 
     public void setLRView(LRView view) {
         lrView = view;
@@ -42,10 +39,7 @@ public class LRCover extends javax.swing.JPanel {
         // 로고 사진 패널
         JPanel logoPanel = new JPanel();
         logoPanel.setBackground(Style.BACKGROUND_COLOR);
-        ImageIcon logoIcon = recolorImage("src/icons/logo.png", new Color(255, 255, 225));
-        Image scaledLogo = logoIcon.getImage().getScaledInstance(300 - 20, 160 - 40, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(scaledLogo);
-        JLabel logoLabel = new JLabel(scaledIcon);
+        JLabel logoLabel = iC.createImageLabel("src/icons/logo.png", new Color(255, 255, 225), 280, 120);
         add(logoLabel);
 
         // 로그인 회원가입 전환 버튼
@@ -111,41 +105,6 @@ public class LRCover extends javax.swing.JPanel {
                 button.setText("회원가입");
             }
             this.isLogin = login;
-        }
-    }
-
-    private ImageIcon recolorImage(String imagePath, Color targetColor) {
-        try {
-            BufferedImage originalImage = ImageIO.read(new File(imagePath));
-            BufferedImage coloredImage = new BufferedImage(
-                    originalImage.getWidth(),
-                    originalImage.getHeight(),
-                    BufferedImage.TYPE_INT_ARGB);
-
-            for (int x = 0; x < originalImage.getWidth(); x++) {
-                for (int y = 0; y < originalImage.getHeight(); y++) {
-                    int rgba = originalImage.getRGB(x, y);
-                    Color col = new Color(rgba, true);
-
-                    // 알파값(투명도) 유지, 색상만 변경
-                    if (col.getAlpha() > 0) {
-                        Color newColor = new Color(
-                                targetColor.getRed(),
-                                targetColor.getGreen(),
-                                targetColor.getBlue(),
-                                col.getAlpha());
-                        coloredImage.setRGB(x, y, newColor.getRGB());
-                    } else {
-                        // 투명한 픽셀은 그대로 유지
-                        coloredImage.setRGB(x, y, rgba);
-                    }
-                }
-            }
-
-            return new ImageIcon(coloredImage);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }
