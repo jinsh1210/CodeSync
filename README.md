@@ -81,11 +81,11 @@ TODO: 저장소 설정 버튼 만들어서 저장소 이름, 설명, 공개여�
 ## 🖥️ 개발 환경
 
 - 언어: Java
-- UI: Swing, Java2D
-- 버전: Java 11 이상
+- 환경: macOS
 - IDE: Eclipse, vsCode, NetBeans
+- 버전: Java 11 이상
+- UI: Swing, Java2D
 - Maven:
-
 ```
 <dependencies>
         <dependency>
@@ -127,5 +127,4 @@ TODO: 저장소 설정 버튼 만들어서 저장소 이름, 설명, 공개여�
 
     </dependencies>
 ```
-
 ---
