@@ -12,6 +12,7 @@ public class Style {
 	public static final Color PRIMARY_COLOR = new Color(35, 116, 225);
 	public static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
 	public static final Color FIELD_BACKGROUND = Color.WHITE;
+	public static final Color BASIC_TEXT_COLOR = Color.BLACK;
 
 	public static final Color DARK_PRIMARY_COLOR = new Color(44, 62, 80);
 	public static final Color DARK_BACKGROUND_COLOR = new Color(34, 34, 34);

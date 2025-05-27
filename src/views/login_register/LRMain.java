@@ -2,9 +2,6 @@ package views.login_register;
 
 import java.awt.*;
 import java.awt.event.*;
-import utils.*;
-
-import javax.swing.*;
 
 import org.jdesktop.animation.timing.*;
 import net.miginfocom.swing.MigLayout;

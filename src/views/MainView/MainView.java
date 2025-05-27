@@ -91,10 +91,10 @@ public class MainView extends JFrame {
 
 		JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
 		titleLabel.setFont(Style.TITLE_FONT);
-		titleLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+		titleLabel.setForeground(Style.BACKGROUND_COLOR);
 
 		JPanel topPanel = new JPanel(new BorderLayout());
-		topPanel.setBackground(Style.BACKGROUND_COLOR);
+		topPanel.setBackground(Style.PRIMARY_COLOR);
 		topPanel.add(titleLabel, BorderLayout.WEST);
 
 		// 리스트 상단 패널
@@ -220,11 +220,11 @@ public class MainView extends JFrame {
 		username.setFont(Style.LABEL_FONT.deriveFont(13f));
 		sizeLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
 
-		nameLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-		descLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-		visibilityLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-		username.setForeground(Style.TEXT_SECONDARY_COLOR);
-		sizeLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+		nameLabel.setForeground(Style.BASIC_TEXT_COLOR);
+		descLabel.setForeground(Style.BASIC_TEXT_COLOR);
+		visibilityLabel.setForeground(Style.BASIC_TEXT_COLOR);
+		username.setForeground(Style.BASIC_TEXT_COLOR);
+		sizeLabel.setForeground(Style.BASIC_TEXT_COLOR);
 
 		detailPanel.add(nameLabel);
 		detailPanel.add(Box.createVerticalStrut(5));
