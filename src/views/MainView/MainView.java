@@ -170,6 +170,12 @@ public class MainView extends JFrame {
 		repositoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		repositoryList.setFont(Style.LABEL_FONT.deriveFont(14f));
 
+		//팝메뉴
+		popupMenu = new JPopupMenu();
+		JMenuItem deleteItem = new JMenuItem("레포지토리 삭제");
+		JMenuItem changeVisible=new JMenuItem("공개여부 변경");
+		JMenuItem rmCollabo=new JMenuItem("콜라보 탈퇴");
+
 		repositoryList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -180,7 +186,16 @@ public class MainView extends JFrame {
 						repositoryList.setSelectedIndex(index);
 
 						if (SwingUtilities.isRightMouseButton(e)) {
-							popupMenu.show(repositoryList, e.getX(), e.getY());
+							Repository selected=repositoryList.getSelectedValue();
+							popupMenu.removeAll();
+							if(selected!=null&&selected.getUsername().equals(currentUser.getUsername())){
+								popupMenu.add(deleteItem);
+								popupMenu.add(changeVisible);
+								popupMenu.show(repositoryList, e.getX(), e.getY());
+							}else if(selected!=null&&!selected.getUsername().equals(currentUser.getUsername())){
+								popupMenu.add(rmCollabo);
+								popupMenu.show(repositoryList, e.getX(), e.getY());
+							}
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
 							toggleSplitPaneDivider(splitPane, 200);
 							timer=mainFunc.openRepositoryPanel(listModel.get(index));
@@ -244,9 +259,11 @@ public class MainView extends JFrame {
 		splitPane.setEnabled(false);
 		splitPane.setDividerSize(0);
 
+		
+		
+
 		// 리스트 항목 선택 시 상세 패널 갱신
 		repositoryList.addListSelectionListener(e -> {
-			System.out.println("🧩 detailPanel 컴포넌트 수: " + detailPanel.getComponentCount());
 			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
 				if (detailPanel.getComponentCount() == 0) {
 					detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
@@ -303,15 +320,25 @@ public class MainView extends JFrame {
 
 		add(mainPanel);
 
-		popupMenu = new JPopupMenu();
-		JMenuItem deleteItem = new JMenuItem("삭제");
-		popupMenu.add(deleteItem);
+		
+		changeVisible.addActionListener(e->{
+			Repository selected=repositoryList.getSelectedValue();
+			if(selected!=null){
+				mainFunc.handleChangeVisible(currentUser.getUsername(),selected.getName(),
+					(selected.getVisibility().equals("public")?"private":"public"));
+			}
+		});
 
 		deleteItem.addActionListener(e -> {
 			Repository selected = repositoryList.getSelectedValue();
 			if (selected != null) {
 				mainFunc.handleDeleteRepository(selected);
 			}
+		});
+
+		rmCollabo.addActionListener(e->{
+			Repository selected=repositoryList.getSelectedValue();
+			if(selected != null) mainFunc.handleRmCollabo(selected.getName(),currentUser.getUsername(),selected.getUsername());
 		});
 	}
 
