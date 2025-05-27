@@ -1,4 +1,4 @@
-# [**Code Sync**]
+# [ **Code Sync** ]
 
 ---
 
