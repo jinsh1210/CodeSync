@@ -1,10 +1,8 @@
 package utils;
 
-import javax.swing.*;
-
-import utils.Rounded.*;
-
 import java.awt.*;
+import javax.swing.*;
+import utils.Rounded.*;
 
 //기본 스타일
 public class Style {
