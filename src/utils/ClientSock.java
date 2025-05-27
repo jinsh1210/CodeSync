@@ -35,7 +35,7 @@ public class ClientSock {
     private static final String VERISION = "v0.0.1b";
     private static final String TOKEN = "fjk123#%k2!lsd!234!%^^f17!@#sdfs!@$3$*s1s56!@#";
     private static final String CONFIG_PATH = "config.json";
-    private static JSONObject config;
+    private static JSONArray configEntries;
 
     public static Socket socket;
     private static PrintWriter out;
@@ -63,8 +63,14 @@ public class ClientSock {
         try (FileReader reader = new FileReader(configFile)) {
             char[] buffer = new char[(int) configFile.length()];
             reader.read(buffer);
-            // 기존 구조에 맞게, 배열을 감싸는 객체로 변환
-            config = new JSONObject("{\"entries\":" + new String(buffer) + "}");
+            String rawJson = new String(buffer);
+            try {
+                configEntries = new JSONArray(rawJson);
+            } catch (org.json.JSONException e) {
+                System.err.println("[loadConfig] JSON 파싱 실패: config.json 초기화");
+                e.printStackTrace();
+                configEntries = new JSONArray();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -421,13 +427,12 @@ public class ClientSock {
         loadConfig(); // Ensure config is loaded
 
         boolean updated = false;
-        for (int i = 0; i < config.getJSONArray("entries").length(); i++) {
-            org.json.JSONObject obj = config.getJSONArray("entries").getJSONObject(i);
+        for (int i = 0; i < configEntries.length(); i++) {
+            org.json.JSONObject obj = configEntries.getJSONObject(i);
             if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
                 File configDir = new File(path);
                 if (!configDir.exists()) {
                     configDir.mkdirs(); // 디렉토리 없으면 생성
-                    
                 }
                 obj.put("path", path); // Update path
                 updated = true;
@@ -445,12 +450,12 @@ public class ClientSock {
             newEntry.put("user", user);
             newEntry.put("repoName", repoName);
             newEntry.put("path", path);
-            config.getJSONArray("entries").put(newEntry);
+            configEntries.put(newEntry);
         }
 
         // Save back to file
         try (FileWriter writer = new FileWriter("TeamProject/" + CONFIG_PATH)) {
-            writer.write(config.getJSONArray("entries").toString(2)); // pretty print
+            writer.write(configEntries.toString(2)); // pretty print
             System.out.println("[config.json] 저장 완료");
         } catch (IOException e) {
             System.err.println("[config.json] 저장 실패");
@@ -460,8 +465,8 @@ public class ClientSock {
 
     public static String getPath(String user, String repoName) {
         loadConfig(); // Ensure config is loaded
-        for (int i = 0; i < config.getJSONArray("entries").length(); i++) {
-            org.json.JSONObject obj = config.getJSONArray("entries").getJSONObject(i);
+        for (int i = 0; i < configEntries.length(); i++) {
+            org.json.JSONObject obj = configEntries.getJSONObject(i);
             if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
                 return obj.getString("path");
             }
@@ -590,7 +595,15 @@ public class ClientSock {
             File hashFile = new File(localRepoPath, ".jsRepohashed.json");
             if (!hashFile.exists()){System.out.println("2.종료됨");return frozenPaths;}
 
-            JSONArray json = new JSONArray(Files.readString(hashFile.toPath()));
+            String hashText = Files.readString(hashFile.toPath());
+            JSONArray json;
+            try {
+                json = new JSONArray(hashText);
+            } catch (org.json.JSONException e) {
+                System.err.println("[getFrozenPaths] .jsRepohashed.json 파싱 오류 - 무시됨");
+                e.printStackTrace();
+                return frozenPaths;
+            }
             System.out.println(json);
             String prefix = "repos/" + repoOwner + "/" + repoName + "/";
 
@@ -616,17 +629,18 @@ public class ClientSock {
     
     public static void getHash(String repoName, String owner){
         sendCommand("/hashJson " + repoName + " " + owner);
-        String line = receiveResponse();
-        System.out.println("getHash: " + line);
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
             StringBuilder jsonBuilder = new StringBuilder();
             String hashLine = "";
-            if (line.startsWith("/#/pull_hashes_SOL")) {
-                do {
-                    hashLine += reader.readLine();
-                    if (hashLine == null || hashLine.contains("/#/pull_hashes_EOL")) break;
-                } while (true);
+            while(true){
+                hashLine+=reader.readLine();
+                if(hashLine.endsWith("/#/pull_hashes_EOL")) break;
+            }
+            String solMarker = "/#/pull_hashes_SOL";
+            int solIndex = hashLine.indexOf(solMarker);
+            if (solIndex != -1) {
+                hashLine = hashLine.substring(solIndex + solMarker.length()); // SOL 제거
             }
             String eolMarker = "/#/pull_hashes_EOL";
             int eolIndex = hashLine.indexOf(eolMarker);
