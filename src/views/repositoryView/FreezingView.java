@@ -1,44 +1,28 @@
 package views.repositoryView;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Set;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import javax.swing.*;
+import org.json.*;
 
 import models.Repository;
-import utils.ClientSock;
-import utils.Style;
+import utils.*;
 
 public class FreezingView extends JFrame {
     private DefaultListModel<String> frozenFileModel;
     private JList<String> frozenFileList;
     private JButton addButton;
     private String prefix;
-    
-    public FreezingView(Set<String> frozenFiles, Repository repository,String curUser) {
+    private IconConv ic = new IconConv();
+
+    public FreezingView(Set<String> frozenFiles, Repository repository, String curUser) {
         this.prefix = "repos/" + repository.getUsername() + "/" + repository.getName() + "/";
         setTitle("프리징된 파일 목록");
         setSize(400, 300);
+        setMinimumSize(new Dimension(400, 300));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
@@ -50,7 +34,7 @@ public class FreezingView extends JFrame {
         frozenFileList.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(frozenFileList);
 
-        addButton = Style.createStyledButton("파일추가", Style.PRIMARY_COLOR, Color.WHITE);
+        addButton = ic.createImageButton("src/icons/freezeadd.png", Style.PRIMARY_COLOR, 30, 30, "", "프리징 파일 추가");
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.add(addButton);
@@ -64,7 +48,8 @@ public class FreezingView extends JFrame {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = chooser.getSelectedFile();
                 String basePath = ClientSock.getPath(curUser, repository.getName());
-                Path relativePath = Paths.get(basePath).toAbsolutePath().relativize(selectedFile.toPath().toAbsolutePath());
+                Path relativePath = Paths.get(basePath).toAbsolutePath()
+                        .relativize(selectedFile.toPath().toAbsolutePath());
                 String relPath = relativePath.toString().replace("\\", "/");
                 String fullPath = prefix + relPath;
                 String absPath = selectedFile.getAbsolutePath();
@@ -103,12 +88,14 @@ public class FreezingView extends JFrame {
         frozenFileList.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) showPopup(e);
+                if (e.isPopupTrigger())
+                    showPopup(e);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) showPopup(e);
+                if (e.isPopupTrigger())
+                    showPopup(e);
             }
 
             private void showPopup(MouseEvent e) {
@@ -123,10 +110,10 @@ public class FreezingView extends JFrame {
         // 메뉴 클릭 시 프리징 해제
         unfreezeItem.addActionListener(e -> {
             int selected = frozenFileList.getSelectedIndex();
-            String localPath=ClientSock.getPath(curUser, repository.getName());
+            String localPath = ClientSock.getPath(curUser, repository.getName());
             if (selected != -1) {
                 String relPath = frozenFileModel.getElementAt(selected);
-                relPath=relPath.substring(localPath.length()+File.pathSeparator.length());
+                relPath = relPath.substring(localPath.length() + File.pathSeparator.length());
                 String fullPath = prefix + relPath.replace(File.separator, "/");
                 frozenFileModel.removeElementAt(selected);
                 System.out.println("[프리징 해제됨] " + fullPath);
@@ -149,10 +136,6 @@ public class FreezingView extends JFrame {
                 }
             }
         });
-    }
-
-    public JButton getAddButton() {
-        return addButton;
     }
 
     public DefaultListModel<String> getFrozenFileModel() {

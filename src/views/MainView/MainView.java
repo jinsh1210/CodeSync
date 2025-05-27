@@ -77,40 +77,20 @@ public class MainView extends JFrame {
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
-		JPanel mainPanel = new JPanel(new BorderLayout(10, 10)) {
-			@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				Graphics2D g2 = (Graphics2D) g;
-				GradientPaint gra = new GradientPaint(0, 0, new Color(35, 116, 225),
-						getWidth(), getHeight(), new Color(255, 255, 225));
-				g2.setPaint(gra);
-				g2.fillRect(0, 0, getWidth(), getHeight());
-			}
-		};
+		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 		mainPanel.setBackground(Style.BACKGROUND_COLOR);
 
 		JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
 		titleLabel.setFont(Style.TITLE_FONT);
-		titleLabel.setForeground(Style.BACKGROUND_COLOR);
+		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
 		JPanel topPanel = new JPanel(new BorderLayout());
-		topPanel.setBackground(Style.PRIMARY_COLOR);
+		topPanel.setBackground(Style.BACKGROUND_COLOR);
 		topPanel.add(titleLabel, BorderLayout.WEST);
 
 		// 리스트 상단 패널
-		JPanel topRepoPanel = new JPanel(new BorderLayout()) {
-			@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				Graphics2D g2 = (Graphics2D) g;
-				GradientPaint gra = new GradientPaint(0, 0, new Color(35, 116, 225),
-						getWidth(), getHeight(), new Color(255, 255, 225));
-				g2.setPaint(gra);
-				g2.fillRect(0, 0, getWidth(), getHeight());
-			}
-		};
+		JPanel topRepoPanel = new JPanel(new BorderLayout());
 		topRepoPanel.setBackground(Style.BACKGROUND_COLOR);
 		topRepoPanel.add(refreshIconButton, BorderLayout.EAST);
 
@@ -209,7 +189,7 @@ public class MainView extends JFrame {
 								popupMenu.show(repositoryList, e.getX(), e.getY());
 							}
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-							toggleSplitPaneDivider(splitPane, 200);
+							toggleSplitPaneDivider(splitPane, 300);
 							timer = mainFunc.openRepositoryPanel(listModel.get(index));
 						}
 					}
@@ -231,7 +211,12 @@ public class MainView extends JFrame {
 		// 저장소 상세 정보 패널 생성
 		detailPanel.setBackground(Style.BACKGROUND_COLOR);
 		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
-		detailPanel.setBorder(BorderFactory.createTitledBorder("저장소 정보"));
+		detailPanel.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createLineBorder(Color.GRAY),
+				"저장소 정보",
+				0, 0,
+				Style.TITLE_FONT.deriveFont(20f),
+				Style.BASIC_TEXT_COLOR));
 		detailPanel.setFont(Style.LABEL_FONT.deriveFont(14f));
 
 		// 저장소 정보
@@ -276,7 +261,12 @@ public class MainView extends JFrame {
 			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
 				if (detailPanel.getComponentCount() == 0) {
 					detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
-					detailPanel.setBorder(BorderFactory.createTitledBorder("저장소 정보"));
+					detailPanel.setBorder(BorderFactory.createTitledBorder(
+							BorderFactory.createLineBorder(Color.GRAY),
+							"저장소 정보",
+							0, 0,
+							Style.TITLE_FONT.deriveFont(20f),
+							Style.BASIC_TEXT_COLOR));
 					detailPanel.setBackground(Style.BACKGROUND_COLOR);
 
 					nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
@@ -285,11 +275,11 @@ public class MainView extends JFrame {
 					username.setFont(Style.LABEL_FONT.deriveFont(13f));
 					sizeLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
 
-					nameLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-					descLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-					visibilityLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
-					username.setForeground(Style.TEXT_SECONDARY_COLOR);
-					sizeLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+					nameLabel.setForeground(Style.BASIC_TEXT_COLOR);
+					descLabel.setForeground(Style.BASIC_TEXT_COLOR);
+					visibilityLabel.setForeground(Style.BASIC_TEXT_COLOR);
+					username.setForeground(Style.BASIC_TEXT_COLOR);
+					sizeLabel.setForeground(Style.BASIC_TEXT_COLOR);
 
 					detailPanel.add(nameLabel);
 					detailPanel.add(Box.createVerticalStrut(5));
@@ -364,15 +354,20 @@ public class MainView extends JFrame {
 		}
 	}
 
+	private Animator animator = null;
+
 	private void toggleSplitPaneDivider(JSplitPane splitPane, int targetLocation) {
+
+		if (animator != null && animator.isRunning()) {
+			animator.stop(); // 이전 애니메이션 중단
+		}
 		int start = splitPane.getDividerLocation();
 		int end = targetLocation;
 
-		// TODO: 부드럽게 해야함
-		Animator animator = new Animator(1000);
+		animator = new Animator(1100);
 		animator.setAcceleration(0.5f);
 		animator.setDeceleration(0.5f);
-		animator.setResolution(0); // 부드러운 애니메이션
+		animator.setResolution(20); // 부드러운 애니메이션
 		animator.addTarget(new TimingTargetAdapter() {
 			@Override
 			public void timingEvent(float fraction) {
