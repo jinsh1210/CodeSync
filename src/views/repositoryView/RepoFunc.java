@@ -1,21 +1,16 @@
 package views.repositoryView;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -34,7 +29,6 @@ import lombok.Setter;
 import models.Repository;
 import models.User;
 import utils.ClientSock;
-import utils.Style;
 
 @Getter
 @Setter
