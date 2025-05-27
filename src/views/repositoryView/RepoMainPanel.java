@@ -42,7 +42,6 @@ public class RepoMainPanel extends JPanel {
         this.collaboratorListView = new ColView(repository);
         repoFunc.loadFiles(targetUser);
 
-        utils.DarkModeManager.apply(this);
     }
 
     private void initializeUI() {
@@ -141,17 +140,10 @@ public class RepoMainPanel extends JPanel {
                 Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
                 Object obj = node.getUserObject();
-                if (Style.isDarkMode) {
-                    setForeground(Style.DARK_TEXT_COLOR);
-                    setBackgroundNonSelectionColor(Style.DARK_BACKGROUND_COLOR);
-                    setBackgroundSelectionColor(new Color(70, 70, 70));
-                    setOpaque(false);
-                } else {
-                    setForeground(Color.BLACK);
-                    setBackgroundNonSelectionColor(Style.BACKGROUND_COLOR);
-                    setBackgroundSelectionColor(UIManager.getColor("Tree.selectionBackground"));
-                    setOpaque(false);
-                }
+                setForeground(Color.BLACK);
+                setBackgroundNonSelectionColor(Style.BACKGROUND_COLOR);
+                setBackgroundSelectionColor(UIManager.getColor("Tree.selectionBackground"));
+                setOpaque(false);
                 if (obj instanceof String && "[비어 있음]".equals(obj)) {
                     setIcon(null);
                 }

@@ -13,8 +13,6 @@ public class Style {
 	public static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
 	public static final Color FIELD_BACKGROUND = Color.WHITE;
 
-	public static boolean isDarkMode = false;
-
 	public static final Color DARK_PRIMARY_COLOR = new Color(44, 62, 80);
 	public static final Color DARK_BACKGROUND_COLOR = new Color(34, 34, 34);
 	public static final Color DARK_FIELD_BACKGROUND = new Color(64, 64, 64);
@@ -36,8 +34,8 @@ public class Style {
 	public static JTextField createStyledTextField() {
 		JTextField field = new JTextField(20);
 		field.setFont(LABEL_FONT);
-		field.setBackground(isDarkMode ? DARK_FIELD_BACKGROUND : FIELD_BACKGROUND);
-		field.setForeground(isDarkMode ? DARK_TEXT_COLOR : Color.BLACK);
+		field.setBackground(FIELD_BACKGROUND);
+		field.setForeground(Color.BLACK);
 
 		int borderRadius = 15; // 둥근 정도 조절
 		Color borderColor = new Color(200, 200, 200);
@@ -52,8 +50,8 @@ public class Style {
 	public static JPasswordField createStyledPasswordField() {
 		JPasswordField field = new JPasswordField(20);
 		field.setFont(LABEL_FONT);
-		field.setBackground(isDarkMode ? DARK_FIELD_BACKGROUND : FIELD_BACKGROUND);
-		field.setForeground(isDarkMode ? DARK_TEXT_COLOR : Color.BLACK);
+		field.setBackground(FIELD_BACKGROUND);
+		field.setForeground(Color.BLACK);
 
 		int borderRadius = 15;
 		Color borderColor = new Color(200, 200, 200);
@@ -71,30 +69,19 @@ public class Style {
 		button.setFont(BUTTON_FONT);
 		button.setPreferredSize(new Dimension(130, 40));
 
+		// 마우스 오버 효과
 		button.addMouseListener(new java.awt.event.MouseAdapter() {
 			@Override
 			public void mouseEntered(java.awt.event.MouseEvent e) {
-				if (DarkModeManager.isDarkMode()) {
-					button.setBackground(Style.DARK_BUTTON_COLOR.darker());
-				} else {
-					button.setBackground(bgColor.darker());
-				}
+				button.setBackground(bgColor.darker());
 			}
 
 			@Override
 			public void mouseExited(java.awt.event.MouseEvent e) {
-				if (DarkModeManager.isDarkMode()) {
-					button.setBackground(Style.DARK_BUTTON_COLOR);
-				} else {
-					button.setBackground(bgColor);
-				}
+				button.setBackground(bgColor);
 			}
 		});
 
 		return button;
-	}
-
-	public static void toggleDarkMode() {
-		isDarkMode = !isDarkMode;
 	}
 }

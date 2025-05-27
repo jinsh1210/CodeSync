@@ -1,4 +1,4 @@
-package views;
+package views.MainView;
 
 import javax.swing.*;
 
@@ -13,7 +13,6 @@ import views.repositoryView.RepoMainPanel;
 import utils.Style;
 import models.Repository;
 import utils.ClientSock;
-import utils.DarkModeManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -106,16 +105,6 @@ public class MainView extends JFrame {
 		// 이 밑으로 메뉴바 오른쪽 정렬
 		menuBar.add(Box.createHorizontalGlue());
 
-		// 다크 모드 토글 버튼 생성
-		JToggleButton darkModeToggle = new JToggleButton("");
-		ImageIcon moonIcon = new ImageIcon("src/icons/moon.png");
-		Image scaledMoon = moonIcon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
-		darkModeToggle.setIcon(new ImageIcon(scaledMoon));
-		darkModeToggle.setFocusable(false);
-		darkModeToggle.setSelected(Style.isDarkMode); // 현재 설정 상태 반영
-		darkModeToggle.setBackground(new Color(230, 230, 230));
-		darkModeToggle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
-
 		// 메뉴 기능
 		createRepoItem.addActionListener(e -> showCreateRepositoryDialog());
 		searchReposItem.addActionListener(e -> searchRepositories());
@@ -135,7 +124,6 @@ public class MainView extends JFrame {
 			});
 		});
 
-		menuBar.add(darkModeToggle);
 		setJMenuBar(menuBar);
 
 		// 메뉴바 전체 크기 조정
@@ -149,10 +137,6 @@ public class MainView extends JFrame {
 		createRepoItem.setFont(Style.MENU_FONT);
 		searchReposItem.setFont(Style.MENU_FONT);
 		logoutItem.setFont(Style.MENU_FONT);
-
-		// 다크모드 토글 버튼 크기 키우기
-		darkModeToggle.setFont(Style.BUTTON_FONT);
-		darkModeToggle.setPreferredSize(new Dimension(50, 36));
 
 		listModel = new DefaultListModel<>();
 		repositoryList = new JList<>(listModel);
@@ -419,12 +403,6 @@ public class MainView extends JFrame {
 					description = description.substring(0, 5) + "...";
 				}
 				setText("저장소: " + repo.getName() + " | " + description);
-
-				// 다크 모드일 경우 색상 적용
-				if (Style.isDarkMode) {
-					setBackground(isSelected ? new Color(60, 60, 60) : Style.DARK_BACKGROUND_COLOR);
-					setForeground(Style.DARK_TEXT_COLOR);
-				}
 			}
 			return this;
 		}

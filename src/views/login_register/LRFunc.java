@@ -5,7 +5,7 @@ import javax.swing.SwingUtilities;
 
 import models.User;
 import utils.ClientSock;
-import views.MainView;
+import views.MainView.MainView;
 
 public class LRFunc {
 

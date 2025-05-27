@@ -34,7 +34,6 @@ import lombok.Setter;
 import models.Repository;
 import models.User;
 import utils.ClientSock;
-import utils.DarkModeManager;
 import utils.Style;
 
 @Getter
@@ -65,32 +64,6 @@ public class RepoFunc {
 		this.refreshTimer = refreshTimer;
 		this.SavedPath = ClientSock.getPath(currentUser.getUsername(), repository.getName());
 		System.out.println("초기 로컬 저장소 경로: " + SavedPath);
-	}
-
-	public void applyComponentDarkMode(Component comp, Color bg, Color fg) {
-		if (comp instanceof JPanel || comp instanceof JScrollPane || comp instanceof JTree) {
-			comp.setBackground(bg);
-			comp.setForeground(fg);
-		}
-		if (comp instanceof JLabel) {
-			comp.setForeground(fg);
-		} else if (comp instanceof JButton) {
-			JButton button = (JButton) comp;
-			button.setBackground(Style.isDarkMode ? Style.DARK_FIELD_BACKGROUND : Style.PRIMARY_COLOR);
-			button.setForeground(Style.isDarkMode ? Style.DARK_TEXT_COLOR : Color.WHITE);
-		} else if (comp instanceof JScrollPane) {
-			JScrollPane scroll = (JScrollPane) comp;
-			scroll.getViewport().setBackground(bg);
-			Component view = scroll.getViewport().getView();
-			if (view != null) {
-				applyComponentDarkMode(view, bg, fg);
-			}
-		}
-		if (comp instanceof Container) {
-			for (Component child : ((Container) comp).getComponents()) {
-				applyComponentDarkMode(child, bg, fg);
-			}
-		}
 	}
 
 	public void loadFiles(String userName) {
@@ -136,22 +109,14 @@ public class RepoFunc {
 						label.setIcon(null);
 					}
 					label.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 4));
-					if (Style.isDarkMode) {
-						label.setBackground(sel ? new Color(70, 70, 70) : Style.DARK_BACKGROUND_COLOR);
-						label.setForeground(Style.DARK_TEXT_COLOR);
-					} else {
-						label.setBackground(sel ? getBackgroundSelectionColor() : getBackgroundNonSelectionColor());
-						label.setForeground(sel ? getTextSelectionColor() : getTextNonSelectionColor());
-					}
+					label.setBackground(sel ? getBackgroundSelectionColor() : getBackgroundNonSelectionColor());
+					label.setForeground(sel ? getTextSelectionColor() : getTextNonSelectionColor());
 					label.setOpaque(true);
 					return label;
 				}
 			};
 			renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon"));
 			fileTree.setCellRenderer(renderer);
-
-			// ⬇ 다크모드 적용 추가
-			DarkModeManager.apply(fileTree);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -329,7 +294,7 @@ public class RepoFunc {
 			try {
 				SwingUtilities.invokeLater(() -> progressBar.setVisible(true));
 				refreshTimer.stop();
-				ClientSock.pull(repository.getName(), "", targetFolder, repository.getUsername(), progressBar,array);
+				ClientSock.pull(repository.getName(), "", targetFolder, repository.getUsername(), progressBar, array);
 				SwingUtilities.invokeLater(() -> {
 					progressBar.setVisible(false);
 				});
@@ -394,23 +359,23 @@ public class RepoFunc {
 				ClientSock.setPath(currentUser.getUsername(), repository.getName(), SavedPath);
 				System.out.println("저장된 경로: " + SavedPath);
 				int option = JOptionPane.showOptionDialog(null,
-							"로컬 저장소가 지정되었습니다.\n어떤 작업을 수행하시겠습니까?", "병합 충돌",
-							JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-							new String[] { "풀", "푸시", "하지 않음" }, "풀");
+						"로컬 저장소가 지정되었습니다.\n어떤 작업을 수행하시겠습니까?", "병합 충돌",
+						JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+						new String[] { "풀", "푸시", "하지 않음" }, "풀");
 
-					switch (option) {
-						case 0: // 풀
-							handleDownload();
-							break;
-						case 1: // 푸시
-							handleUpload();
-							break;
-						case 2: // 취소
-							// 아무것도 하지 않음
-							break;
-						default:
-							break;
-					}
+				switch (option) {
+					case 0: // 풀
+						handleDownload();
+						break;
+					case 1: // 푸시
+						handleUpload();
+						break;
+					case 2: // 취소
+						// 아무것도 하지 않음
+						break;
+					default:
+						break;
+				}
 			} else {
 				JOptionPane.showMessageDialog(null, "유효한 폴더를 선택해주세요.");
 			}

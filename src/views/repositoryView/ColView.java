@@ -25,7 +25,6 @@ import org.json.JSONObject;
 import models.Repository;
 import utils.ClientSock;
 import utils.Style;
-import utils.DarkModeManager;
 
 public class ColView extends JDialog {
 
@@ -141,10 +140,6 @@ public class ColView extends JDialog {
             okPanel.add(okButton);
             dialog.getContentPane().add(okPanel, BorderLayout.SOUTH);
 
-            // ✅ DarkModeManager 적용
-            DarkModeManager.apply(panel);
-            DarkModeManager.apply(dialog.getContentPane());
-
             dialog.pack();
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
@@ -181,9 +176,6 @@ public class ColView extends JDialog {
 
         JDialog dialog = new JDialog((JFrame) null, "입력", true);
         dialog.setContentPane(panel);
-
-        // ✅ DarkModeManager 적용
-        DarkModeManager.apply(dialog.getContentPane());
 
         dialog.pack();
         dialog.setLocationRelativeTo(null);
