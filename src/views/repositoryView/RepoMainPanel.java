@@ -24,7 +24,7 @@ public class RepoMainPanel extends JPanel {
     private DefaultTreeModel treeModel;
     private JProgressBar progressBar;
 
-    private JButton uploadButton, downloadButton, deleteButton, localButton;
+    private JButton uploadButton, downloadButton, deleteButton, localButton, freezingButton;
 
     private Timer refreshTimer;
 
@@ -100,6 +100,7 @@ public class RepoMainPanel extends JPanel {
         // 업로드/다운로드/삭제 버튼 생성 및 색상 설정
         uploadButton = Style.createStyledButton("푸쉬", Style.PRIMARY_COLOR, Color.WHITE);
         downloadButton = Style.createStyledButton("풀", Style.PRIMARY_COLOR, Color.WHITE);
+        freezingButton = Style.createStyledButton("파일프리징", Style.PRIMARY_COLOR, Color.WHITE);
         localButton = Style.createStyledButton("로컬 저장소", Style.PRIMARY_COLOR, Color.WHITE);
         deleteButton = Style.createStyledButton("삭제", new Color(231, 76, 60), Color.WHITE);
 
@@ -108,6 +109,7 @@ public class RepoMainPanel extends JPanel {
         buttonPanel.setBackground(Style.BACKGROUND_COLOR);
         buttonPanel.add(uploadButton);
         buttonPanel.add(downloadButton);
+        buttonPanel.add(freezingButton);
         buttonPanel.add(localButton);
         buttonPanel.add(deleteButton);
 
