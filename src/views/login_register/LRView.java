@@ -31,7 +31,7 @@ public class LRView extends javax.swing.JLayeredPane {
         login.setVisible(true);
     }
 
-    //로그인 | 회원가입 화면
+    // 로그인 | 회원가입 화면
     private void initRegister() {
         register.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]10[]10[]10[]10[]10[]30[]push"));
         // 제목
@@ -100,7 +100,7 @@ public class LRView extends javax.swing.JLayeredPane {
         login.add(loginButton, "w 30%, h 40");
     }
 
-    //애니메이션 작동 시 로그인or회원가입 전환 로직
+    // 애니메이션 작동 시 로그인or회원가입 전환 로직
     public void showRegister(boolean show) {
         if (show) {
             register.setVisible(false);
@@ -153,6 +153,23 @@ public class LRView extends javax.swing.JLayeredPane {
                         .addGap(0, 324, Short.MAX_VALUE));
 
         add(register, "card2");
+        login.setOpaque(false);
+        register.setOpaque(false);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g); // 꼭 호출해야 기본 그리기 유지
+        Graphics2D g2 = (Graphics2D) g.create();
+        int width = getWidth();
+        int height = getHeight();
+        GradientPaint gradient = new GradientPaint(
+                0, 0, new Color(255, 255, 240), // 시작 색
+                width, height, new Color(240, 240, 240) // 끝 색
+        );
+        g2.setPaint(gradient);
+        g2.fillRect(0, 0, width, height);
+        g2.dispose();
     }
 
     private javax.swing.JPanel jPanel2;
