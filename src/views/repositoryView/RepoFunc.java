@@ -276,6 +276,7 @@ public class RepoFunc {
 				} else
 					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
 							repository.getUsername(), progressBar, array);
+					ClientSock.getHash(repository.getName(), repository.getUsername());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(null, "업로드 중 오류 발생");

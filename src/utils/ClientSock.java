@@ -37,7 +37,7 @@ public class ClientSock {
     private static final String CONFIG_PATH = "config.json";
     private static JSONObject config;
 
-    private static Socket socket;
+    public static Socket socket;
     private static PrintWriter out;
     private static BufferedReader in;
     private static InputStream inputStream;
@@ -185,7 +185,7 @@ public class ClientSock {
             }
         }
     }
-
+    
     public static void pull(String repoName, String relPath, File targetFolder, String Owner, JProgressBar bar, JSONArray pathAll) {
         try {
             // 우선 서버에 요청 보냄
@@ -224,8 +224,8 @@ public class ClientSock {
                         serverPaths.add(pathAll.getJSONObject(i).getString("path"));
                     }
                     try {
-                        java.nio.file.Files.walk(localRoot.toPath())
-                            .map(java.nio.file.Path::toFile)
+                        Files.walk(localRoot.toPath())
+                            .map(Path::toFile)
                             .filter(f -> {
                                 if (f.getName().equals(".jsRepohashed.json")) return false;
                                 String rel = localRoot.toPath().relativize(f.toPath()).toString().replace("\\", "/");
@@ -258,8 +258,6 @@ public class ClientSock {
             }
             try {
                 JSONArray serverHashList = new JSONArray(jsonBuilder.toString());
-                System.out.println("hashList: " + serverHashList);
-
                 // 기존 해시 목록 불러오기
                 String localRepoPath = getPath(currentUser, repoName);
                 File hashFile = new File(localRepoPath, ".jsRepohashed.json");
@@ -353,17 +351,18 @@ public class ClientSock {
             relativePath = relativePath.substring(repository.length() + 1);
         } else if (relativePath.equals(repository)) {
             relativePath = "";  // repoName만 있을 경우 완전 제거
-        } 
+        }
         // 빈 폴더면 mkdir 명령어 전송
         if (isEmpty) {
-
             sendCommand("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);
-            
             System.out.println("owner: " + Owner);
             System.out.println("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);// 디버그
             String response = receiveResponse();
             return;
         }
+
+        // --- Get frozenPaths before file processing loop ---
+        Set<String> frozenPaths = getFrozenPaths(currentUser, repository, Owner);
 
         // 폴더 안에 내용이 있을 경우
         for (File file : contents) {
@@ -371,7 +370,12 @@ public class ClientSock {
             if (file.getName().equals(".jsRepohashed.json")) continue;
             if(file.getName().equals(".DS_Store")) continue;
             if (file.isFile()) {
-                String filePath = relativePath.equals("")? file.getName():relativePath + "/" + file.getName();
+                String filePath = relativePath.equals("") ? file.getName() : relativePath + "/" + file.getName();
+                File absFile = new File(getPath(currentUser, repository), filePath);
+                if (frozenPaths.contains(absFile.getAbsolutePath())) {
+                    System.out.println("[프리징됨 - push 건너뜀] " + absFile.getAbsolutePath());
+                    continue;
+                }
                 push(file, repository, userId, filePath, Owner, bar);
             } else if (file.isDirectory()) {
                 push(file, relativePath, repository, userId, Owner, bar, pathall); // 재귀 호출
@@ -481,6 +485,7 @@ public class ClientSock {
                 System.err.println("[해시 스냅샷 저장 실패: 로컬 경로를 찾을 수 없음]");
             }
         } catch (Exception e) {
+            System.out.println("해시스냅샷의 알 수 없는 오류");
             e.printStackTrace();
         }
     }
@@ -585,6 +590,36 @@ public class ClientSock {
             e.printStackTrace();
         }
         return frozenPaths;
+    }
+    
+    public static void getHash(String repoName, String owner){
+        sendCommand("/hashJson "+repoName+" "+owner);
+        String line=receiveResponse();
+        System.out.println("getHash: "+line);
+        try{
+            BufferedReader reader=new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            StringBuilder jsonBuilder = new StringBuilder();
+            String hashLine = "";
+            if (line.startsWith("/#/pull_hashes_SOL")) {
+                System.out.println(hashLine);
+                do {
+                    hashLine += reader.readLine();
+                    if (hashLine == null || hashLine.endsWith("/#/pull_hashes_EOL\n")) break;
+                } while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
+            }
+            String eolMarker = "/#/pull_hashes_EOL";
+            int eolIndex = hashLine.indexOf(eolMarker);
+            if (eolIndex != -1) {
+                hashLine = hashLine.substring(0, eolIndex); // EOL 제거
+            }
+            jsonBuilder.append(hashLine);
+            System.out.println("Header: "+jsonBuilder);
+            JSONArray serverHashList = new JSONArray(jsonBuilder.toString());
+            saveHashSnapshot(currentUser, repoName, serverHashList);
+        } catch (Exception ex) {
+            System.out.println("클라이언트의 알 수 없는 오류");
+            ex.printStackTrace();
+        }
     }
 
 }
