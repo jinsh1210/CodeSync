@@ -116,7 +116,10 @@ public class MainView extends JFrame {
 		darkModeToggle.setBackground(new Color(230, 230, 230));
 		darkModeToggle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
+		// 메뉴 기능
 		createRepoItem.addActionListener(e -> showCreateRepositoryDialog());
+		searchReposItem.addActionListener(e -> searchRepositories());
+		logoutItem.addActionListener(e -> handleLogout());
 
 		refreshIconButton.addActionListener(e -> {
 			toggleSplitPaneDivider(splitPane, 800);
