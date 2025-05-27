@@ -30,11 +30,12 @@ public class ColView extends JDialog {
     private Repository repository;
     private IconConv ic = new IconConv();
 
-    public ColView(Repository repository){
+    public ColView(Repository repository) {
         this.repository = repository;
     }
 
     public void handleViewCollaborators() {
+        JDialog dialog = new JDialog(this, "콜라보레이터 목록", true);
         try {
             ClientSock.sendCommand("/list_collaborators " + repository.getName());
 
@@ -43,7 +44,8 @@ public class ColView extends JDialog {
 
             while (true) {
                 String line = ClientSock.receiveResponse();
-                if (line == null) break;
+                if (line == null)
+                    break;
 
                 if (line.contains("/#/collaborator_list_SOL")) {
                     started = true;
@@ -81,7 +83,7 @@ public class ColView extends JDialog {
                 if (index >= 0) {
                     String selected = listModel.get(index);
                     String targetId = selected.substring(selected.indexOf(" ") + 1);
-                    int confirm = JOptionPane.showConfirmDialog(null,
+                    int confirm = JOptionPane.showConfirmDialog(dialog,
                             "[" + targetId + "] 사용자를 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         try {
@@ -90,11 +92,11 @@ public class ColView extends JDialog {
                             if (res.startsWith("/#/remove_collaborator")) {
                                 listModel.remove(index);
                             } else {
-                                JOptionPane.showMessageDialog(null, "❌ 삭제 실패: " + res.replace("/#/error", "").trim());
+                                JOptionPane.showMessageDialog(dialog, "❌ 삭제 실패: " + res.replace("/#/error", "").trim());
                             }
                         } catch (Exception ex) {
                             ex.printStackTrace();
-                            JOptionPane.showMessageDialog(null, "서버 오류");
+                            JOptionPane.showMessageDialog(dialog, "서버 오류");
                         }
                     }
                 }
@@ -104,7 +106,7 @@ public class ColView extends JDialog {
 
             JButton addButton = ic.createImageButton("src/icons/coladd.png", Style.PRIMARY_COLOR, 40, 40, "", "콜라보 추가");
             addButton.addActionListener(e -> {
-                String newUser = showCustomInputDialog("추가할 사용자 아이디 입력:");
+                String newUser = showCustomInputDialog("추가할 사용자 아이디 입력:",dialog);
                 if (newUser != null && !newUser.trim().isEmpty()) {
                     try {
                         ClientSock.sendCommand("/add_collaborator " + repository.getName() + " " + newUser.trim());
@@ -112,11 +114,12 @@ public class ColView extends JDialog {
                         if (response.startsWith("/#/add_collaborator")) {
                             listModel.addElement((listModel.size() + 1) + ". " + newUser.trim());
                         } else {
-                            JOptionPane.showMessageDialog(null, "❌ 추가 실패: " + response.replace("/#/error", "").trim());
+                            JOptionPane.showMessageDialog(dialog,
+                                    "❌ 추가 실패: " + response.replace("/#/error", "").trim());
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "서버 오류");
+                        JOptionPane.showMessageDialog(dialog, "서버 오류");
                     }
                 }
             });
@@ -128,7 +131,6 @@ public class ColView extends JDialog {
             controlPanel.add(addButton);
             panel.add(controlPanel, BorderLayout.SOUTH);
 
-            JDialog dialog = new JDialog(this, "콜라보레이터 목록", true);
             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             dialog.getContentPane().add(panel, BorderLayout.CENTER);
 
@@ -149,7 +151,7 @@ public class ColView extends JDialog {
         }
     }
 
-    private String showCustomInputDialog(String message) {
+    private String showCustomInputDialog(String message, JDialog parentDialog) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         JLabel label = new JLabel(message);
         label.setFont(Style.LABEL_FONT);
@@ -158,8 +160,7 @@ public class ColView extends JDialog {
         JTextField textField = Style.createStyledTextField();
         textField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)
-        ));
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)));
 
         JPanel marginPanel = new JPanel(new BorderLayout());
         marginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -167,13 +168,13 @@ public class ColView extends JDialog {
         panel.add(marginPanel, BorderLayout.CENTER);
 
         JButton okButton = Style.createStyledButton("확인", Style.PRIMARY_COLOR, Color.WHITE);
-        JButton cancelButton = Style.createStyledButton("취소", new Color(192, 57, 43), Color.WHITE);
+        JButton cancelButton = Style.createStyledButton("취소", Style.WARNING_COLOR, Color.WHITE);
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        JDialog dialog = new JDialog((JFrame) null, "입력", true);
+        JDialog dialog = new JDialog(parentDialog, "입력", true);
         dialog.setContentPane(panel);
 
         dialog.pack();

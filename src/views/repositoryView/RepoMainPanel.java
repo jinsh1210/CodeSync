@@ -119,7 +119,7 @@ public class RepoMainPanel extends JPanel {
         freezingButton = ic.createImageButton("src/icons/freeze.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,"파일프리징");
         localButton = ic.createImageButton("src/icons/local.png", Style.PRIMARY_COLOR, btn_width - 10, btn_height - 10,
                 null,"로컬저장소 설정");
-        deleteButton = ic.createImageButton("src/icons/delete.png", Style.WARNING_COLOR, btn_width - 5, btn_height - 15,
+        deleteButton = ic.createImageButton("src/icons/delete.png", Style.WARNING_COLOR, btn_width - 5, btn_height - 10,
                 null,"삭제");
 
         // 하단 버튼 영역 패널 구성
@@ -146,8 +146,8 @@ public class RepoMainPanel extends JPanel {
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
         renderer.setOpenIcon(UIManager.getIcon("FileView.directoryIcon"));
         renderer.setClosedIcon(UIManager.getIcon("FileView.directoryIcon"));
-        renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon")); // ✅ 핵심
-        fileTree.setCellRenderer(renderer); // ✅ 꼭 호출
+        renderer.setLeafIcon(UIManager.getIcon("FileView.fileIcon"));
+        fileTree.setCellRenderer(renderer);
 
         fileTree.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         fileTree.setRootVisible(true);
