@@ -2,6 +2,12 @@ package views.repositoryView;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -288,6 +294,21 @@ public class RepoFunc {
 			}
 		}).start();
 	}
+	private String computeFileHash(Path path) throws IOException, NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		try (InputStream is = Files.newInputStream(path)) {
+			byte[] buffer = new byte[8192];
+			int read;
+			while ((read = is.read(buffer)) != -1) {
+				digest.update(buffer, 0, read);
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+		for (byte b : digest.digest()) {
+			sb.append(String.format("%02x", b));
+		}
+		return sb.toString();
+	}
 
 	public void handleDownload() {
 		if (SavedPath == null || SavedPath.isEmpty()) {
@@ -295,10 +316,61 @@ public class RepoFunc {
 			return;
 		}
 		File targetFolder = new File(SavedPath);
+
+		// 병합 충돌 감지
+		try {
+			File hashFile = new File(ClientSock.getPath(currentUser.getUsername(), repository.getName()), ".jsRepohashed.json");
+			if (hashFile.exists()) {
+				System.out.println("json파일 감지함");
+				String jsonText = Files.readString(hashFile.toPath());
+				JSONArray hashArray = new JSONArray(jsonText);
+				List<String> conflictFiles = new ArrayList<>();
+
+				for (int i = 0; i < hashArray.length(); i++) {
+					JSONObject obj = hashArray.getJSONObject(i);
+					if (obj.optBoolean("freeze", false)) continue;
+
+					String serverPath = obj.getString("path");
+					// serverPath is like "repos/username/reponame/relative/path/to/file"
+					String basePrefix = "repos/" + repository.getUsername() + "/" + repository.getName() + "/";
+					if (!serverPath.startsWith(basePrefix)) continue;
+
+					String relativePath = serverPath.substring(basePrefix.length());
+					Path localPath = Path.of(SavedPath, relativePath).normalize();
+					File localFile = localPath.toFile();
+					if (!localFile.exists() || localFile.isDirectory()) continue;
+
+					String currentHash = computeFileHash(localFile.toPath());
+					String savedHash = obj.getString("hash");
+
+					if (!currentHash.equals(savedHash)) {
+						conflictFiles.add(relativePath);
+					}
+				}
+
+				if (!conflictFiles.isEmpty()) {
+					int option = JOptionPane.showConfirmDialog(null,
+							"수정된 파일이 감지되었습니다:\n" + String.join("\n", conflictFiles) +
+							"\n서버 파일로 덮어쓰시겠습니까?",
+							"병합 충돌 감지", JOptionPane.YES_NO_OPTION);
+					if (option != JOptionPane.YES_OPTION) {
+						return;
+					}
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			JOptionPane.showMessageDialog(null, "병합 충돌 검사 중 오류 발생");
+			return;
+		}
+
+		
+
 		new Thread(() -> {
 			try {
 				SwingUtilities.invokeLater(() -> progressBar.setVisible(true));
 				refreshTimer.stop();
+
 				ClientSock.pull(repository.getName(), "", targetFolder, repository.getUsername(), progressBar, array);
 				SwingUtilities.invokeLater(() -> {
 					progressBar.setVisible(false);
