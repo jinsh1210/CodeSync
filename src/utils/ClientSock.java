@@ -531,6 +531,7 @@ public class ClientSock {
                 }
             } else {
                 System.err.println("[클라이언트] 예기치 못한 응답: " + response);
+                return false;
             }
         } catch (Exception e) {
             System.err.println("[mergeCheck 예외]");

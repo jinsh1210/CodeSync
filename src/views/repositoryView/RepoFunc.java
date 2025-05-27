@@ -243,12 +243,14 @@ public class RepoFunc {
 
 					JSONArray errorArray = ClientSock.mergeFailed;
 					StringBuilder fileNames = new StringBuilder();
-					for (int i = 0; i < errorArray.length(); i++) {
-						String errorPath = errorArray.getString(i);
-						String fileName = errorPath.substring(errorPath.lastIndexOf("/") + 1);
-						fileNames.append(fileName);
-						if (i < errorArray.length() - 1) {
-							fileNames.append(", ");
+					if(errorArray!=null){
+						for (int i = 0; i < errorArray.length(); i++) {
+							String errorPath = errorArray.getString(i);
+							String fileName = errorPath.substring(errorPath.lastIndexOf("/") + 1);
+							fileNames.append(fileName);
+							if (i < errorArray.length() - 1) {
+								fileNames.append(", ");
+							}
 						}
 					}
 					int option = JOptionPane.showOptionDialog(null,
