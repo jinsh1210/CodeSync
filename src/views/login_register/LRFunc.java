@@ -60,6 +60,12 @@ public class LRFunc {
             if (response != null && response.startsWith("/#/info")) {
                 showSuccessDialog("회원가입이 완료되었습니다.");
                 lrView.showRegister(false);
+                ClientSock.setUser(username);
+                User user = new User();
+                user.setUsername(username);
+                SwingUtilities.getWindowAncestor(lrView).dispose();
+                new MainView(user).setVisible(true);
+
             } else if (response != null && response.startsWith("/#/error")) {
                 String msg = response.replace("/#/error", "").trim();
                 showErrorDialog("회원가입 실패: " + msg);
