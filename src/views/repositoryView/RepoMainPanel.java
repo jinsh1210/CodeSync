@@ -16,7 +16,7 @@ import models.User;
 public class RepoMainPanel extends JPanel {
     private Repository repository;
     private User currentUser;
-    private String targetUser;
+    
     private String lastSelectedPath = "";
 
     private JTree fileTree;
@@ -31,17 +31,16 @@ public class RepoMainPanel extends JPanel {
     private ColView collaboratorListView;
     private RepoFunc repoFunc;
 
-    public RepoMainPanel(Repository repository, User currentUser, String targetUser) {
+    public RepoMainPanel(Repository repository, User currentUser) {
         this.repository = repository;
         this.currentUser = currentUser;
-        this.targetUser = targetUser;
+        
 
         initializeUI();
 
         this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
         this.collaboratorListView = new ColView(repository);
-        repoFunc.loadFiles(targetUser);
-
+        repoFunc.loadFiles(repository.getUsername().equals(currentUser.getUsername())?null:repository.getUsername());
     }
 
     private void initializeUI() {
@@ -163,7 +162,7 @@ public class RepoMainPanel extends JPanel {
         deleteButton.addActionListener(e -> repoFunc.handleDelete());
         localButton.addActionListener(e -> repoFunc.handlesetLocalFolder());
 
-        refreshTimer = new Timer(3000, e -> repoFunc.loadFiles(targetUser));
+        refreshTimer = new Timer(3000, e -> repoFunc.loadFiles(repository.getUsername().equals(currentUser.getUsername())?null:repository.getUsername()));
         refreshTimer.start();
     }
 

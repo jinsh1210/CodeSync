@@ -369,8 +369,8 @@ public class MainView extends JFrame {
 				((RepoMainPanel) detailPanel.getComponent(0)).stopRefreshTimer();
 			}
 			detailPanel.removeAll();
-			String targetUser = repository.getVisibility().equals("private") ? null : repository.getUsername();
-			detailPanel.add(new views.repositoryView.RepoMainPanel(repository, currentUser, targetUser));
+			
+			detailPanel.add(new views.repositoryView.RepoMainPanel(repository, currentUser));
 			detailPanel.revalidate();
 			detailPanel.repaint();
 		} catch (Exception e) {

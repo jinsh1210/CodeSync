@@ -70,17 +70,22 @@ public class RepoFunc {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		rootNode.removeAllChildren();
 		try {
-			if (userName == null)
+			if (userName == null){
 				ClientSock.sendCommand("/repo_content " + repository.getName());
-			else
+				System.out.println("/repo_content " + repository.getName());
+			}else{
 				ClientSock.sendCommand("/repo_content " + userName + " " + repository.getName());
+				System.out.println("/repo_content " + userName + " " + repository.getName());
+			}
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
+				System.out.println(line);
 				if(line.contains("/#/repo_content_error 저장소가 존재하지 않습니다")){
 					JOptionPane.showMessageDialog(null, "저장소가 존재하지 않습니다.","에러",JOptionPane.ERROR_MESSAGE);
+					refreshTimer.stop();
 					return;
-				}else if(line.contains("/#/repo_content_error 접근 권한이 없습니다")) return;
+				}else if(line.contains("/#/repo_content_error 접근 권한이 없습니다")) {refreshTimer.stop(); return;}
 				if (line == null)
 					break;
 				response += line;
