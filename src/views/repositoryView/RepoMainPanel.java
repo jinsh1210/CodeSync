@@ -1,14 +1,36 @@
 package views.repositoryView;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.tree.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Image;
 
-import lombok.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
-import utils.Style;
+import lombok.Getter;
+import lombok.Setter;
 import models.Repository;
 import models.User;
+import utils.ClientSock;
+import utils.Style;
 
 @Getter
 @Setter
@@ -163,6 +185,7 @@ public class RepoMainPanel extends JPanel {
         downloadButton.addActionListener(e -> repoFunc.handleDownload());
         deleteButton.addActionListener(e -> repoFunc.handleDelete());
         localButton.addActionListener(e -> repoFunc.handlesetLocalFolder());
+        freezingButton.addActionListener(e-> new FreezingView(ClientSock.getFrozenPaths(currentUser.getUsername(), repository.getName(),repository.getUsername()),repository,currentUser.getUsername()).setVisible(true));
 
         refreshTimer = new Timer(3000, e -> repoFunc.loadFiles(repository.getUsername().equals(currentUser.getUsername())?null:repository.getUsername()));
         refreshTimer.start();

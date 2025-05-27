@@ -15,9 +15,12 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.swing.JProgressBar;
@@ -25,8 +28,6 @@ import javax.swing.SwingUtilities;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import models.FileInfo;
 
 public class ClientSock {
     private static final String SERVERIP = "sjc07250.iptime.org";
@@ -54,9 +55,7 @@ public class ClientSock {
                 try (FileWriter writer = new FileWriter(configFile)) {
                     writer.write("[]"); // 빈 JSON 배열로 초기화
                 }
-                System.out.println("[config.json] 설정 파일이 없어서 새로 생성했습니다.");
             } catch (IOException e) {
-                System.err.println("[config.json] 파일 생성 실패");
                 e.printStackTrace();
             }
         }
@@ -66,9 +65,7 @@ public class ClientSock {
             reader.read(buffer);
             // 기존 구조에 맞게, 배열을 감싸는 객체로 변환
             config = new JSONObject("{\"entries\":" + new String(buffer) + "}");
-            System.out.println("[config.json] 설정 파일 로드 완료");
         } catch (IOException e) {
-            System.err.println("[config.json] 로드 실패");
             e.printStackTrace();
         }
     }
@@ -122,8 +119,6 @@ public class ClientSock {
         if (!parent.exists())
             parent.mkdirs();
 
-        System.out.println("[파일 수신 시작]: " + filePath + " (" + size + " bytes)");
-
         bar.setVisible(true);
         SwingUtilities.invokeLater(() -> bar.setValue(0));
         try (FileOutputStream fileOut = new FileOutputStream(targetFile)) {
@@ -144,7 +139,6 @@ public class ClientSock {
         }
 
         SwingUtilities.invokeLater(() -> bar.setValue(100));
-        System.out.println("[파일 저장 완료]: " + targetFile.getPath());
     }
 
     private static void handleSingleFilePull(String header, File baseFolder, JProgressBar bar,String repoName) throws IOException {
@@ -201,23 +195,15 @@ public class ClientSock {
                 return;
             }
             System.out.println(line);
+            StringBuilder jsonBuilder = new StringBuilder();
+            String hashLine = "";
             if (line.startsWith("/#/pull_hashes_SOL")) {
-                StringBuilder jsonBuilder = new StringBuilder();
-                String hashLine = "";
                 System.out.println(hashLine);
                 do {
                     hashLine += reader.readLine();
                     if (hashLine == null || hashLine.endsWith("/#/pull_hashes_EOL\n")) break;
                     jsonBuilder.append(hashLine);
                 } while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
-                try {
-                    org.json.JSONArray hashList = new org.json.JSONArray(jsonBuilder.toString());
-                    System.out.println("hashList: " + hashList);
-                    saveHashSnapshot(currentUser, repoName, hashList);
-                } catch (Exception e) {
-                    System.err.println("[클라이언트] 해시 JSON 파싱 오류");
-                    e.printStackTrace();
-                }
                 // --- [로컬에만 있는 파일/폴더 제거] ---
                 // 서버 repo_content 결과(pathAll) 기준으로 로컬에만 있는 파일/폴더 제거
                 String basePath = getPath(currentUser, repoName);
@@ -257,7 +243,43 @@ public class ClientSock {
             } else if (line != null) {
                 System.err.println("[오류] 알 수 없는 응답: " + line);
             }
+            try {
+                JSONArray serverHashList = new JSONArray(jsonBuilder.toString());
+                System.out.println("hashList: " + serverHashList);
 
+                // 기존 해시 목록 불러오기
+                String localRepoPath = getPath(currentUser, repoName);
+                File hashFile = new File(localRepoPath, ".jsRepohashed.json");
+                java.util.Map<String, Boolean> existingFreezeMap = new java.util.HashMap<>();
+
+                if (hashFile.exists()) {
+                    JSONArray existingList = new JSONArray(Files.readString(hashFile.toPath()));
+                    for (int i = 0; i < existingList.length(); i++) {
+                        JSONObject obj = existingList.getJSONObject(i);
+                        String path = obj.getString("path");
+                        boolean freeze = obj.optBoolean("freeze", false);
+                        if (freeze) {
+                            existingFreezeMap.put(path, true); // freeze가 true인 항목만 보존
+                        }
+                    }
+                }
+
+                // 서버 목록에 freeze 값 보존
+                for (int i = 0; i < serverHashList.length(); i++) {
+                    JSONObject obj = serverHashList.getJSONObject(i);
+                    String path = obj.getString("path");
+                    if (existingFreezeMap.containsKey(path)) {
+                        obj.put("freeze", true);
+                    } else {
+                        obj.put("freeze", false);
+                    }
+                }
+
+                saveHashSnapshot(currentUser, repoName, serverHashList);
+            } catch (Exception e) {
+                System.err.println("[클라이언트] 해시 JSON 파싱 오류");
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             System.err.println("[pull 예외 발생]");
             e.printStackTrace();
@@ -327,7 +349,6 @@ public class ClientSock {
             System.out.println("owner: " + Owner);
             System.out.println("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);// 디버그
             String response = receiveResponse();
-            System.out.println("[서버 mkdir 응답] " + response);
             return;
         }
 
@@ -344,14 +365,13 @@ public class ClientSock {
             }
         }
 
-        System.out.println("currentUser:" +currentUser);
         List<String> deletedPaths = getDeletedPaths(pathall, currentUser, repository);
         for (String path : deletedPaths) {
             sendCommand("/delete_file " + repository + " \"" + path + "\" " + Owner);
             String response = receiveResponse();
             if (!response.startsWith("/#/delete_success")) {
                 System.err.println("[삭제 실패] " + path + ": " + response);
-            }else System.out.println("[삭제 성공] " + path + ": " + response);
+            }
         }
     }
 
@@ -368,33 +388,6 @@ public class ClientSock {
         return null;
     }
 
-    public static void startReceiver() {
-        Thread receiveThread = new Thread(() -> {
-            String line;
-            try {
-                while ((line = in.readLine()) != null) {
-                    System.out.println("[서버 응답] " + line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        receiveThread.start();
-    }
-
-    public static List<FileInfo> receiveFileList(int repositoryId) {
-        List<FileInfo> files = new ArrayList<>();
-        try {
-            sendCommand("LIST_FILES|" + repositoryId);
-            String response = receiveResponse();
-
-            // JSON 파싱 필요 시 여기에 파싱 로직 작성
-            System.out.println("[파일 목록 수신]: " + response);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return files;
-    }
 
     public static void disconnect() {
         try {
@@ -461,6 +454,13 @@ public class ClientSock {
         try {
             String localRepoPath = getPath(user, repoName);
             if (localRepoPath != null) {
+                // 모든 항목에 freeze: false 기본값 추가 (이미 존재하지 않을 경우만)
+                for (int i = 0; i < hashList.length(); i++) {
+                    JSONObject obj = hashList.getJSONObject(i);
+                    if (!obj.has("freeze")) {
+                        obj.put("freeze", false);
+                    }
+                }
                 java.nio.file.Path jsonPath = java.nio.file.Paths.get(localRepoPath, ".jsRepohashed.json");
                 java.nio.file.Files.writeString(jsonPath, hashList.toString(2));
                 System.out.println("[해시 스냅샷 저장 완료 - 로컬]");
@@ -539,4 +539,38 @@ public class ClientSock {
         }
         return false;
     }
+    
+    public static Set<String> getFrozenPaths(String user, String repoName,String repoOwner) {
+        Set<String> frozenPaths = new java.util.HashSet<>();
+        try {
+            String localRepoPath = getPath(user, repoName);
+            if (localRepoPath == null){System.out.println("1.종료됨");return frozenPaths;}
+
+            File hashFile = new File(localRepoPath, ".jsRepohashed.json");
+            if (!hashFile.exists()){System.out.println("2.종료됨");return frozenPaths;}
+
+            JSONArray json = new JSONArray(Files.readString(hashFile.toPath()));
+            System.out.println(json);
+            String prefix = "repos/" + repoOwner + "/" + repoName + "/";
+
+            for (int i = 0; i < json.length(); i++) {
+                JSONObject obj = json.getJSONObject(i);
+                if (obj.optBoolean("freeze", false)) {
+                    String fullPath = obj.getString("path");
+                    System.out.println(fullPath+" | "+obj.getBoolean("freeze"));
+                    if (fullPath.startsWith(prefix)) {
+                        String relPath = fullPath.substring(prefix.length());
+                        Path localPath = Paths.get(getPath(currentUser, repoName), relPath.split("/"));
+                        System.out.println("추가됨: "+localPath.toFile().getAbsolutePath());
+                        frozenPaths.add(localPath.toFile().getAbsolutePath());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[getFrozenPaths 오류]");
+            e.printStackTrace();
+        }
+        return frozenPaths;
+    }
+
 }

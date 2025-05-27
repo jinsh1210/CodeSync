@@ -66,15 +66,12 @@ public class RepoFunc {
 		try {
 			if (userName == null){
 				ClientSock.sendCommand("/repo_content " + repository.getName());
-				System.out.println("/repo_content " + repository.getName());
 			}else{
 				ClientSock.sendCommand("/repo_content " + userName + " " + repository.getName());
-				System.out.println("/repo_content " + userName + " " + repository.getName());
 			}
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
-				System.out.println(line);
 				if(line.contains("/#/repo_content_error 저장소가 존재하지 않습니다")){
 					JOptionPane.showMessageDialog(null, "저장소가 존재하지 않습니다.","에러",JOptionPane.ERROR_MESSAGE);
 					refreshTimer.stop();
