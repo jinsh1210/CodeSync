@@ -100,7 +100,17 @@ public class MainView extends JFrame {
 		topPanel.add(titleLabel, BorderLayout.WEST);
 
 		// 리스트 상단 패널
-		JPanel topRepoPanel = new JPanel(new BorderLayout());
+		JPanel topRepoPanel = new JPanel(new BorderLayout()) {
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				Graphics2D g2 = (Graphics2D) g;
+				GradientPaint gra = new GradientPaint(0, 0, new Color(35, 116, 225),
+						getWidth(), getHeight(), new Color(255, 255, 225));
+				g2.setPaint(gra);
+				g2.fillRect(0, 0, getWidth(), getHeight());
+			}
+		};
 		topRepoPanel.setBackground(Style.BACKGROUND_COLOR);
 		topRepoPanel.add(refreshIconButton, BorderLayout.EAST);
 
@@ -172,11 +182,11 @@ public class MainView extends JFrame {
 		repositoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		repositoryList.setFont(Style.LABEL_FONT.deriveFont(14f));
 
-		//팝메뉴
+		// 팝메뉴
 		popupMenu = new JPopupMenu();
 		JMenuItem deleteItem = new JMenuItem("레포지토리 삭제");
-		JMenuItem changeVisible=new JMenuItem("공개여부 변경");
-		JMenuItem rmCollabo=new JMenuItem("콜라보 탈퇴");
+		JMenuItem changeVisible = new JMenuItem("공개여부 변경");
+		JMenuItem rmCollabo = new JMenuItem("콜라보 탈퇴");
 
 		repositoryList.addMouseListener(new MouseAdapter() {
 			@Override
@@ -188,13 +198,13 @@ public class MainView extends JFrame {
 						repositoryList.setSelectedIndex(index);
 
 						if (SwingUtilities.isRightMouseButton(e)) {
-							Repository selected=repositoryList.getSelectedValue();
+							Repository selected = repositoryList.getSelectedValue();
 							popupMenu.removeAll();
-							if(selected!=null&&selected.getUsername().equals(currentUser.getUsername())){
+							if (selected != null && selected.getUsername().equals(currentUser.getUsername())) {
 								popupMenu.add(deleteItem);
 								popupMenu.add(changeVisible);
 								popupMenu.show(repositoryList, e.getX(), e.getY());
-							}else if(selected!=null&&!selected.getUsername().equals(currentUser.getUsername())){
+							} else if (selected != null && !selected.getUsername().equals(currentUser.getUsername())) {
 								popupMenu.add(rmCollabo);
 								popupMenu.show(repositoryList, e.getX(), e.getY());
 							}
@@ -261,9 +271,6 @@ public class MainView extends JFrame {
 		splitPane.setEnabled(false);
 		splitPane.setDividerSize(0);
 
-		
-		
-
 		// 리스트 항목 선택 시 상세 패널 갱신
 		repositoryList.addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
@@ -322,12 +329,11 @@ public class MainView extends JFrame {
 
 		add(mainPanel);
 
-		
-		changeVisible.addActionListener(e->{
-			Repository selected=repositoryList.getSelectedValue();
-			if(selected!=null){
-				mainFunc.handleChangeVisible(currentUser.getUsername(),selected.getName(),
-					(selected.getVisibility().equals("public")?"private":"public"));
+		changeVisible.addActionListener(e -> {
+			Repository selected = repositoryList.getSelectedValue();
+			if (selected != null) {
+				mainFunc.handleChangeVisible(currentUser.getUsername(), selected.getName(),
+						(selected.getVisibility().equals("public") ? "private" : "public"));
 			}
 		});
 
@@ -338,9 +344,10 @@ public class MainView extends JFrame {
 			}
 		});
 
-		rmCollabo.addActionListener(e->{
-			Repository selected=repositoryList.getSelectedValue();
-			if(selected != null) mainFunc.handleRmCollabo(selected.getName(),currentUser.getUsername(),selected.getUsername());
+		rmCollabo.addActionListener(e -> {
+			Repository selected = repositoryList.getSelectedValue();
+			if (selected != null)
+				mainFunc.handleRmCollabo(selected.getName(), currentUser.getUsername(), selected.getUsername());
 		});
 	}
 

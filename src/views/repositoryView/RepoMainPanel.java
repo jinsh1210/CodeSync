@@ -111,8 +111,8 @@ public class RepoMainPanel extends JPanel {
         add(headerWrapper, BorderLayout.NORTH);
 
         // 업로드/다운로드/삭제 버튼 생성 및 색상 설정
-        int btn_width = 90;
-        int btn_height = 70;
+        int btn_width = 70;
+        int btn_height = 60;
         uploadButton = ic.createImageButton("src/icons/upload.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,"푸시");
         downloadButton = ic.createImageButton("src/icons/download.png", Style.PRIMARY_COLOR, btn_width, btn_height,
                 null,"풀");
