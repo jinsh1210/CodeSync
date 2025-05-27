@@ -30,7 +30,7 @@ public class LRCover extends javax.swing.JPanel {
         JPanel logoPanel = new JPanel();
         logoPanel.setBackground(Style.BACKGROUND_COLOR);
         ImageIcon logoIcon = new ImageIcon("src/icons/logo.png");
-        Image scaledLogo = logoIcon.getImage().getScaledInstance(300, 150, Image.SCALE_SMOOTH);
+        Image scaledLogo = logoIcon.getImage().getScaledInstance(300-40, 160-40, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledLogo);
         JLabel logoLabel = new JLabel(scaledIcon);
         add(logoLabel);
@@ -50,7 +50,7 @@ public class LRCover extends javax.swing.JPanel {
     @Override
     protected void paintComponent(Graphics grphcs) {
         Graphics2D g2 = (Graphics2D) grphcs;
-        GradientPaint gra = new GradientPaint(0, 0, new Color(187, 187, 187), 0, getHeight(), new Color(77, 77, 77));
+        GradientPaint gra = new GradientPaint(0, 0, new Color(165, 221, 255), 0, getHeight(), new Color(15, 114, 175));
         g2.setPaint(gra);
         g2.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(grphcs);
