@@ -7,6 +7,7 @@ import java.awt.event.*;
 import models.User;
 import views.MainView.MainFunc.RepositoryListCellRenderer;
 import views.login_register.LRMain;
+import utils.ClientSock;
 import utils.Style;
 import models.Repository;
 
@@ -259,6 +260,8 @@ public class MainView extends JFrame {
 		if (confirm == JOptionPane.YES_OPTION) {
 			new LRMain().setVisible(true);
 			this.dispose();
+			ClientSock.disconnect();
+			ClientSock.connect();
 		}
 	}
 
