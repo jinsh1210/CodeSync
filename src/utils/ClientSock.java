@@ -261,26 +261,27 @@ public class ClientSock {
                 // 기존 해시 목록 불러오기
                 String localRepoPath = getPath(currentUser, repoName);
                 File hashFile = new File(localRepoPath, ".jsRepohashed.json");
-                java.util.Map<String, Boolean> existingFreezeMap = new java.util.HashMap<>();
+                java.util.Map<String, JSONObject> freezeMap = new java.util.HashMap<>();
 
                 if (hashFile.exists()) {
                     JSONArray existingList = new JSONArray(Files.readString(hashFile.toPath()));
                     for (int i = 0; i < existingList.length(); i++) {
                         JSONObject obj = existingList.getJSONObject(i);
                         String path = obj.getString("path");
-                        boolean freeze = obj.optBoolean("freeze", false);
-                        if (freeze) {
-                            existingFreezeMap.put(path, true); // freeze가 true인 항목만 보존
+                        if (obj.optBoolean("freeze", false)) {
+                            freezeMap.put(path, obj); // freeze == true인 항목은 전체 보존
                         }
                     }
                 }
 
-                // 서버 목록에 freeze 값 보존
+                // 서버 목록에 freeze/hash 값 보존
                 for (int i = 0; i < serverHashList.length(); i++) {
                     JSONObject obj = serverHashList.getJSONObject(i);
                     String path = obj.getString("path");
-                    if (existingFreezeMap.containsKey(path)) {
+                    if (freezeMap.containsKey(path)) {
+                        JSONObject frozen = freezeMap.get(path);
                         obj.put("freeze", true);
+                        obj.put("hash", frozen.getString("hash")); // 해시도 보존
                     } else {
                         obj.put("freeze", false);
                     }
@@ -471,13 +472,33 @@ public class ClientSock {
         try {
             String localRepoPath = getPath(user, repoName);
             if (localRepoPath != null) {
-                // 모든 항목에 freeze: false 기본값 추가 (이미 존재하지 않을 경우만)
+                File hashFile = new File(localRepoPath, ".jsRepohashed.json");
+                java.util.Map<String, JSONObject> freezeMap = new java.util.HashMap<>();
+
+                // 이전 freeze 및 hash 값 보존
+                if (hashFile.exists()) {
+                    JSONArray existingList = new JSONArray(Files.readString(hashFile.toPath()));
+                    for (int i = 0; i < existingList.length(); i++) {
+                        JSONObject obj = existingList.getJSONObject(i);
+                        String path = obj.getString("path");
+                        if (obj.optBoolean("freeze", false)) {
+                            freezeMap.put(path, obj); // freeze == true인 항목만 보존
+                        }
+                    }
+                }
+
                 for (int i = 0; i < hashList.length(); i++) {
                     JSONObject obj = hashList.getJSONObject(i);
-                    if (!obj.has("freeze")) {
+                    String path = obj.getString("path");
+                    if (freezeMap.containsKey(path)) {
+                        JSONObject frozen = freezeMap.get(path);
+                        obj.put("freeze", true);
+                        obj.put("hash", frozen.getString("hash")); // 해시값도 기존 그대로
+                    } else {
                         obj.put("freeze", false);
                     }
                 }
+
                 java.nio.file.Path jsonPath = java.nio.file.Paths.get(localRepoPath, ".jsRepohashed.json");
                 java.nio.file.Files.writeString(jsonPath, hashList.toString(2));
                 System.out.println("[해시 스냅샷 저장 완료 - 로컬]");
