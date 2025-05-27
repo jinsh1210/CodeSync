@@ -17,20 +17,29 @@ public class LRCover extends javax.swing.JPanel {
     private MigLayout layout;
     private JButton button;
     private boolean isLogin;
+    private LRView lrView;
 
-    public LRCover() {
+    public void setLRView(LRView view) {
+        lrView = view;
+    }
+
+    // 패널 표현 형식
+    public LRCover(LRView view) {
+        this.lrView = view;
         setOpaque(false);
         layout = new MigLayout("wrap, fill", "[center]", "push[]50[]10[]10[]push");
         setLayout(layout);
         init();
     }
 
+    // 커버 패널
     private void init() {
 
+        // 로고 사진 패널
         JPanel logoPanel = new JPanel();
         logoPanel.setBackground(Style.BACKGROUND_COLOR);
         ImageIcon logoIcon = new ImageIcon("src/icons/logo.png");
-        Image scaledLogo = logoIcon.getImage().getScaledInstance(300-40, 160-40, Image.SCALE_SMOOTH);
+        Image scaledLogo = logoIcon.getImage().getScaledInstance(300 - 40, 160 - 40, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledLogo);
         JLabel logoLabel = new JLabel(scaledIcon);
         add(logoLabel);
@@ -39,14 +48,21 @@ public class LRCover extends javax.swing.JPanel {
         button = Style.createStyledButton("회원가입", Style.PRIMARY_COLOR, Color.WHITE);
         add(button, "w 45%, h 40");
         button.addActionListener(e -> {
-            buttonActionPerformed(e);
+            if (event != null) {
+                event.actionPerformed(e);
+            }
+            // 전환 시 모든 텍스트 필드 공백
+            lrView.getUpusernameField().setText("");
+            lrView.getUppasswordField().setText("");
+            lrView.getUpconfirmPasswordField().setText("");
+
+            lrView.getInusernameField().setText("");
+            lrView.getInpasswordField().setText("");
+
         });
     }
 
-    public void buttonActionPerformed(java.awt.event.ActionEvent evt) {
-        event.actionPerformed(evt);
-    }
-
+    // 컴포넌트 그라데이션
     @Override
     protected void paintComponent(Graphics grphcs) {
         Graphics2D g2 = (Graphics2D) grphcs;
@@ -65,14 +81,17 @@ public class LRCover extends javax.swing.JPanel {
         v = Double.valueOf(df.format(v));
         login(false);
     }
+
     public void registerRight(double v) {
         v = Double.valueOf(df.format(v));
         login(false);
     }
+
     public void loginLeft(double v) {
         v = Double.valueOf(df.format(v));
         login(true);
     }
+
     public void loginRight(double v) {
         v = Double.valueOf(df.format(v));
         login(true);

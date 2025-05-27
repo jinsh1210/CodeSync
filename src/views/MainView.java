@@ -10,7 +10,6 @@ import java.util.Set;
 import models.User;
 import views.login_register.LRMain;
 import views.repositoryView.RepoMainPanel;
-// import views.repositoryView.RepoMainView;
 import utils.Style;
 import models.Repository;
 import utils.ClientSock;
@@ -118,22 +117,19 @@ public class MainView extends JFrame {
 		darkModeToggle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
 		createRepoItem.addActionListener(e -> showCreateRepositoryDialog());
-		// TODO: 아직 테스트 안 함.
-		/*현재 상황: 더블 클릭 이후 refresh 하고 한 번 눌렀을 때
-		저장소 정보가 detailPanel에 안 뜨는 중*/
+
 		refreshIconButton.addActionListener(e -> {
 			toggleSplitPaneDivider(splitPane, 800);
 			detailPanel.removeAll();
 			detailPanel.revalidate();
 			detailPanel.repaint();
-			loadRepositories(); // 먼저 리스트를 새로 로드
-			SwingUtilities.invokeLater(() -> repositoryList.clearSelection()); // 로드 후 clearSelection 호출
-		});
-		searchReposItem.addActionListener(e -> searchRepositories());
-		logoutItem.addActionListener(e -> handleLogout());
-		darkModeToggle.addItemListener(e -> {
-			DarkModeManager.toggle();
-			DarkModeManager.apply(getContentPane());
+			loadRepositories(); // 리스트 새로 로드
+			SwingUtilities.invokeLater(() -> {
+				if (!listModel.isEmpty()) {
+					repositoryList.setSelectedIndex(0); // 첫번째 선택
+					repositoryList.clearSelection(); // 바로 선택 해제
+				}
+			});
 		});
 
 		menuBar.add(darkModeToggle);
@@ -173,7 +169,6 @@ public class MainView extends JFrame {
 						if (SwingUtilities.isRightMouseButton(e)) {
 							popupMenu.show(repositoryList, e.getX(), e.getY());
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-							// openRepository(listModel.get(index));
 							toggleSplitPaneDivider(splitPane, 200);
 							openRepositoryInDetailPanel(listModel.get(index));
 						}

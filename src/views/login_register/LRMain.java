@@ -17,7 +17,7 @@ public class LRMain extends javax.swing.JFrame {
     private LRCover cover;
     private LRView loginAndRegister;
     private boolean isLogin;
-    
+
     private final double coverSize = 40;
     private final double loginSize = 60;
     private final DecimalFormat df = new DecimalFormat("##0.###");
@@ -27,10 +27,14 @@ public class LRMain extends javax.swing.JFrame {
         init();
     }
 
+    // 로그인 | 회원가입 | 커버 전체화면
     private void init() {
         layout = new MigLayout("fill, insets 0");
-        cover = new LRCover();
-        loginAndRegister = new LRView();
+
+        LRView lrView = new LRView();
+        cover = new LRCover(lrView);
+        loginAndRegister = lrView;
+
         TimingTarget target = new TimingTargetAdapter() {
 
             @Override
@@ -71,6 +75,7 @@ public class LRMain extends javax.swing.JFrame {
             }
         };
 
+        // 애니메이션 로직
         Animator animator = new Animator(800, target);
         animator.setAcceleration(0.5f);
         animator.setDeceleration(0.5f);
@@ -91,12 +96,12 @@ public class LRMain extends javax.swing.JFrame {
     private void initComponents() {
 
         bg = new javax.swing.JLayeredPane();
-        
+
         setMinimumSize(new Dimension(800, 500));
         setResizable(false);
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        bg.setBackground(new java.awt.Color(255, 255, 255));
+        bg.setBackground(new java.awt.Color(240, 240, 240));
         bg.setOpaque(true);
 
         javax.swing.GroupLayout bgLayout = new javax.swing.GroupLayout(bg);
@@ -130,7 +135,6 @@ public class LRMain extends javax.swing.JFrame {
                 }
             }
         } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            // logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
 
         java.awt.EventQueue.invokeLater(new Runnable() {

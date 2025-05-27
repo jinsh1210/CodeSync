@@ -31,6 +31,7 @@ public class LRView extends javax.swing.JLayeredPane {
         login.setVisible(true);
     }
 
+    //로그인 | 회원가입 화면
     private void initRegister() {
         register.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]10[]10[]10[]10[]10[]30[]push"));
         // 제목
@@ -99,6 +100,7 @@ public class LRView extends javax.swing.JLayeredPane {
         login.add(loginButton, "w 30%, h 40");
     }
 
+    //애니메이션 작동 시 로그인or회원가입 전환 로직
     public void showRegister(boolean show) {
         if (show) {
             register.setVisible(false);
@@ -126,7 +128,7 @@ public class LRView extends javax.swing.JLayeredPane {
 
         setLayout(new java.awt.CardLayout());
 
-        login.setBackground(new java.awt.Color(255, 255, 255));
+        login.setBackground(new java.awt.Color(240, 240, 240));
 
         javax.swing.GroupLayout loginLayout = new javax.swing.GroupLayout(login);
         login.setLayout(loginLayout);
@@ -139,7 +141,7 @@ public class LRView extends javax.swing.JLayeredPane {
 
         add(login, "card3");
 
-        register.setBackground(new java.awt.Color(255, 255, 255));
+        register.setBackground(new java.awt.Color(240, 240, 240));
 
         javax.swing.GroupLayout registerLayout = new javax.swing.GroupLayout(register);
         register.setLayout(registerLayout);
