@@ -345,6 +345,7 @@ public class ClientSock {
         File[] contents = folder.listFiles();
         boolean isEmpty = (contents == null || contents.length == 0);
 
+
         // 상대 경로 계산
         String relativePath = (basePath.isEmpty() ? folder.getName() : basePath + "/" + folder.getName());
         System.out.println("폴더 전용 relativePath: " + relativePath + " | basePath: " + basePath + " | owner: " + Owner); // 디버그
@@ -361,7 +362,7 @@ public class ClientSock {
             String response = receiveResponse();
             return;
         }
-
+        
         // --- Get frozenPaths before file processing loop ---
         Set<String> frozenPaths = getFrozenPaths(currentUser, repository, Owner);
 

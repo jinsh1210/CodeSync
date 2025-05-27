@@ -68,7 +68,6 @@ public class RepoFunc {
 
 	public void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
-		rootNode.removeAllChildren();
 		try {
 			if (userName == null){
 				ClientSock.sendCommand("/repo_content " + repository.getName());
@@ -93,6 +92,43 @@ public class RepoFunc {
 			int end = response.indexOf("/#/repo_content_EOL");
 			response = response.substring(start, end).trim();
 			array = new JSONArray(response);
+
+			// === Begin: Compare newPaths with currentPaths and skip reload if identical ===
+			List<String> newPaths = new ArrayList<>();
+			for (int i = 0; i < array.length(); i++) {
+				JSONObject obj = array.getJSONObject(i);
+				String path = obj.getString("path");
+				newPaths.add(path);
+			}
+			// 현재 트리에서 path 리스트 추출
+			List<String> currentPaths = new ArrayList<>();
+			java.util.Enumeration<?> e = rootNode.depthFirstEnumeration();
+			while (e.hasMoreElements()) {
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
+				javax.swing.tree.TreeNode[] nodes = node.getPath();
+				if (nodes.length > 1) {
+					StringBuilder sb = new StringBuilder();
+					for (int i = 1; i < nodes.length; i++) {
+						sb.append(nodes[i].toString());
+						if (i < nodes.length - 1)
+							sb.append("/");
+					}
+					currentPaths.add(sb.toString() + (node.isLeaf() ? "" : "/"));
+				}
+			}
+			java.util.Collections.sort(newPaths);
+			java.util.Collections.sort(currentPaths);
+			if (newPaths.equals(currentPaths)) {
+				// If the root node is empty, add "[비어 있음]" node and reload
+				if (rootNode.getChildCount() == 0) {
+					rootNode.add(new DefaultMutableTreeNode("[비어 있음]"));
+					treeModel.reload();
+				}
+				return; // 변경사항이 없으므로 JTree 리프레시 생략
+			}
+			// === End: Compare newPaths with currentPaths and skip reload if identical ===
+
+			rootNode.removeAllChildren();
 			for (int i = 0; i < array.length(); i++) {
 				JSONObject obj = array.getJSONObject(i);
 				String path = obj.getString("path");
@@ -222,6 +258,12 @@ public class RepoFunc {
 	}
 
 	public void handleUpload() {
+		ClientSock.sendCommand("/push " + repository.getName() + " \"" + "checkPermission" + "\" " + 0 + " " + repository.getUsername());
+        if(ClientSock.receiveResponse().startsWith("/#/push_error 이 저장소에 푸시할 권한이 없습니다.")){
+            JOptionPane.showMessageDialog(null, "권한이 없습니다.","권한 오류",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+		System.out.println("권한확인완료");
 		if (SavedPath == null || SavedPath.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "로컬 저장소를 지정해주세요");
 			return;
@@ -272,7 +314,7 @@ public class RepoFunc {
 						case 1: // 강제 푸시
 							ClientSock.push(new File(SavedPath), "", repository.getName(), currentUser.getId(),
 									repository.getUsername(), progressBar, array);
-							handleDownload();
+							ClientSock.getHash(repository.getName(), currentUser.getUsername());
 							break;
 						case 2: // 취소
 							// 아무것도 하지 않음
@@ -321,7 +363,6 @@ public class RepoFunc {
 		try {
 			File hashFile = new File(ClientSock.getPath(currentUser.getUsername(), repository.getName()), ".jsRepohashed.json");
 			if (hashFile.exists()) {
-				System.out.println("json파일 감지함");
 				String jsonText = Files.readString(hashFile.toPath());
 				JSONArray hashArray = new JSONArray(jsonText);
 				List<String> conflictFiles = new ArrayList<>();
