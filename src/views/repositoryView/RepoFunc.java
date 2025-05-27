@@ -77,6 +77,10 @@ public class RepoFunc {
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
+				if(line.contains("/#/repo_content_error 저장소가 존재하지 않습니다")){
+					JOptionPane.showMessageDialog(null, "저장소가 존재하지 않습니다.","에러",JOptionPane.ERROR_MESSAGE);
+					return;
+				}else if(line.contains("/#/repo_content_error 접근 권한이 없습니다")) return;
 				if (line == null)
 					break;
 				response += line;
