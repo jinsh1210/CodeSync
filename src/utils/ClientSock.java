@@ -104,14 +104,15 @@ public class ClientSock {
         }
     }
 
-    private static void receiveFile(String headerLine, File baseFolder, JProgressBar bar,String repoName) throws IOException {
+    // Owner 인자를 추가하여 frozen 파일 처리 지원
+    private static void receiveFile(String headerLine, File baseFolder, JProgressBar bar, String repoName, String Owner) throws IOException {
         String[] tokens = headerLine.substring(13).trim().split(" ");
         if (tokens.length < 2)
             throw new IOException("pull_file 명령어 파싱 실패: " + headerLine);
 
         int size = Integer.parseInt(tokens[tokens.length - 1]);
         String filePath = String.join(" ", Arrays.copyOf(tokens, tokens.length - 1));
-        if (filePath.startsWith(repoName + "/")) 
+        if (filePath.startsWith(repoName + "/"))
             filePath = filePath.replaceFirst(Pattern.quote(repoName + "/"), "");
 
         File targetFile = new File(baseFolder, filePath);
@@ -119,9 +120,13 @@ public class ClientSock {
         if (!parent.exists())
             parent.mkdirs();
 
+        // 프리징된 파일인지 확인
+        Set<String> frozenPaths = getFrozenPaths(currentUser, repoName, Owner);
+        boolean isFrozen = frozenPaths.contains(targetFile.getAbsolutePath());
+
         bar.setVisible(true);
         SwingUtilities.invokeLater(() -> bar.setValue(0));
-        try (FileOutputStream fileOut = new FileOutputStream(targetFile)) {
+        try (OutputStream fileOut = isFrozen ? OutputStream.nullOutputStream() : new FileOutputStream(targetFile)) {
             byte[] buffer = new byte[8192];
             int offset = 0;
             int read;
@@ -139,13 +144,17 @@ public class ClientSock {
         }
 
         SwingUtilities.invokeLater(() -> bar.setValue(100));
+        if (isFrozen) {
+            System.out.println("[프리징됨 - 무시했지만 데이터는 수신함]: " + filePath);
+        }
+        return;
     }
 
-    private static void handleSingleFilePull(String header, File baseFolder, JProgressBar bar,String repoName) throws IOException {
-        receiveFile(header, baseFolder, bar,repoName);
+    private static void handleSingleFilePull(String header, File baseFolder, JProgressBar bar, String repoName, String Owner) throws IOException {
+        receiveFile(header, baseFolder, bar, repoName, Owner);
     }
 
-    private static void handleDirectoryPull(BufferedReader reader, File baseFolder, JProgressBar bar,String repoName)
+    private static void handleDirectoryPull(BufferedReader reader, File baseFolder, JProgressBar bar, String repoName, String Owner)
             throws IOException {
         while (true) {
             String line = reader.readLine();
@@ -172,7 +181,7 @@ public class ClientSock {
             }
             if (line.startsWith("/#/pull_file ")) {
                 sendCommand("/ACK");
-                receiveFile(line, baseFolder, bar,repoName);
+                receiveFile(line, baseFolder, bar, repoName, Owner);
             }
         }
     }
@@ -208,6 +217,7 @@ public class ClientSock {
                 // 서버 repo_content 결과(pathAll) 기준으로 로컬에만 있는 파일/폴더 제거
                 String basePath = getPath(currentUser, repoName);
                 if (basePath != null) {
+                    Set<String> frozenPaths = getFrozenPaths(currentUser, repoName, Owner);
                     File localRoot = new File(basePath);
                     java.util.Set<String> serverPaths = new java.util.HashSet<>();
                     for (int i = 0; i < pathAll.length(); i++) {
@@ -220,7 +230,10 @@ public class ClientSock {
                                 if (f.getName().equals(".jsRepohashed.json")) return false;
                                 String rel = localRoot.toPath().relativize(f.toPath()).toString().replace("\\", "/");
                                 if (f.isDirectory()) rel += "/";
-                                return !serverPaths.contains(rel);
+                                if (!serverPaths.contains(rel)) {
+                                    return !frozenPaths.contains(f.getAbsolutePath()); // 프리징된 항목 제외
+                                }
+                                return false;
                             })
                             .sorted((a, b) -> b.getAbsolutePath().length() - a.getAbsolutePath().length())
                             .forEach(f -> {
@@ -237,9 +250,9 @@ public class ClientSock {
             }
             line = reader.readLine();
             if (line != null && line.startsWith("/#/pull_file ")) {
-                handleSingleFilePull(line, targetFolder, bar, repoName);
+                handleSingleFilePull(line, targetFolder, bar, repoName, Owner);
             } else if (line != null && line.equals("/#/pull_dir_SOL")) {
-                handleDirectoryPull(reader, targetFolder, bar, repoName);
+                handleDirectoryPull(reader, targetFolder, bar, repoName, Owner);
             } else if (line != null) {
                 System.err.println("[오류] 알 수 없는 응답: " + line);
             }

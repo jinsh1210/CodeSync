@@ -8,10 +8,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -20,6 +23,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import models.Repository;
 import utils.ClientSock;
@@ -50,6 +54,43 @@ public class FreezingView extends JFrame {
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.add(addButton);
+
+        // 파일 추가 버튼 동작: 파일 선택 후 프리징 처리
+        addButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(ClientSock.getPath(curUser, repository.getName()));
+            chooser.setDialogTitle("프리징할 파일 선택");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            int result = chooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = chooser.getSelectedFile();
+                String basePath = ClientSock.getPath(curUser, repository.getName());
+                Path relativePath = Paths.get(basePath).toAbsolutePath().relativize(selectedFile.toPath().toAbsolutePath());
+                String relPath = relativePath.toString().replace("\\", "/");
+                String fullPath = prefix + relPath;
+                String absPath = selectedFile.getAbsolutePath();
+
+                // .jsRepohashed.json 업데이트
+                try {
+                    File hashFile = new File(basePath, ".jsRepohashed.json");
+                    JSONArray json = new JSONArray(Files.readString(hashFile.toPath()));
+                    for (int i = 0; i < json.length(); i++) {
+                        JSONObject obj = json.getJSONObject(i);
+                        if (obj.getString("path").equals(fullPath)) {
+                            obj.put("freeze", true);
+                            break;
+                        }
+                    }
+                    Files.writeString(hashFile.toPath(), json.toString(2));
+                    System.out.println("[프리징 추가됨] " + fullPath);
+                    if (!frozenFileModel.contains(absPath)) {
+                        frozenFileModel.addElement(absPath);
+                    }
+                } catch (Exception ex) {
+                    System.err.println("[프리징 추가 오류]");
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
