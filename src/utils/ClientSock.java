@@ -593,19 +593,18 @@ public class ClientSock {
     }
     
     public static void getHash(String repoName, String owner){
-        sendCommand("/hashJson "+repoName+" "+owner);
-        String line=receiveResponse();
-        System.out.println("getHash: "+line);
-        try{
-            BufferedReader reader=new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        sendCommand("/hashJson " + repoName + " " + owner);
+        String line = receiveResponse();
+        System.out.println("getHash: " + line);
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
             StringBuilder jsonBuilder = new StringBuilder();
             String hashLine = "";
             if (line.startsWith("/#/pull_hashes_SOL")) {
-                System.out.println(hashLine);
                 do {
                     hashLine += reader.readLine();
-                    if (hashLine == null || hashLine.endsWith("/#/pull_hashes_EOL\n")) break;
-                } while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
+                    if (hashLine == null || hashLine.contains("/#/pull_hashes_EOL")) break;
+                } while (true);
             }
             String eolMarker = "/#/pull_hashes_EOL";
             int eolIndex = hashLine.indexOf(eolMarker);
@@ -613,8 +612,37 @@ public class ClientSock {
                 hashLine = hashLine.substring(0, eolIndex); // EOL 제거
             }
             jsonBuilder.append(hashLine);
-            System.out.println("Header: "+jsonBuilder);
+            System.out.println("Header: " + jsonBuilder);
+
             JSONArray serverHashList = new JSONArray(jsonBuilder.toString());
+
+            // 기존 해시 목록 불러오기
+            String localRepoPath = getPath(currentUser, repoName);
+            File hashFile = new File(localRepoPath, ".jsRepohashed.json");
+            java.util.Map<String, Boolean> existingFreezeMap = new java.util.HashMap<>();
+
+            if (hashFile.exists()) {
+                JSONArray existingList = new JSONArray(Files.readString(hashFile.toPath()));
+                for (int i = 0; i < existingList.length(); i++) {
+                    JSONObject obj = existingList.getJSONObject(i);
+                    String path = obj.getString("path");
+                    boolean freeze = obj.optBoolean("freeze", false);
+                    if (freeze) {
+                        existingFreezeMap.put(path, true); // freeze가 true인 항목만 보존
+                    }
+                }
+            }
+
+            for (int i = 0; i < serverHashList.length(); i++) {
+                JSONObject obj = serverHashList.getJSONObject(i);
+                String path = obj.getString("path");
+                if (existingFreezeMap.containsKey(path)) {
+                    obj.put("freeze", true);
+                } else {
+                    obj.put("freeze", false);
+                }
+            }
+
             saveHashSnapshot(currentUser, repoName, serverHashList);
         } catch (Exception ex) {
             System.out.println("클라이언트의 알 수 없는 오류");
