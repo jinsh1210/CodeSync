@@ -648,7 +648,7 @@ public class ClientSock {
                 hashLine = hashLine.substring(0, eolIndex); // EOL 제거
             }
             jsonBuilder.append(hashLine);
-            System.out.println("Header: " + jsonBuilder);
+            
 
             JSONArray serverHashList = new JSONArray(jsonBuilder.toString());
 
