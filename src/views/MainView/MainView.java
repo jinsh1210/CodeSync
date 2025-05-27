@@ -1,17 +1,46 @@
 package views.MainView;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
+import org.jdesktop.animation.timing.Animator;
+import org.jdesktop.animation.timing.TimingTargetAdapter;
+
+import models.Repository;
 import models.User;
-import views.MainView.MainFunc.RepositoryListCellRenderer;
-import views.login_register.LRMain;
 import utils.ClientSock;
 import utils.Style;
-import models.Repository;
-
-import org.jdesktop.animation.timing.*;
+import views.MainView.MainFunc.RepositoryListCellRenderer;
+import views.login_register.LRMain;
 
 //MainView 클래스 - 로그인된 사용자의 저장소를 보여주고 관리하는 메인 UI
 public class MainView extends JFrame {
@@ -23,6 +52,7 @@ public class MainView extends JFrame {
 
 	private JSplitPane splitPane;
 	private MainFunc mainFunc;
+	private Timer timer=null;
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
@@ -153,7 +183,7 @@ public class MainView extends JFrame {
 							popupMenu.show(repositoryList, e.getX(), e.getY());
 						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
 							toggleSplitPaneDivider(splitPane, 200);
-							mainFunc.openRepositoryPanel(listModel.get(index));
+							timer=mainFunc.openRepositoryPanel(listModel.get(index));
 						}
 					}
 				}
@@ -260,6 +290,7 @@ public class MainView extends JFrame {
 		if (confirm == JOptionPane.YES_OPTION) {
 			new LRMain().setVisible(true);
 			this.dispose();
+			if(timer!=null) timer.stop();
 			ClientSock.disconnect();
 			ClientSock.connect();
 		}

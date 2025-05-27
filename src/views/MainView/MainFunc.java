@@ -1,17 +1,34 @@
 package views.MainView;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.awt.*;
-import java.util.*;
-import models.User;
-import views.repositoryView.RepoMainPanel;
-import utils.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.Timer;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import lombok.Getter;
+import lombok.Setter;
 import models.Repository;
-
-import org.json.*;
-
-import lombok.*;
+import models.User;
+import utils.ClientSock;
+import utils.Style;
+import views.repositoryView.RepoMainPanel;
 
 @Getter
 @Setter
@@ -132,18 +149,21 @@ public class MainFunc {
     }
 
     // 저장소 패널 로딩
-    public void openRepositoryPanel(Repository repository) {
+    public Timer openRepositoryPanel(Repository repository) {
         try {
             if (detailPanel.getComponentCount() > 0 && detailPanel.getComponent(0) instanceof RepoMainPanel) {
                 ((RepoMainPanel) detailPanel.getComponent(0)).stopRefreshTimer();
             }
+            RepoMainPanel repoView=new RepoMainPanel(repository, currentUser);
             detailPanel.removeAll();
-            detailPanel.add(new views.repositoryView.RepoMainPanel(repository, currentUser));
+            detailPanel.add(repoView);
             detailPanel.revalidate();
             detailPanel.repaint();
+            return repoView.getRefreshTimer();
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "저장소 상세 패널 로딩 실패: " + e.getMessage());
+            return null;
         }
     }
 
