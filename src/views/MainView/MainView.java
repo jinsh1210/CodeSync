@@ -246,7 +246,38 @@ public class MainView extends JFrame {
 
 		// 리스트 항목 선택 시 상세 패널 갱신
 		repositoryList.addListSelectionListener(e -> {
+			System.out.println("🧩 detailPanel 컴포넌트 수: " + detailPanel.getComponentCount());
 			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
+				if (detailPanel.getComponentCount() == 0) {
+					detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
+					detailPanel.setBorder(BorderFactory.createTitledBorder("저장소 정보"));
+					detailPanel.setBackground(Style.BACKGROUND_COLOR);
+
+					nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
+					descLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
+					visibilityLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
+					username.setFont(Style.LABEL_FONT.deriveFont(13f));
+					sizeLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
+
+					nameLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+					descLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+					visibilityLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+					username.setForeground(Style.TEXT_SECONDARY_COLOR);
+					sizeLabel.setForeground(Style.TEXT_SECONDARY_COLOR);
+
+					detailPanel.add(nameLabel);
+					detailPanel.add(Box.createVerticalStrut(5));
+					detailPanel.add(descLabel);
+					detailPanel.add(Box.createVerticalStrut(5));
+					detailPanel.add(visibilityLabel);
+					detailPanel.add(Box.createVerticalStrut(5));
+					detailPanel.add(username);
+					detailPanel.add(Box.createVerticalStrut(5));
+					detailPanel.add(sizeLabel);
+					detailPanel.revalidate();
+					detailPanel.repaint();
+				}
+
 				Repository selected = repositoryList.getSelectedValue();
 				if (selected != null) {
 					String description = selected.getDescription();
