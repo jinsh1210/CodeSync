@@ -7,11 +7,11 @@
   <img src="https://img.shields.io/badge/TEAM-6A5ACD?style=for-the-badge&logoColor=white">
 </h1>
 <pre align="center" style="font-size: 2.1em;">
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                   ┃
-┃      <b>🌟   J.S.Repo  🌟</b>      ┃
-┃                                   ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
++---------------------+
+|                     |
+|     🌟 J.S.Repo 🌟    |
+|                     |
++---------------------+
 </pre>
 
 ---
