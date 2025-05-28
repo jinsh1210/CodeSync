@@ -99,7 +99,7 @@ public class RepoMainPanel extends JPanel {
         }
         JButton settingButton = ic.createImageButton("src/icons/setting.png", Style.PRIMARY_COLOR, 30, 30, null, "설정");
         topRightPanel.add(settingButton);
-        settingButton.addActionListener(e-> settingView.handleSetting());
+        settingButton.addActionListener(e-> settingView.handleSettingView());
 
         // 업로드/다운로드 상태를 표시할 진행 바 생성
         progressBar = new JProgressBar(0, 100);
