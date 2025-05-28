@@ -519,63 +519,6 @@ public class RepoFunc {
 		}
 	}
 
-	public void handleSetting() {
-		JTextField nameField = Style.createStyledTextField();
-		JTextArea descField = new JTextArea(3, 20);
-		descField.setLineWrap(true);
-		descField.setWrapStyleWord(true);
-
-		JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
-		panel.setBackground(Style.BACKGROUND_COLOR);
-		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		panel.add(new JLabel("저장소 이름:"));
-		panel.add(nameField);
-		panel.add(new JLabel("설명:"));
-		panel.add(new JScrollPane(descField));
-
-		//TODO: 변경하는 로직으로 수정 필요
-
-		String[] options = { "private", "public" };
-		String selected = (String) JOptionPane.showInputDialog(null, "접근 권한:", "설정", JOptionPane.PLAIN_MESSAGE, null,
-				options, "private");
-
-		int result = JOptionPane.showConfirmDialog(null, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
-		if (result == JOptionPane.OK_OPTION && selected != null) {
-			String rawName = nameField.getText().trim();
-			String name = nameField.getText().trim().replaceAll("\\s+", "_");
-			String description = descField.getText().trim();
-
-			if (!name.equals(rawName)) {
-				JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 밑줄(_)로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
-						JOptionPane.INFORMATION_MESSAGE);
-			}
-
-			if (name.isEmpty()) {
-				JOptionPane.showMessageDialog(null, "저장소 이름을 입력해주세요.");
-				return;
-			}
-
-			try {
-				String safeDescription = description.replace("\n", "\\n");
-				ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
-				String response = ClientSock.receiveResponse();
-
-				if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
-					JOptionPane.showMessageDialog(null, "저장소 생성 성공");
-					mainFunc.loadRepositories();
-				} else if (response != null && response.startsWith("/#/error")) {
-					String msg = response.replace("/#/error", "").trim();
-					showErrorDialog("저장소 생성 실패: " + msg);
-				} else {
-					showErrorDialog("알 수 없는 서버 응답: " + response);
-				}
-			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "서버 연결 실패");
-			}
-		}
-	}
-
 	// 에러 메시지 일괄 처리 팝업
 	private void showErrorDialog(String message) {
 		JOptionPane.showMessageDialog(null, message, "오류", JOptionPane.ERROR_MESSAGE);

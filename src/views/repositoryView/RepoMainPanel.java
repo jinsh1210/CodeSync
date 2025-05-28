@@ -96,11 +96,6 @@ public class RepoMainPanel extends JPanel {
             collaborateButton.addActionListener(e -> colView.handleViewCollaborators());
             topRightPanel.add(collaborateButton);
         }
-        JButton settingButton = ic.createImageButton("src/icons/setting.png", Style.PRIMARY_COLOR, 30, 30, null, "설정");
-        topRightPanel.add(settingButton);
-        settingButton.addActionListener(e -> {
-            repoFunc.handleSetting();
-        });
         // 업로드/다운로드 상태를 표시할 진행 바 생성
         progressBar = new JProgressBar(0, 100);
         progressBar.setVisible(false);

@@ -162,7 +162,7 @@ public class MainView extends JFrame {
 		// 팝메뉴
 		popupMenu = new JPopupMenu();
 		JMenuItem deleteItem = new JMenuItem("레포지토리 삭제");
-		// JMenuItem changeVisible = new JMenuItem("공개여부 변경");
+		JMenuItem changeVisible = new JMenuItem("공개여부 변경");
 		JMenuItem rmCollabo = new JMenuItem("콜라보 탈퇴");
 
 		repositoryList.addMouseListener(new MouseAdapter() {
@@ -316,13 +316,13 @@ public class MainView extends JFrame {
 
 		add(mainPanel);
 
-		// changeVisible.addActionListener(e -> {
-		// 	Repository selected = repositoryList.getSelectedValue();
-		// 	if (selected != null) {
-		// 		mainFunc.handleChangeVisible(currentUser.getUsername(), selected.getName(),
-		// 				(selected.getVisibility().equals("public") ? "private" : "public"));
-		// 	}
-		// });
+		changeVisible.addActionListener(e -> {
+			Repository selected = repositoryList.getSelectedValue();
+			if (selected != null) {
+				mainFunc.handleChangeVisible(currentUser.getUsername(), selected.getName(),
+						(selected.getVisibility().equals("public") ? "private" : "public"));
+			}
+		});
 
 		deleteItem.addActionListener(e -> {
 			Repository selected = repositoryList.getSelectedValue();
