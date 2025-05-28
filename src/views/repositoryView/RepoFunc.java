@@ -53,7 +53,6 @@ public class RepoFunc {
 	private Timer refreshTimer;
 	private JSONArray array = null;
 	private MainFunc mainFunc;
-	// private RepoFunc repofunc=null;
 
 	public RepoFunc(Repository repository, User currentUser, JTree fileTree,
 			DefaultMutableTreeNode rootNode, DefaultTreeModel treeModel,
@@ -68,10 +67,6 @@ public class RepoFunc {
 		this.SavedPath = ClientSock.getPath(currentUser.getUsername(), repository.getName());
 		System.out.println("초기 로컬 저장소 경로: " + SavedPath);
 	}
-
-	// public RepoFunc(RepoFunc repoFunc){
-	// 	this.repofunc=repoFunc;
-	// }
 
 	public void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
@@ -92,6 +87,7 @@ public class RepoFunc {
 					refreshTimer.stop();
 					return;
 				}
+				//TODO: Dead Code 
 				if (line == null)
 					break;
 				response += line;

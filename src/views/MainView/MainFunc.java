@@ -1,7 +1,6 @@
 package views.MainView;
 
 import java.awt.Component;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.util.HashSet;
 import java.util.Set;
