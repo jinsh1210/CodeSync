@@ -37,12 +37,14 @@ public class MainFunc {
     private User currentUser;
     private JPanel detailPanel;
     private DefaultListModel<Repository> listModel;
+    private MainView mainView;
 
     // 생성자
-    public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser) {
+    public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView) {
         this.listModel = listModel;
         this.detailPanel = detailPanel;
         this.currentUser = currentUser;
+        this.mainView = mainView;
     }
 
     // 저장소 목록을 불러와 리스트에 표시
@@ -154,7 +156,7 @@ public class MainFunc {
             if (detailPanel.getComponentCount() > 0 && detailPanel.getComponent(0) instanceof RepoMainPanel) {
                 ((RepoMainPanel) detailPanel.getComponent(0)).stopRefreshTimer();
             }
-            RepoMainPanel repoView=new RepoMainPanel(repository, currentUser);
+            RepoMainPanel repoView = new RepoMainPanel(repository, currentUser);
             detailPanel.removeAll();
             detailPanel.add(repoView);
             detailPanel.revalidate();
@@ -233,7 +235,9 @@ public class MainFunc {
 
     // 저장소 검색 기능
     public void searchRepositories() {
-        String keyword = JOptionPane.showInputDialog(null, "검색할 키워드를 입력하세요:");
+        // String keyword = JOptionPane.showInputDialog(null, "검색할 키워드를 입력하세요:");
+        String keyword = mainView.getSearchField().getText();
+        System.out.println(keyword);
         if (keyword == null || keyword.trim().isEmpty())
             return;
 
@@ -297,12 +301,12 @@ public class MainFunc {
     }
 
     public void handleChangeVisible(String username, String repoName, String visible) {
-        ClientSock.sendCommand("/change_visible "+repoName+" "+visible);
-        String result=ClientSock.receiveResponse();
+        ClientSock.sendCommand("/change_visible " + repoName + " " + visible);
+        String result = ClientSock.receiveResponse();
         if (result.startsWith("/#/visibility_update_fail")) {
             String message = result.replaceFirst("/#/visibility_update_fail\\s*", "").trim();
             JOptionPane.showMessageDialog(null, "설정 실패: " + message);
-        }else if (result.startsWith("/#/visibility_update_success")) {
+        } else if (result.startsWith("/#/visibility_update_success")) {
             String message = result.replaceFirst("/#/visibility_update_success\\s*", "").trim();
             JOptionPane.showMessageDialog(null, "변경됨: " + message);
         }
@@ -310,13 +314,13 @@ public class MainFunc {
     }
 
     public void handleRmCollabo(String repoName, String curUser, String owner) {
-        ClientSock.sendCommand("/remove_collaborator "+repoName+" "+curUser+" "+owner);
-        System.out.println("/remove_collaborator "+repoName+" "+curUser+" "+owner);
-        String result=ClientSock.receiveResponse();
+        ClientSock.sendCommand("/remove_collaborator " + repoName + " " + curUser + " " + owner);
+        System.out.println("/remove_collaborator " + repoName + " " + curUser + " " + owner);
+        String result = ClientSock.receiveResponse();
         if (result.startsWith("/#/error")) {
             String message = result.replaceFirst("/#/error\\s*", "").trim();
             JOptionPane.showMessageDialog(null, "콜라보 해제 실패\n" + message);
-        }else if (result.startsWith("/#/remove_collaborator")) {
+        } else if (result.startsWith("/#/remove_collaborator")) {
             JOptionPane.showMessageDialog(null, "콜라보 해제 성공");
         }
         loadRepositories();

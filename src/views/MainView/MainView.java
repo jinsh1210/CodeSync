@@ -3,6 +3,7 @@ package views.MainView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -25,6 +26,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -33,13 +35,18 @@ import javax.swing.Timer;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
 
+import lombok.Getter;
+import lombok.Setter;
 import models.Repository;
 import models.User;
 import utils.*;
 import views.MainView.MainFunc.RepositoryListCellRenderer;
 import views.login_register.LRMain;
 
-//MainView 클래스 - 로그인된 사용자의 저장소를 보여주고 관리하는 메인 UI
+@Getter
+@Setter
+
+// MainView 클래스 - 로그인된 사용자의 저장소를 보여주고 관리하는 메인 UI
 public class MainView extends JFrame {
 	private User currentUser;
 	private JList<Repository> repositoryList;
@@ -51,13 +58,14 @@ public class MainView extends JFrame {
 	private MainFunc mainFunc;
 	private Timer timer = null;
 	private IconConv ic = new IconConv();
+	private JTextField searchField;
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
 		this.currentUser = user;
 		listModel = new DefaultListModel<>();
 		detailPanel = new JPanel();
-		mainFunc = new MainFunc(listModel, detailPanel, currentUser);
+		mainFunc = new MainFunc(listModel, detailPanel, currentUser, this);
 		mainFunc.loadRepositories();
 		initializeUI();
 	}
@@ -82,9 +90,30 @@ public class MainView extends JFrame {
 		titleLabel.setFont(Style.TITLE_FONT);
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
+		JButton searchButton = ic.createImageButton("src/icons/search.png", Style.PRIMARY_COLOR, 20, 20, null, "검색");
+
+		searchField = new JTextField(20);
+		searchField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Style.PRIMARY_COLOR));
+		searchField.setBackground(Style.BACKGROUND_COLOR);
+		searchField.setOpaque(true);
+		searchField.setFont(Style.LABEL_FONT.deriveFont(14f));
+		searchField.setForeground(Style.BASIC_TEXT_COLOR);
+
+		JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		topRightPanel.add(searchField);
+		topRightPanel.add(searchButton);
+		topRightPanel.setBackground(Style.BACKGROUND_COLOR);
+
+		searchButton.addActionListener(e -> {
+			mainFunc.searchRepositories();
+		});
+		// Enter 키 입력 시 바로 검색 실행
+		searchField.addActionListener(e -> mainFunc.searchRepositories());
+
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.setBackground(Style.BACKGROUND_COLOR);
 		topPanel.add(titleLabel, BorderLayout.WEST);
+		topPanel.add(topRightPanel, BorderLayout.EAST);
 
 		// 리스트 상단 패널
 		JPanel topRepoPanel = new JPanel(new BorderLayout());
@@ -104,9 +133,9 @@ public class MainView extends JFrame {
 
 		JMenu repoMenu = new JMenu("저장소");
 		JMenuItem createRepoItem = new JMenuItem("저장소 만들기");
-		JMenuItem searchReposItem = new JMenuItem("저장소 검색");
+		// JMenuItem searchReposItem = new JMenuItem("저장소 검색");
 		repoMenu.add(createRepoItem);
-		repoMenu.add(searchReposItem);
+		// repoMenu.add(searchReposItem);
 
 		JMenu accountMenu = new JMenu("계정");
 		JMenuItem logoutItem = new JMenuItem("로그아웃");
@@ -123,7 +152,7 @@ public class MainView extends JFrame {
 
 		// 메뉴 기능
 		createRepoItem.addActionListener(e -> mainFunc.showCreateRepositoryDialog());
-		searchReposItem.addActionListener(e -> mainFunc.searchRepositories());
+		// searchReposItem.addActionListener(e -> mainFunc.searchRepositories());
 		logoutItem.addActionListener(e -> handleLogout());
 
 		refreshIconButton.addActionListener(e -> {
@@ -151,7 +180,7 @@ public class MainView extends JFrame {
 
 		// 메뉴 아이템 폰트 확대
 		createRepoItem.setFont(Style.MENU_FONT);
-		searchReposItem.setFont(Style.MENU_FONT);
+		// searchReposItem.setFont(Style.MENU_FONT);
 		logoutItem.setFont(Style.MENU_FONT);
 
 		repositoryList = new JList<>(listModel);
