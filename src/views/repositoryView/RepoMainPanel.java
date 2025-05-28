@@ -47,8 +47,9 @@ public class RepoMainPanel extends JPanel {
 
     private Timer refreshTimer;
 
-    private ColView collaboratorListView;
+    private ColView colView;
     private RepoFunc repoFunc;
+    private SettingView settingView;
     private IconConv ic = new IconConv();
 
     public RepoMainPanel(Repository repository, User currentUser) {
@@ -58,7 +59,8 @@ public class RepoMainPanel extends JPanel {
         initializeUI();
 
         this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
-        this.collaboratorListView = new ColView(repository);
+        this.colView = new ColView(repository);
+        this.settingView = new SettingView();
         repoFunc.loadFiles(
                 repository.getUsername().equals(currentUser.getUsername()) ? null : repository.getUsername());
     }
@@ -91,10 +93,13 @@ public class RepoMainPanel extends JPanel {
         JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         topRightPanel.setBackground(Style.BACKGROUND_COLOR);
         if (repository.getUsername().equals(currentUser.getUsername())) {
-            JButton collaborateButton = ic.createImageButton("src/icons/col.png", null, 50, 50, null,"콜라보");
-            collaborateButton.addActionListener(e -> collaboratorListView.handleViewCollaborators());
+            JButton collaborateButton = ic.createImageButton("src/icons/col.png", Style.PRIMARY_COLOR, 30, 30, null,"콜라보");
+            collaborateButton.addActionListener(e -> colView.handleViewCollaborators());
             topRightPanel.add(collaborateButton);
         }
+        JButton settingButton = ic.createImageButton("src/icons/setting.png", Style.PRIMARY_COLOR, 30, 30, null, "설정");
+        topRightPanel.add(settingButton);
+        settingButton.addActionListener(e-> settingView.handleSetting());
 
         // 업로드/다운로드 상태를 표시할 진행 바 생성
         progressBar = new JProgressBar(0, 100);

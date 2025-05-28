@@ -69,19 +69,22 @@ public class RepoFunc {
 	public void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		try {
-			if (userName == null){
+			if (userName == null) {
 				ClientSock.sendCommand("/repo_content " + repository.getName());
-			}else{
+			} else {
 				ClientSock.sendCommand("/repo_content " + userName + " " + repository.getName());
 			}
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
-				if(line.contains("/#/repo_content_error 저장소가 존재하지 않습니다")){
-					JOptionPane.showMessageDialog(null, "저장소가 존재하지 않습니다.","에러",JOptionPane.ERROR_MESSAGE);
+				if (line.contains("/#/repo_content_error 저장소가 존재하지 않습니다")) {
+					JOptionPane.showMessageDialog(null, "저장소가 존재하지 않습니다.", "에러", JOptionPane.ERROR_MESSAGE);
 					refreshTimer.stop();
 					return;
-				}else if(line.contains("/#/repo_content_error 접근 권한이 없습니다")) {refreshTimer.stop(); return;}
+				} else if (line.contains("/#/repo_content_error 접근 권한이 없습니다")) {
+					refreshTimer.stop();
+					return;
+				}
 				if (line == null)
 					break;
 				response += line;
@@ -93,7 +96,8 @@ public class RepoFunc {
 			response = response.substring(start, end).trim();
 			array = new JSONArray(response);
 
-			// === Begin: Compare newPaths with currentPaths and skip reload if identical ===
+			// === Begin: Compare newPaths with currentPaths and skip reload if identical
+			// ===
 			List<String> newPaths = new ArrayList<>();
 			for (int i = 0; i < array.length(); i++) {
 				JSONObject obj = array.getJSONObject(i);
@@ -258,11 +262,12 @@ public class RepoFunc {
 	}
 
 	public void handleUpload() {
-		ClientSock.sendCommand("/push " + repository.getName() + " \"" + "checkPermission" + "\" " + 0 + " " + repository.getUsername());
-        if(ClientSock.receiveResponse().startsWith("/#/push_error 이 저장소에 푸시할 권한이 없습니다.")){
-            JOptionPane.showMessageDialog(null, "권한이 없습니다.","권한 오류",JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+		ClientSock.sendCommand("/push " + repository.getName() + " \"" + "checkPermission" + "\" " + 0 + " "
+				+ repository.getUsername());
+		if (ClientSock.receiveResponse().startsWith("/#/push_error 이 저장소에 푸시할 권한이 없습니다.")) {
+			JOptionPane.showMessageDialog(null, "권한이 없습니다.", "권한 오류", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		System.out.println("권한확인완료");
 		if (SavedPath == null || SavedPath.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "로컬 저장소를 지정해주세요");
@@ -287,12 +292,12 @@ public class RepoFunc {
 						e.printStackTrace();
 					}
 				}
-				
+
 				if (!ClientSock.mergeCheck(repository.getName(), repository.getUsername())) {
 
 					JSONArray errorArray = ClientSock.mergeFailed;
 					StringBuilder fileNames = new StringBuilder();
-					if(errorArray!=null){
+					if (errorArray != null) {
 						for (int i = 0; i < errorArray.length(); i++) {
 							String errorPath = errorArray.getString(i);
 							String fileName = errorPath.substring(errorPath.lastIndexOf("/") + 1);
@@ -322,7 +327,7 @@ public class RepoFunc {
 						default:
 							break;
 					}
-				} else{
+				} else {
 					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
 							repository.getUsername(), progressBar, array);
 					ClientSock.getHash(repository.getName(), repository.getUsername());
@@ -336,6 +341,7 @@ public class RepoFunc {
 			}
 		}).start();
 	}
+
 	private String computeFileHash(Path path) throws IOException, NoSuchAlgorithmException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		try (InputStream is = Files.newInputStream(path)) {
@@ -361,7 +367,8 @@ public class RepoFunc {
 
 		// 병합 충돌 감지
 		try {
-			File hashFile = new File(ClientSock.getPath(currentUser.getUsername(), repository.getName()), ".jsRepohashed.json");
+			File hashFile = new File(ClientSock.getPath(currentUser.getUsername(), repository.getName()),
+					".jsRepohashed.json");
 			if (hashFile.exists()) {
 				String jsonText = Files.readString(hashFile.toPath());
 				JSONArray hashArray = new JSONArray(jsonText);
@@ -369,17 +376,20 @@ public class RepoFunc {
 
 				for (int i = 0; i < hashArray.length(); i++) {
 					JSONObject obj = hashArray.getJSONObject(i);
-					if (obj.optBoolean("freeze", false)) continue;
+					if (obj.optBoolean("freeze", false))
+						continue;
 
 					String serverPath = obj.getString("path");
 					// serverPath is like "repos/username/reponame/relative/path/to/file"
 					String basePrefix = "repos/" + repository.getUsername() + "/" + repository.getName() + "/";
-					if (!serverPath.startsWith(basePrefix)) continue;
+					if (!serverPath.startsWith(basePrefix))
+						continue;
 
 					String relativePath = serverPath.substring(basePrefix.length());
 					Path localPath = Path.of(SavedPath, relativePath).normalize();
 					File localFile = localPath.toFile();
-					if (!localFile.exists() || localFile.isDirectory()) continue;
+					if (!localFile.exists() || localFile.isDirectory())
+						continue;
 
 					String currentHash = computeFileHash(localFile.toPath());
 					String savedHash = obj.getString("hash");
@@ -392,7 +402,7 @@ public class RepoFunc {
 				if (!conflictFiles.isEmpty()) {
 					int option = JOptionPane.showConfirmDialog(null,
 							"수정된 파일이 감지되었습니다:\n" + String.join("\n", conflictFiles) +
-							"\n서버 파일로 덮어쓰시겠습니까?",
+									"\n서버 파일로 덮어쓰시겠습니까?",
 							"병합 충돌 감지", JOptionPane.YES_NO_OPTION);
 					if (option != JOptionPane.YES_OPTION) {
 						return;
@@ -404,8 +414,6 @@ public class RepoFunc {
 			JOptionPane.showMessageDialog(null, "병합 충돌 검사 중 오류 발생");
 			return;
 		}
-
-		
 
 		new Thread(() -> {
 			try {
@@ -498,5 +506,10 @@ public class RepoFunc {
 				JOptionPane.showMessageDialog(null, "유효한 폴더를 선택해주세요.");
 			}
 		}
+	}
+
+	public void handleSetting() {
+		// TODO: 저장소 이름, 설명, 공개여부, 삭제 기능 구현 필요
+		System.out.println("기능 구현 중");
 	}
 }
