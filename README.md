@@ -1,9 +1,9 @@
-# 프로젝트
+<h1 align="center">📂 프로젝트</h1>
 <p align="center">
   <img src="src/icons/logo.png" alt="Code Sync Logo" width="220"/>
 </p>
 
-# 팀
+<h2 align="center">🤝 팀</h2>
 <div align="center" style="font-size: 1.25em;">
 <table style="font-size: 0.2em;">
 <tr>
