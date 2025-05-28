@@ -1,9 +1,9 @@
-<p align="center">
+<p align="left">
   <img src="src/icons/logo.png" alt="Code Sync Logo" width="180"/>
 </p>
 
 
-<div align="center" style="font-size: 1.25em;">
+<div align="left" style="font-size: 1.25em;">
 <table style="font-size: 0.8em;">
 <tr>
 <td><img src="https://img.shields.io/badge/TEAM-6A5ACD?style=for-the-badge&logoColor=white" width="75"></td>
