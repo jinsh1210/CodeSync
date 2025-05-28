@@ -3,12 +3,14 @@
 </p>
 
 
+<div align="center">
 <table>
 <tr>
 <td><img src="https://img.shields.io/badge/TEAM-6A5ACD?style=for-the-badge&logoColor=white" width="150"></td>
 <td><h1>🌟🌟 J.S.Repo 🌟🌟</h1></td>
 </tr>
 </table>
+</div>
 
 ---
 
