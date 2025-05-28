@@ -1,6 +1,7 @@
 package views.repositoryView;
 
 import java.awt.Component;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,11 @@ import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -35,6 +40,8 @@ import lombok.Setter;
 import models.Repository;
 import models.User;
 import utils.ClientSock;
+import utils.Style;
+import views.MainView.MainFunc;
 
 @Getter
 @Setter
@@ -101,8 +108,6 @@ public class RepoFunc {
 			response = response.substring(start, end).trim();
 			array = new JSONArray(response);
 
-			// === Begin: Compare newPaths with currentPaths and skip reload if identical
-			// ===
 			List<String> newPaths = new ArrayList<>();
 			for (int i = 0; i < array.length(); i++) {
 				JSONObject obj = array.getJSONObject(i);
@@ -514,7 +519,64 @@ public class RepoFunc {
 	}
 
 	public void handleSetting() {
-		// TODO: 저장소 이름, 설명, 공개여부, 삭제 기능 구현 필요
-		System.out.println("기능 구현 중");
+		JTextField nameField = Style.createStyledTextField();
+		JTextArea descField = new JTextArea(3, 20);
+		descField.setLineWrap(true);
+		descField.setWrapStyleWord(true);
+
+		JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
+		panel.setBackground(Style.BACKGROUND_COLOR);
+		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		panel.add(new JLabel("저장소 이름:"));
+		panel.add(nameField);
+		panel.add(new JLabel("설명:"));
+		panel.add(new JScrollPane(descField));
+
+		//TODO: 변경하는 로직으로 수정 필요
+
+		String[] options = { "private", "public" };
+		String selected = (String) JOptionPane.showInputDialog(null, "접근 권한:", "설정", JOptionPane.PLAIN_MESSAGE, null,
+				options, "private");
+
+		int result = JOptionPane.showConfirmDialog(null, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE);
+		if (result == JOptionPane.OK_OPTION && selected != null) {
+			String rawName = nameField.getText().trim();
+			String name = nameField.getText().trim().replaceAll("\\s+", "_");
+			String description = descField.getText().trim();
+
+			if (!name.equals(rawName)) {
+				JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 밑줄(_)로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+
+			if (name.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "저장소 이름을 입력해주세요.");
+				return;
+			}
+
+			try {
+				String safeDescription = description.replace("\n", "\\n");
+				ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
+				String response = ClientSock.receiveResponse();
+
+				if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
+					JOptionPane.showMessageDialog(null, "저장소 생성 성공");
+					mainFunc.loadRepositories();
+				} else if (response != null && response.startsWith("/#/error")) {
+					String msg = response.replace("/#/error", "").trim();
+					showErrorDialog("저장소 생성 실패: " + msg);
+				} else {
+					showErrorDialog("알 수 없는 서버 응답: " + response);
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, "서버 연결 실패");
+			}
+		}
+	}
+
+	// 에러 메시지 일괄 처리 팝업
+	private void showErrorDialog(String message) {
+		JOptionPane.showMessageDialog(null, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
 }

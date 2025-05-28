@@ -49,7 +49,6 @@ public class RepoMainPanel extends JPanel {
 
     private ColView colView;
     private RepoFunc repoFunc;
-    private SettingView settingView;
     private IconConv ic = new IconConv();
 
     public RepoMainPanel(Repository repository, User currentUser) {
@@ -60,7 +59,6 @@ public class RepoMainPanel extends JPanel {
 
         this.repoFunc = new RepoFunc(repository, currentUser, fileTree, rootNode, treeModel, progressBar, refreshTimer);
         this.colView = new ColView(repository);
-        this.settingView = new SettingView();
         repoFunc.loadFiles(
                 repository.getUsername().equals(currentUser.getUsername()) ? null : repository.getUsername());
     }
@@ -93,14 +91,16 @@ public class RepoMainPanel extends JPanel {
         JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         topRightPanel.setBackground(Style.BACKGROUND_COLOR);
         if (repository.getUsername().equals(currentUser.getUsername())) {
-            JButton collaborateButton = ic.createImageButton("src/icons/col.png", Style.PRIMARY_COLOR, 30, 30, null,"콜라보");
+            JButton collaborateButton = ic.createImageButton("src/icons/col.png", Style.PRIMARY_COLOR, 30, 30, null,
+                    "콜라보");
             collaborateButton.addActionListener(e -> colView.handleViewCollaborators());
             topRightPanel.add(collaborateButton);
         }
         JButton settingButton = ic.createImageButton("src/icons/setting.png", Style.PRIMARY_COLOR, 30, 30, null, "설정");
         topRightPanel.add(settingButton);
-        settingButton.addActionListener(e-> settingView.handleSettingView());
-
+        settingButton.addActionListener(e -> {
+            repoFunc.handleSetting();
+        });
         // 업로드/다운로드 상태를 표시할 진행 바 생성
         progressBar = new JProgressBar(0, 100);
         progressBar.setVisible(false);
@@ -118,14 +118,16 @@ public class RepoMainPanel extends JPanel {
         // 업로드/다운로드/삭제 버튼 생성 및 색상 설정
         int btn_width = 70;
         int btn_height = 60;
-        uploadButton = ic.createImageButton("src/icons/upload.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,"푸시");
+        uploadButton = ic.createImageButton("src/icons/upload.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,
+                "푸시");
         downloadButton = ic.createImageButton("src/icons/download.png", Style.PRIMARY_COLOR, btn_width, btn_height,
-                null,"풀");
-        freezingButton = ic.createImageButton("src/icons/freeze.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,"파일프리징");
+                null, "풀");
+        freezingButton = ic.createImageButton("src/icons/freeze.png", Style.PRIMARY_COLOR, btn_width, btn_height, null,
+                "파일프리징");
         localButton = ic.createImageButton("src/icons/local.png", Style.PRIMARY_COLOR, btn_width - 10, btn_height - 10,
-                null,"로컬저장소 설정");
+                null, "로컬저장소 설정");
         deleteButton = ic.createImageButton("src/icons/delete.png", Style.WARNING_COLOR, btn_width - 5, btn_height - 10,
-                null,"삭제");
+                null, "삭제");
 
         // 하단 버튼 영역 패널 구성
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
