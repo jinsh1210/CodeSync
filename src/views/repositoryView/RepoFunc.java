@@ -1,7 +1,6 @@
 package views.repositoryView;
 
 import java.awt.Component;
-import java.awt.GridLayout;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,11 +16,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -40,7 +35,6 @@ import lombok.Setter;
 import models.Repository;
 import models.User;
 import utils.ClientSock;
-import utils.Style;
 import views.MainView.MainFunc;
 
 @Getter
@@ -517,10 +511,5 @@ public class RepoFunc {
 				JOptionPane.showMessageDialog(null, "유효한 폴더를 선택해주세요.");
 			}
 		}
-	}
-
-	// 에러 메시지 일괄 처리 팝업
-	private void showErrorDialog(String message) {
-		JOptionPane.showMessageDialog(null, message, "오류", JOptionPane.ERROR_MESSAGE);
 	}
 }
