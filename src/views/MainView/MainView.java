@@ -17,18 +17,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -81,6 +78,19 @@ public class MainView extends JFrame {
 		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침");
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+		refreshIconButton.addActionListener(e -> {
+			toggleSplitPaneDivider(splitPane, 800);
+			detailPanel.removeAll();
+			detailPanel.revalidate();
+			detailPanel.repaint();
+			mainFunc.loadRepositories();
+			SwingUtilities.invokeLater(() -> {
+				if (!listModel.isEmpty()) {
+					repositoryList.setSelectedIndex(0);
+					repositoryList.clearSelection();
+				}
+			});
+		});
 
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -123,65 +133,26 @@ public class MainView extends JFrame {
 		// 메뉴바 구현
 		JMenuBar menuBar = new JMenuBar();
 
-		// 메뉴 구분선
-		JSeparator separator = new JSeparator(SwingConstants.VERTICAL);
-		separator.setPreferredSize(new Dimension(2, 20));
-		separator.setMaximumSize(new Dimension(2, 20));
-		separator.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-		separator.setForeground(Color.GRAY);
-		separator.setBackground(Color.GRAY);
+		// 메뉴 버튼
+		JButton btnAddRepo = ic.createImageButton("src/icons/addfile.png", Style.PRIMARY_COLOR, 30, 30, null, "저장소 생성");
+		JButton btnLogout = ic.createImageButton("src/icons/logout.png", Style.PRIMARY_COLOR, 30, 30, null, "로그아웃");
 
-		JMenu repoMenu = new JMenu("저장소");
-		JMenuItem createRepoItem = new JMenuItem("저장소 만들기");
-		// JMenuItem searchReposItem = new JMenuItem("저장소 검색");
-		repoMenu.add(createRepoItem);
-		// repoMenu.add(searchReposItem);
+		// 메뉴 기능
+		btnAddRepo.addActionListener(e -> mainFunc.showCreateRepositoryDialog());
+		btnLogout.addActionListener(e -> handleLogout());
 
-		JMenu accountMenu = new JMenu("계정");
-		JMenuItem logoutItem = new JMenuItem("로그아웃");
-		accountMenu.add(logoutItem);
-
-		menuBar.add(repoMenu);
-		menuBar.add(Box.createHorizontalStrut(5));
-		menuBar.add(separator);
-		menuBar.add(Box.createHorizontalStrut(5));
-		menuBar.add(accountMenu);
+		// 메뉴 정렬
+		menuBar.add(btnAddRepo);
+		menuBar.add(Box.createHorizontalStrut(10));
+		menuBar.add(btnLogout);
 
 		// 이 밑으로 메뉴바 오른쪽 정렬
 		menuBar.add(Box.createHorizontalGlue());
-
-		// 메뉴 기능
-		createRepoItem.addActionListener(e -> mainFunc.showCreateRepositoryDialog());
-		// searchReposItem.addActionListener(e -> mainFunc.searchRepositories());
-		logoutItem.addActionListener(e -> handleLogout());
-
-		refreshIconButton.addActionListener(e -> {
-			toggleSplitPaneDivider(splitPane, 800);
-			detailPanel.removeAll();
-			detailPanel.revalidate();
-			detailPanel.repaint();
-			mainFunc.loadRepositories(); // 리스트 새로 로드
-			SwingUtilities.invokeLater(() -> {
-				if (!listModel.isEmpty()) {
-					repositoryList.setSelectedIndex(0); // 첫번째 선택
-					repositoryList.clearSelection(); // 바로 선택 해제
-				}
-			});
-		});
 
 		setJMenuBar(menuBar);
 
 		// 메뉴바 전체 크기 조정
 		menuBar.setPreferredSize(new Dimension(0, 36));
-
-		// 각 메뉴의 폰트와 마진 확대
-		repoMenu.setFont(Style.MENU_FONT);
-		accountMenu.setFont(Style.MENU_FONT);
-
-		// 메뉴 아이템 폰트 확대
-		createRepoItem.setFont(Style.MENU_FONT);
-		// searchReposItem.setFont(Style.MENU_FONT);
-		logoutItem.setFont(Style.MENU_FONT);
 
 		repositoryList = new JList<>(listModel);
 		repositoryList.setCellRenderer(new RepositoryListCellRenderer());
