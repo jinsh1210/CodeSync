@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -26,6 +27,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Repository;
 import models.User;
+import net.miginfocom.swing.MigLayout;
 import utils.ClientSock;
 import utils.Style;
 import views.repositoryView.RepoMainPanel;
@@ -100,25 +102,28 @@ public class MainFunc {
         JTextArea descField = new JTextArea(3, 20);
         descField.setLineWrap(true);
         descField.setWrapStyleWord(true);
+        JComboBox<String> visibilityComboBox = new JComboBox<>(new String[] { "private", "public" });
 
-        JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
+        JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]", "[]10[]10[]10[]"));
         panel.setBackground(Style.BACKGROUND_COLOR);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(new JLabel("저장소 이름:"));
-        panel.add(nameField);
-        panel.add(new JLabel("설명:"));
-        panel.add(new JScrollPane(descField));
 
-        String[] options = { "private", "public" };
-        String selected = (String) JOptionPane.showInputDialog(null, "접근 권한:", "설정", JOptionPane.PLAIN_MESSAGE, null,
-                options, "private");
+        panel.add(new JLabel("이름:"));
+        panel.add(nameField, "growx, wmin 150");
+
+        panel.add(new JLabel("설명:"));
+        panel.add(new JScrollPane(descField), "growx, h 80!");
+
+        panel.add(new JLabel("권한:"));
+        panel.add(visibilityComboBox, "growx, wmin 150");
 
         int result = JOptionPane.showConfirmDialog(null, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
-        if (result == JOptionPane.OK_OPTION && selected != null) {
+        if (result == JOptionPane.OK_OPTION) {
             String rawName = nameField.getText().trim();
-            String name = nameField.getText().trim().replaceAll("\\s+", "_");
+            String name = rawName.replaceAll("\\s+", "_");
             String description = descField.getText().trim();
+            String selected = (String) visibilityComboBox.getSelectedItem();
 
             if (!name.equals(rawName)) {
                 JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 밑줄(_)로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
