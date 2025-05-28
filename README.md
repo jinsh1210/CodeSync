@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="src/icons/logo.png" alt="Code Sync Logo" width="180"/>
+  <img src="src/icons/logo.png" alt="Code Sync Logo" width="200"/>
 </p>
 
 
