@@ -86,43 +86,43 @@ src/
 - Maven:
 ```
 <dependencies>
-        <dependency>
-            <groupId>com.fifesoft</groupId>
-            <artifactId>rsyntaxtextarea</artifactId>
-            <version>3.6.0</version>
+	<dependency>
+            	<groupId>com.fifesoft</groupId>
+            	<artifactId>rsyntaxtextarea</artifactId>
+            	<version>3.6.0</version>
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
-            <scope>provided</scope>
+            	<groupId>org.projectlombok</groupId>
+            	<artifactId>lombok</artifactId>
+            	<version>1.18.38</version>
+            	<scope>provided</scope>
         </dependency>
 
         <dependency>
-    		<groupId>mysql</groupId>
-    		<artifactId>mysql-connector-java</artifactId>
-    		<version>8.0.33</version>
-		</dependency>
+            	<groupId>mysql</groupId>
+            	<artifactId>mysql-connector-java</artifactId>
+            	<version>8.0.33</version>
+	</dependency>
 
-		<dependency>
-    		<groupId>org.json</groupId>
-    		<artifactId>json</artifactId>
-    		<version>20210307</version>
-		</dependency>
+	<dependency>
+             	<groupId>org.json</groupId>
+             	<artifactId>json</artifactId>
+             	<version>20210307</version>
+	</dependency>
 
-    <dependency>
-        <groupId>com.miglayout</groupId>
-        <artifactId>miglayout-swing</artifactId>
-        <version>5.3</version>
-    </dependency>
+    	<dependency>
+        	<groupId>com.miglayout</groupId>
+        	<artifactId>miglayout-swing</artifactId>
+        	<version>5.3</version>
+    	</dependency>
 
-    <dependency>
-        <groupId>net.java.dev.timingframework</groupId>
-        <artifactId>timingframework</artifactId>
-        <version>1.0</version>
-    </dependency>
+    	<dependency>
+        	<groupId>net.java.dev.timingframework</groupId>
+        	<artifactId>timingframework</artifactId>
+        	<version>1.0</version>
+    	</dependency>
 
-    </dependencies>
+</dependencies>
 ```
 ---
