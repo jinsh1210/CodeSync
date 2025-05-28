@@ -1,9 +1,10 @@
-<p align="left">
+# 프로젝트
+<p align="center">
   <img src="src/icons/logo.png" alt="Code Sync Logo" width="220"/>
 </p>
 
-
-<div align="left" style="font-size: 1.25em;">
+# 팀
+<div align="center" style="font-size: 1.25em;">
 <table style="font-size: 0.2em;">
 <tr>
 <td><img src="https://img.shields.io/badge/TEAM-6A5ACD?style=for-the-badge&logoColor=white" width="70"></td>
