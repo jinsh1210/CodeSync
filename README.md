@@ -4,7 +4,7 @@
 
 
 <h1 align="center">
-  <img src="https://img.shields.io/badge/TEAM-6A5ACD?style=for-the-badge&logoColor=white">
+  <img src="https://img.shields.io/badge/TEAM-6A5ACD?style=for-the-badge&logoColor=white" width="300">
 </h1>
 <pre align="center" style="font-size: 2.1em;">
 +---------------------+
