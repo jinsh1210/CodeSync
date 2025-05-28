@@ -6,26 +6,21 @@ import utils.Rounded.*;
 
 //기본 스타일
 public class Style {
-	// 공통 색상/폰트
+	// 공통 색깔
 	public static final Color PRIMARY_COLOR = new Color(35, 116, 225);
 	public static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
 	public static final Color FIELD_BACKGROUND = Color.WHITE;
 	public static final Color BASIC_TEXT_COLOR = Color.BLACK;
 	public static final Color WARNING_COLOR = new Color(192, 57, 43);
 
-	public static final Color DARK_PRIMARY_COLOR = new Color(44, 62, 80);
-	public static final Color DARK_BACKGROUND_COLOR = new Color(34, 34, 34);
-	public static final Color DARK_FIELD_BACKGROUND = new Color(64, 64, 64);
-	public static final Color DARK_TEXT_COLOR = new Color(230, 230, 230);
-	public static final Color DARK_BUTTON_COLOR = new Color(70, 70, 70);
-
+	// 공통 폰트
 	public static final Font TITLE_FONT = new Font("Malgun Gothic", Font.BOLD, 26);
 	public static final Font LABEL_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
 	public static final Font BUTTON_FONT = new Font("Malgun Gothic", Font.BOLD, 16);
 	public static final Font MENU_FONT = new Font("Malgun Gothic", Font.PLAIN, 16);
 	public static final Font DESC_FONT = new Font("Malgun Gothic", Font.PLAIN, 13);
 
-	// 밝은 테마 전용 텍스트 색상
+	// 텍스트 색상
 	public static final Color TEXT_PRIMARY_COLOR = new Color(52, 152, 219); // 파란색 제목
 	public static final Color TEXT_SECONDARY_COLOR = Color.DARK_GRAY; // 보조 정보
 	public static final Color TEXT_META_COLOR = Color.GRAY; // 부가 정보
@@ -81,7 +76,6 @@ public class Style {
 				button.setBackground(bgColor);
 			}
 		});
-
 		return button;
 	}
 }

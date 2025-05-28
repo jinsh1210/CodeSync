@@ -39,6 +39,7 @@ import views.MainView.MainFunc;
 
 @Getter
 @Setter
+// 저장소 기능 클래스
 public class RepoFunc {
 
 	private Repository repository;
@@ -54,6 +55,7 @@ public class RepoFunc {
 	private JSONArray array = null;
 	private MainFunc mainFunc;
 
+	// 생성자
 	public RepoFunc(Repository repository, User currentUser, JTree fileTree,
 			DefaultMutableTreeNode rootNode, DefaultTreeModel treeModel,
 			JProgressBar progressBar, Timer refreshTimer) {
@@ -68,6 +70,7 @@ public class RepoFunc {
 		System.out.println("초기 로컬 저장소 경로: " + SavedPath);
 	}
 
+	// 파일 목록 불러오기
 	public void loadFiles(String userName) {
 		List<String> expandedPaths = getExpandedPathsAsStrings(fileTree);
 		try {
@@ -87,7 +90,7 @@ public class RepoFunc {
 					refreshTimer.stop();
 					return;
 				}
-				//TODO: Dead Code 
+				// TODO: Dead Code
 				if (line == null)
 					break;
 				response += line;
@@ -124,14 +127,12 @@ public class RepoFunc {
 			java.util.Collections.sort(newPaths);
 			java.util.Collections.sort(currentPaths);
 			if (newPaths.equals(currentPaths)) {
-				// If the root node is empty, add "[비어 있음]" node and reload
 				if (rootNode.getChildCount() == 0) {
 					rootNode.add(new DefaultMutableTreeNode("[비어 있음]"));
 					treeModel.reload();
 				}
 				return; // 변경사항이 없으므로 JTree 리프레시 생략
 			}
-			// === End: Compare newPaths with currentPaths and skip reload if identical ===
 
 			rootNode.removeAllChildren();
 			for (int i = 0; i < array.length(); i++) {
@@ -158,7 +159,7 @@ public class RepoFunc {
 					label.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 4));
 					label.setBackground(sel ? getBackgroundSelectionColor() : getBackgroundNonSelectionColor());
 					label.setForeground(sel ? getTextSelectionColor() : getTextNonSelectionColor());
-					label.setOpaque(true);
+					label.setOpaque(false);
 					return label;
 				}
 			};
@@ -171,16 +172,23 @@ public class RepoFunc {
 		}
 	}
 
+	// 트리 확장 경로 문자열로 저장
 	private List<String> getExpandedPathsAsStrings(JTree tree) {
 		List<String> paths = new ArrayList<>();
+		// 트리의 모델(계층 구조)을 가져옴
 		TreeModel model = tree.getModel();
+		// 트리의 루트 노드를 가져옴
 		Object root = model.getRoot();
+		// 루트 노드가 존재할 경우
 		if (root != null) {
+			// 루트부터 재귀적으로 경로를 수집
 			collectExpandedStrings(tree, new TreePath(root), "", paths);
 		}
+		// 경로 리스트 반환
 		return paths;
 	}
 
+	// 확장 경로 재귀적으로 모으기
 	private void collectExpandedStrings(JTree tree, TreePath path, String currentPath, List<String> paths) {
 		if (tree.isExpanded(path)) {
 			Object node = path.getLastPathComponent();
@@ -195,6 +203,7 @@ public class RepoFunc {
 		}
 	}
 
+	// 확장 경로 복원하기
 	private void restoreExpandedPathsFromStrings(JTree tree, List<String> paths) {
 		for (String fullPath : paths) {
 			TreePath path = findTreePathByString(tree, fullPath);
@@ -203,6 +212,7 @@ public class RepoFunc {
 		}
 	}
 
+	// 문자열 경로를 트리 경로로 찾기
 	private TreePath findTreePathByString(JTree tree, String fullPath) {
 		String[] parts = fullPath.split("/");
 		TreeModel model = tree.getModel();
@@ -226,6 +236,7 @@ public class RepoFunc {
 		return path;
 	}
 
+	// 비어있는 폴더 표시하기
 	private void markEmptyFolders(DefaultMutableTreeNode node) {
 		if (node.getChildCount() == 0) {
 			String name = node.getUserObject().toString();
@@ -240,6 +251,7 @@ public class RepoFunc {
 		}
 	}
 
+	// 경로를 트리에 추가하기
 	private void addPathToTree(String path, String type) {
 		String[] parts = path.split("/");
 		DefaultMutableTreeNode current = rootNode;
@@ -262,6 +274,7 @@ public class RepoFunc {
 		}
 	}
 
+	// 파일 업로드하기
 	public void handleUpload() {
 		ClientSock.sendCommand("/push " + repository.getName() + " \"" + "checkPermission" + "\" " + 0 + " "
 				+ repository.getUsername());
@@ -343,6 +356,7 @@ public class RepoFunc {
 		}).start();
 	}
 
+	// 파일 해시값 계산하기
 	private String computeFileHash(Path path) throws IOException, NoSuchAlgorithmException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		try (InputStream is = Files.newInputStream(path)) {
@@ -359,6 +373,7 @@ public class RepoFunc {
 		return sb.toString();
 	}
 
+	// 파일 다운로드하기
 	public void handleDownload() {
 		if (SavedPath == null || SavedPath.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "로컬 저장소를 지정해주세요");
@@ -437,6 +452,7 @@ public class RepoFunc {
 		}).start();
 	}
 
+	// 파일 또는 폴더 삭제하기
 	public void handleDelete() {
 		TreePath selectedPath = fileTree.getSelectionPath();
 		if (selectedPath == null) {
@@ -475,6 +491,7 @@ public class RepoFunc {
 		}
 	}
 
+	// 로컬 저장소 경로 지정하기
 	public void handlesetLocalFolder() {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

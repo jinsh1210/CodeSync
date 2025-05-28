@@ -89,7 +89,7 @@ public class IconConv {
         button.setVerticalTextPosition(SwingConstants.BOTTOM);
         button.setMargin(new Insets(0, 0, 0, 0));
 
-        final Timer hoverTimer = new Timer(400, new java.awt.event.ActionListener() {
+        final Timer hoverTimer = new Timer(10, new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 button.setToolTipText(Hint); // 원하는 힌트 내용

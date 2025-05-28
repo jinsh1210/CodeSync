@@ -18,7 +18,7 @@ public class LRCover extends javax.swing.JPanel {
     private JButton button;
     private boolean isLogin;
     private LRView lrView;
-    private IconConv iC = new IconConv();
+    private IconConv ic = new IconConv();
 
     public void setLRView(LRView view) {
         lrView = view;
@@ -39,7 +39,7 @@ public class LRCover extends javax.swing.JPanel {
         // 로고 사진 패널
         JPanel logoPanel = new JPanel();
         logoPanel.setBackground(Style.BACKGROUND_COLOR);
-        JLabel logoLabel = iC.createImageLabel("src/icons/logo.png", new Color(255, 255, 225), 280, 120);
+        JLabel logoLabel = ic.createImageLabel("src/icons/logo.png", new Color(255, 255, 225), 280, 120);
         add(logoLabel);
 
         // 로그인 회원가입 전환 버튼
@@ -53,7 +53,6 @@ public class LRCover extends javax.swing.JPanel {
             lrView.getUpusernameField().setText("");
             lrView.getUppasswordField().setText("");
             lrView.getUpconfirmPasswordField().setText("");
-
             lrView.getInusernameField().setText("");
             lrView.getInpasswordField().setText("");
 

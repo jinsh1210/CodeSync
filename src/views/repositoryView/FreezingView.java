@@ -18,6 +18,7 @@ public class FreezingView extends JFrame {
     private String prefix;
     private IconConv ic = new IconConv();
 
+    // 프리징 화면 생성자
     public FreezingView(Set<String> frozenFiles, Repository repository, String curUser) {
         this.prefix = "repos/" + repository.getUsername() + "/" + repository.getName() + "/";
         setTitle("프리징된 파일 목록");
@@ -30,13 +31,14 @@ public class FreezingView extends JFrame {
         frozenFileModel = new DefaultListModel<>();
         frozenFiles.stream().sorted().forEach(frozenFileModel::addElement);
 
+        // 프리징 목록
         frozenFileList = new JList<>(frozenFileModel);
-        frozenFileList.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        frozenFileList.setFont(Style.DESC_FONT);
         JScrollPane scrollPane = new JScrollPane(frozenFileList);
 
-        addButton = ic.createImageButton("src/icons/freezeadd.png", Style.PRIMARY_COLOR, 30, 30, "", "프리징 파일 추가");
-
+        // 프리징 추가 버튼
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        addButton = ic.createImageButton("src/icons/freezeadd.png", Style.PRIMARY_COLOR, 30, 30, "", "프리징 파일 추가");
         bottomPanel.add(addButton);
 
         // 파일 추가 버튼 동작: 파일 선택 후 프리징 처리
@@ -138,10 +140,12 @@ public class FreezingView extends JFrame {
         });
     }
 
+    // 프리징된 파일 모델 반환
     public DefaultListModel<String> getFrozenFileModel() {
         return frozenFileModel;
     }
 
+    // 프리징 파일 추가
     public void addFrozenFile(String filePath) {
         if (!frozenFileModel.contains(filePath)) {
             frozenFileModel.addElement(filePath);

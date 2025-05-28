@@ -29,12 +29,15 @@ public class ColView extends JDialog {
     private Repository repository;
     private IconConv ic = new IconConv();
 
+    // 생성자
     public ColView(Repository repository) {
         this.repository = repository;
     }
 
+    // 콜라보 목록 보기
     public void handleViewCollaborators() {
         JDialog dialog = new JDialog(this, "콜라보레이터 목록", true);
+        // 콜라보 목록 서버에 요청
         try {
             ClientSock.sendCommand("/list_collaborators " + repository.getName());
 
@@ -45,38 +48,45 @@ public class ColView extends JDialog {
                 String line = ClientSock.receiveResponse();
                 if (line == null)
                     break;
-
+                // 진행중
                 if (line.contains("/#/collaborator_list_SOL")) {
                     started = true;
                     continue;
                 }
+                // 요청 끝
                 if (line.contains("/#/collaborator_list_EOL")) {
                     line = line.replace("/#/collaborator_list_EOL", "");
                     responseBuilder.append(line);
                     break;
                 }
+                // responseBuilder에 서버로부터 받은 데이터 추가
                 if (started) {
                     responseBuilder.append(line);
                 }
             }
-
+            // 문자열로 변환
             String jsonText = responseBuilder.toString().trim();
             JSONArray collaborators = new JSONArray(jsonText);
-
+            // 콜라보 표시 형식
             DefaultListModel<String> listModel = new DefaultListModel<>();
             for (int i = 0; i < collaborators.length(); i++) {
                 JSONObject userObj = collaborators.getJSONObject(i);
                 String userId = userObj.getString("user_id");
                 listModel.addElement((i + 1) + ". " + userId);
             }
-
+            // 콜라보 목록
             JList<String> collaboratorList = new JList<>(listModel);
-            collaboratorList.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+            collaboratorList.setFont(Style.DESC_FONT);
             JScrollPane scrollPane = new JScrollPane(collaboratorList);
             scrollPane.setPreferredSize(new Dimension(300, 200));
 
+            // 우클릭시 삭제 팝 메뉴
             JPopupMenu menu = new JPopupMenu();
             JMenuItem removeItem = new JMenuItem("삭제");
+            menu.add(removeItem);
+            collaboratorList.setComponentPopupMenu(menu);
+
+            // 콜라보 삭제 로직
             removeItem.addActionListener(ev -> {
                 int index = collaboratorList.getSelectedIndex();
                 if (index >= 0) {
@@ -85,6 +95,7 @@ public class ColView extends JDialog {
                     int confirm = JOptionPane.showConfirmDialog(dialog,
                             "[" + targetId + "] 사용자를 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
+                        // 서버로 콜라보 삭제 요청
                         try {
                             ClientSock.sendCommand("/remove_collaborator " + repository.getName() + " " + targetId);
                             String res = ClientSock.receiveResponse();
@@ -100,12 +111,11 @@ public class ColView extends JDialog {
                     }
                 }
             });
-            menu.add(removeItem);
-            collaboratorList.setComponentPopupMenu(menu);
 
+            // 콜라보 추가 로직
             JButton addButton = ic.createImageButton("src/icons/coladd.png", Style.PRIMARY_COLOR, 40, 40, "", "콜라보 추가");
             addButton.addActionListener(e -> {
-                String newUser = showCustomInputDialog("추가할 사용자 아이디 입력:",dialog);
+                String newUser = addColDialog("추가할 사용자 아이디 입력:", dialog);
                 if (newUser != null && !newUser.trim().isEmpty()) {
                     try {
                         ClientSock.sendCommand("/add_collaborator " + repository.getName() + " " + newUser.trim());
@@ -123,9 +133,11 @@ public class ColView extends JDialog {
                 }
             });
 
+            // 콜라보 목록 패널
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(scrollPane, BorderLayout.CENTER);
 
+            // 버튼 패널
             JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             controlPanel.add(addButton);
             panel.add(controlPanel, BorderLayout.SOUTH);
@@ -150,7 +162,8 @@ public class ColView extends JDialog {
         }
     }
 
-    private String showCustomInputDialog(String message, JDialog parentDialog) {
+    // 콜라보 추가 입력창
+    private String addColDialog(String message, JDialog parentDialog) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         JLabel label = new JLabel(message);
         label.setFont(Style.LABEL_FONT);

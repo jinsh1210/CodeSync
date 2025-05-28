@@ -8,6 +8,8 @@ import net.miginfocom.swing.MigLayout;
 
 import java.text.DecimalFormat;
 
+import javax.swing.UIManager;
+
 public class LRMain extends javax.swing.JFrame {
 
     private MigLayout layout;
@@ -60,6 +62,7 @@ public class LRMain extends javax.swing.JFrame {
                 }
                 fractionCover = Double.valueOf(df.format(fractionCover));
                 fractionLogin = Double.valueOf(df.format(fractionLogin));
+                // 컴포넌트 크기 지정
                 layout.setComponentConstraints(cover, "width " + coverSize + "%, pos " + fractionCover + "al 0 n 100%");
                 layout.setComponentConstraints(loginAndRegister,
                         "width " + loginSize + "%, pos " + fractionLogin + "al 0 n 100%");
@@ -91,7 +94,7 @@ public class LRMain extends javax.swing.JFrame {
     }
 
     private void initComponents() {
-
+        // 그라데이션
         bg = new javax.swing.JLayeredPane() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -101,7 +104,7 @@ public class LRMain extends javax.swing.JFrame {
                 int height = getHeight();
                 GradientPaint gradient = new GradientPaint(
                         0, 0, new Color(50, 126, 228), // 시작 색
-                        width, 0, new Color(244, 244, 244) // 끝 색
+                        width, 0, new Color(255, 255, 255) // 끝 색
                 );
                 g2.setPaint(gradient);
                 g2.fillRect(0, 0, width, height);
@@ -112,18 +115,7 @@ public class LRMain extends javax.swing.JFrame {
         setMinimumSize(new Dimension(800, 500));
         setResizable(false);
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        bg.setBackground(new java.awt.Color(240, 240, 240));
         bg.setOpaque(false);
-
-        javax.swing.GroupLayout bgLayout = new javax.swing.GroupLayout(bg);
-        bg.setLayout(bgLayout);
-        bgLayout.setHorizontalGroup(
-                bgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 687, Short.MAX_VALUE));
-        bgLayout.setVerticalGroup(
-                bgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 405, Short.MAX_VALUE));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -133,19 +125,14 @@ public class LRMain extends javax.swing.JFrame {
         layout.setVerticalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(bg));
-        pack();
     }
 
     public static void main(String args[]) {
 
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -154,6 +141,5 @@ public class LRMain extends javax.swing.JFrame {
             }
         });
     }
-
     private javax.swing.JLayeredPane bg;
 }

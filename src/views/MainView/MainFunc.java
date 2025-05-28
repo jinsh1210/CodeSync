@@ -50,7 +50,9 @@ public class MainFunc {
 
     // 저장소 목록을 불러와 리스트에 표시
     public void loadRepositories() {
+        // 기존 내역 초기화
         listModel.clear();
+        // 서버에 저장소 불러오기 시도
         try {
             ClientSock.sendCommand("/repo_list");
 
@@ -59,18 +61,20 @@ public class MainFunc {
             boolean inRepoList = false;
 
             while ((line = ClientSock.receiveResponse()) != null) {
+                // 진행중
                 if (line.equals("/#/repo_SOL")) {
                     inRepoList = true;
                     continue;
+                    // 불러오기가 다 끝났을 떄
                 } else if (line.equals("/#/repo_EOL")) {
                     break;
                 }
-
+                // 서버로 부터 받은 리스트를 jsonBuilder에 저장
                 if (inRepoList) {
                     jsonBuilder.append(line);
                 }
             }
-
+            // jsonBuilder를 배열로 저장
             JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
             Set<Integer> addedIds = new HashSet<>();
 
@@ -97,16 +101,19 @@ public class MainFunc {
 
     // 저장소 생성 다이얼로그를 띄우고 서버에 생성 요청
     public void showCreateRepositoryDialog() {
+        // 필드 생성
         JTextField nameField = new JTextField();
         JTextArea descField = new JTextArea(3, 20);
         descField.setLineWrap(true);
         descField.setWrapStyleWord(true);
         JComboBox<String> visibilityComboBox = new JComboBox<>(new String[] { "private", "public" });
 
+        // MigLayout으로 패널 생성
         JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]", "[]10[]10[]10[]"));
         panel.setBackground(Style.BACKGROUND_COLOR);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Layout에 라벨 추가
         panel.add(new JLabel("이름:"));
         panel.add(nameField, "growx, wmin 150");
 
@@ -116,32 +123,36 @@ public class MainFunc {
         panel.add(new JLabel("권한:"));
         panel.add(visibilityComboBox, "growx, wmin 150");
 
+        // 메시지 출력
         int result = JOptionPane.showConfirmDialog(null, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
+        // OK 선택 시
         if (result == JOptionPane.OK_OPTION) {
             String rawName = nameField.getText().trim();
             String name = rawName.replaceAll("\\s+", "_");
             String description = descField.getText().trim();
             String selected = (String) visibilityComboBox.getSelectedItem();
-
+            // 저장소 이름 공백 밑줄 처리
             if (!name.equals(rawName)) {
-                JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 밑줄(_)로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
+                JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 '_'로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
                         JOptionPane.INFORMATION_MESSAGE);
             }
-
+            // 저장소 이름 입력 안 할 경우
             if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "저장소 이름을 입력해주세요.");
                 return;
             }
-
+            // 서버에 저장소 생성 시도
             try {
                 String safeDescription = description.replace("\n", "\\n");
                 ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
                 String response = ClientSock.receiveResponse();
 
+                // 저장소 생성 성공
                 if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
                     JOptionPane.showMessageDialog(null, "저장소 생성 성공");
                     loadRepositories();
+                    // 생성 실패
                 } else if (response != null && response.startsWith("/#/error")) {
                     String msg = response.replace("/#/error", "").trim();
                     showErrorDialog("저장소 생성 실패: " + msg);
@@ -154,12 +165,13 @@ public class MainFunc {
         }
     }
 
-    // 저장소 패널 로딩
+    // 저장소 패널 여는 로직
     public Timer openRepositoryPanel(Repository repository) {
         try {
             if (detailPanel.getComponentCount() > 0 && detailPanel.getComponent(0) instanceof RepoMainPanel) {
                 ((RepoMainPanel) detailPanel.getComponent(0)).stopRefreshTimer();
             }
+            // 저장소 띄울 detailPanel 초기화 이후 덮어쓰기
             RepoMainPanel repoView = new RepoMainPanel(repository, currentUser);
             detailPanel.removeAll();
             detailPanel.add(repoView);
@@ -167,13 +179,14 @@ public class MainFunc {
             detailPanel.repaint();
             return repoView.getRefreshTimer();
         } catch (Exception e) {
+            // 실패할 경우
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "저장소 상세 패널 로딩 실패: " + e.getMessage());
             return null;
         }
     }
 
-    // 저장소 리스트 셀 렌더링 (형식 지정)
+    // 저장소 표시 형식
     public static class RepositoryListCellRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -193,7 +206,7 @@ public class MainFunc {
         }
     }
 
-    // 저장소 Public | Private 이미지 추가
+    // 저장소 공개 여부 이미지 추가
     private static ImageIcon getVisibilityIcon(String visibility) {
         String filename = visibility.equalsIgnoreCase("public")
                 ? "unlocked.png"
@@ -214,7 +227,7 @@ public class MainFunc {
         return new ImageIcon(scaledImage); // 파일 경로에서 직접 로딩
     }
 
-    // 저장소 삭제 요청 및 응답 처리
+    // 저장소 삭제 로직
     public void handleDeleteRepository(Repository selected) {
         int confirm = JOptionPane.showConfirmDialog(null, "정말로 '" + selected.getName() + "' 저장소를 삭제하시겠습니까?",
                 "저장소 삭제 확인", JOptionPane.YES_NO_OPTION);
@@ -237,15 +250,17 @@ public class MainFunc {
         }
     }
 
-    // 저장소 검색 기능
+    // 저장소 검색 로직
     public void searchRepositories() {
-        // String keyword = JOptionPane.showInputDialog(null, "검색할 키워드를 입력하세요:");
+        // 검색창 텍스트 받아와서
         String keyword = mainView.getSearchField().getText();
         System.out.println(keyword);
+        // 공백일 경우
         if (keyword == null || keyword.trim().isEmpty())
             return;
-
+        // 초기화
         listModel.clear();
+        // 서버에 검색 시도
         try {
             ClientSock.sendCommand("/search_repos " + keyword);
 
@@ -260,20 +275,23 @@ public class MainFunc {
             String fullResponse = rawBuilder.toString().trim();
             System.out.println("[서버 응답]: " + fullResponse);
 
-            // ✅ JSON 부분 추출
+            // JSON 부분 추출
             int startIdx = fullResponse.indexOf("/#/search_repo_SOL") + "/#/search_repo_SOL".length();
             int endIdx = fullResponse.indexOf("/#/search_repo_EOL");
 
             if (startIdx == -1 || endIdx == -1 || startIdx >= endIdx) {
                 throw new RuntimeException("JSON 응답 파싱 실패: 구분자 오류");
             }
-
+            // 정보를 String으로 변환
             String jsonText = fullResponse.substring(startIdx, endIdx).trim();
+            // 디버깅
             System.out.println("[추출된 JSON]: " + jsonText);
 
+            // 배열로 저장
             JSONArray jsonArray = new JSONArray(jsonText);
             Set<Integer> addedIds = new HashSet<>();
 
+            // detailPanel에 불러올 정보 표현
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 int id = obj.optInt("id", i);
@@ -290,6 +308,7 @@ public class MainFunc {
                 }
             }
 
+            // 결과가 0일 경우 일치하는 항목 없음.
             if (jsonArray.length() == 0) {
                 JOptionPane.showMessageDialog(null, "검색 결과가 없습니다.");
             }
@@ -304,6 +323,7 @@ public class MainFunc {
         JOptionPane.showMessageDialog(null, message, "오류", JOptionPane.ERROR_MESSAGE);
     }
 
+    // 공개여부 변경 로직
     public void handleChangeVisible(String username, String repoName, String visible) {
         ClientSock.sendCommand("/change_visible " + repoName + " " + visible);
         String result = ClientSock.receiveResponse();
@@ -317,6 +337,7 @@ public class MainFunc {
         loadRepositories();
     }
 
+    // 콜라보 해제 로직
     public void handleRmCollabo(String repoName, String curUser, String owner) {
         ClientSock.sendCommand("/remove_collaborator " + repoName + " " + curUser + " " + owner);
         System.out.println("/remove_collaborator " + repoName + " " + curUser + " " + owner);
