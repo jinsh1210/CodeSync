@@ -36,7 +36,9 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Repository;
 import models.User;
-import utils.*;
+import utils.ClientSock;
+import utils.IconConv;
+import utils.Style;
 import views.MainView.MainFunc.RepositoryListCellRenderer;
 import views.login_register.LRMain;
 
@@ -117,10 +119,32 @@ public class MainView extends JFrame {
 		searchField.setForeground(Style.BASIC_TEXT_COLOR);
 		// 검색 기능
 		searchButton.addActionListener(e -> {
+			toggleSplitPaneDivider(splitPane, 800);
+			detailPanel.removeAll();
+			detailPanel.revalidate();
+			detailPanel.repaint();
+			mainFunc.loadRepositories();
+			SwingUtilities.invokeLater(() -> {
+				if (!listModel.isEmpty()) {
+					repositoryList.setSelectedIndex(0);
+					repositoryList.clearSelection();
+				}
+			});
 			mainFunc.searchRepositories();
 			searchField.setText("");
 		});
 		searchField.addActionListener(e -> {
+			toggleSplitPaneDivider(splitPane, 800);
+			detailPanel.removeAll();
+			detailPanel.revalidate();
+			detailPanel.repaint();
+			mainFunc.loadRepositories();
+			SwingUtilities.invokeLater(() -> {
+				if (!listModel.isEmpty()) {
+					repositoryList.setSelectedIndex(0);
+					repositoryList.clearSelection();
+				}
+			});
 			mainFunc.searchRepositories();
 			searchField.setText("");
 		});
