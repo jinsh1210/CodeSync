@@ -101,6 +101,7 @@ public class MainView extends JFrame {
 		// 상단 패널 구성 요소 ...
 		// 제목
 		JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
+
 		titleLabel.setFont(Style.TITLE_FONT);
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
@@ -117,8 +118,12 @@ public class MainView extends JFrame {
 		// 검색 기능
 		searchButton.addActionListener(e -> {
 			mainFunc.searchRepositories();
+			searchField.setText("");
 		});
-		searchField.addActionListener(e -> mainFunc.searchRepositories());
+		searchField.addActionListener(e -> {
+			mainFunc.searchRepositories();
+			searchField.setText("");
+		});
 
 		// 메인 상단 우측 패널
 		JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
