@@ -181,6 +181,8 @@ public class ColView extends JDialog {
 
         JButton okButton = Style.createStyledButton("확인", Style.PRIMARY_COLOR, Color.WHITE);
         JButton cancelButton = Style.createStyledButton("취소", Style.WARNING_COLOR, Color.WHITE);
+        okButton.setPreferredSize(new Dimension(80, 30));
+        cancelButton.setPreferredSize(new Dimension(80, 30));
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
@@ -192,6 +194,7 @@ public class ColView extends JDialog {
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         okButton.addActionListener(e -> dialog.dispose());
+        textField.addActionListener(e -> dialog.dispose());
         cancelButton.addActionListener(e -> {
             textField.setText(null);
             dialog.dispose();
