@@ -202,6 +202,7 @@ public class MainView extends JFrame {
 								popupMenu.show(repositoryList, e.getX(), e.getY());
 								// 본인 저장소가 아닐 경우
 							} else if (selected != null && !selected.getUsername().equals(currentUser.getUsername())) {
+								// TODO: 콜라보에 속해 있을 때만 뜨게 변경 필요
 								popupMenu.add(rmCollabo);
 								popupMenu.show(repositoryList, e.getX(), e.getY());
 							}
