@@ -109,7 +109,7 @@ public class MainView extends JFrame {
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
 		// 타이핑 애니메이션 로직
-		Timer typingTimer = new Timer(150, null); // 글자당 딜레이 (ms)
+		Timer typingTimer = new Timer(10, null); // 글자당 딜레이 (ms)
 		final int[] index = { 0 };
 
 		typingTimer.addActionListener(e -> {

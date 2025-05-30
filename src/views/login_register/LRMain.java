@@ -102,10 +102,17 @@ public class LRMain extends javax.swing.JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 int width = getWidth();
                 int height = getHeight();
-                GradientPaint gradient = new GradientPaint(
-                        0, 0, new Color(50, 126, 228), // 시작 색
-                        width, 0, new Color(255, 255, 255) // 끝 색
-                );
+                GradientPaint gradient;
+                if (isLogin) {
+                    gradient = new GradientPaint(
+                            0, 0, new Color(255, 255, 255),
+                            width, 0, new Color(50, 126, 228));
+
+                } else {
+                    gradient = new GradientPaint(
+                            0, 0, new Color(50, 126, 228),
+                            width, 0, new Color(255, 255, 255));
+                }
                 g2.setPaint(gradient);
                 g2.fillRect(0, 0, width, height);
                 g2.dispose();
@@ -141,5 +148,6 @@ public class LRMain extends javax.swing.JFrame {
             }
         });
     }
+
     private javax.swing.JLayeredPane bg;
 }
