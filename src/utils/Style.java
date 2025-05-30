@@ -41,6 +41,25 @@ public class Style {
 		return field;
 	}
 
+	// 공통 텍스트 공간
+	public static JTextArea createStyledTextArea(int row, int column) {
+		JTextArea area = new JTextArea(row, column); // 기본 행수와 열수
+		area.setFont(LABEL_FONT);
+		area.setBackground(FIELD_BACKGROUND);
+		area.setForeground(Color.BLACK);
+		area.setLineWrap(true); // 자동 줄바꿈
+		area.setWrapStyleWord(true); // 단어 단위 줄바꿈
+
+		int borderRadius = 15; // 둥근 정도 조절
+		Color borderColor = new Color(200, 200, 200);
+
+		area.setBorder(BorderFactory.createCompoundBorder(
+				new RoundedBorder(borderRadius, borderColor),
+				BorderFactory.createEmptyBorder(4, 10, 4, 10)));
+
+		return area;
+	}
+
 	// 공통 패스워드 필드
 	public static JPasswordField createStyledPasswordField() {
 		JPasswordField field = new JPasswordField(20);

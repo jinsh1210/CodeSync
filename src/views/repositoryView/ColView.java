@@ -167,22 +167,26 @@ public class ColView extends JDialog {
         JLabel label = new JLabel(message);
         label.setFont(Style.LABEL_FONT);
         panel.add(label, BorderLayout.NORTH);
+        panel.setBackground(Style.FIELD_BACKGROUND);
 
+        // JTextField textField = Style.createStyledTextField();
+        // textField.setBorder(BorderFactory.createCompoundBorder(
+        //         BorderFactory.createLineBorder(new Color(200, 200, 200)),
+        //         BorderFactory.createEmptyBorder(10, 15, 10, 15)));
         JTextField textField = Style.createStyledTextField();
-        textField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)));
 
         JPanel marginPanel = new JPanel(new BorderLayout());
         marginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         marginPanel.add(textField, BorderLayout.CENTER);
         panel.add(marginPanel, BorderLayout.CENTER);
+        marginPanel.setBackground(Style.FIELD_BACKGROUND);
 
         JButton okButton = Style.createStyledButton("확인", Style.PRIMARY_COLOR, Color.WHITE);
         JButton cancelButton = Style.createStyledButton("취소", Style.WARNING_COLOR, Color.WHITE);
         okButton.setPreferredSize(new Dimension(80, 30));
         cancelButton.setPreferredSize(new Dimension(80, 30));
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Style.BACKGROUND_COLOR);
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);

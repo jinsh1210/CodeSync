@@ -102,23 +102,25 @@ public class MainFunc {
     // 저장소 생성 다이얼로그를 띄우고 서버에 생성 요청
     public void showCreateRepositoryDialog() {
         // 필드 생성
-        JTextField nameField = new JTextField();
-        JTextArea descField = new JTextArea(3, 20);
-        descField.setLineWrap(true);
-        descField.setWrapStyleWord(true);
+        JTextField nameField = Style.createStyledTextField();
+        JTextArea descField = Style.createStyledTextArea(3, 20);
+
         JComboBox<String> visibilityComboBox = new JComboBox<>(new String[] { "private", "public" });
 
         // MigLayout으로 패널 생성
         JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]", "[]10[]10[]10[]"));
-        panel.setBackground(Style.BACKGROUND_COLOR);
+        panel.setBackground(Style.FIELD_BACKGROUND);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JScrollPane scrollPane = new JScrollPane(descField);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         // Layout에 라벨 추가
         panel.add(new JLabel("이름:"));
         panel.add(nameField, "growx, wmin 150");
 
         panel.add(new JLabel("설명:"));
-        panel.add(new JScrollPane(descField), "growx, h 80!");
+        panel.add(scrollPane, "growx, h 80!");
 
         panel.add(new JLabel("권한:"));
         panel.add(visibilityComboBox, "growx, wmin 150");
