@@ -1,6 +1,8 @@
 package views.MainView;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,6 +11,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -17,8 +20,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
+import org.jdesktop.animation.timing.Animator;
+import org.jdesktop.animation.timing.TimingTargetAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,6 +34,7 @@ import models.Repository;
 import models.User;
 import net.miginfocom.swing.MigLayout;
 import utils.ClientSock;
+import utils.IconConv;
 import utils.Style;
 import views.repositoryView.RepoMainPanel;
 
@@ -39,13 +46,17 @@ public class MainFunc {
     private JPanel detailPanel;
     private DefaultListModel<Repository> listModel;
     private MainView mainView;
+    private IconConv ic = new IconConv();
+    private JPanel overlayPanel;
 
     // 생성자
-    public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView) {
+    public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView,
+            JPanel overlayPanel) {
         this.listModel = listModel;
         this.detailPanel = detailPanel;
         this.currentUser = currentUser;
         this.mainView = mainView;
+        this.overlayPanel = overlayPanel;
     }
 
     // 저장소 목록을 불러와 리스트에 표시
@@ -100,22 +111,27 @@ public class MainFunc {
     }
 
     // 저장소 생성 다이얼로그를 띄우고 서버에 생성 요청
-    public void showCreateRepositoryDialog() {
-        // 필드 생성
+    public JPanel showCreateRepositoryPanel() {
         JTextField nameField = Style.createStyledTextField();
         JTextArea descField = Style.createStyledTextArea(3, 20);
+        JComboBox<String> visibilityComboBox = new JComboBox<>(new String[] {
+                "private", "public" });
+        JLabel titleLabel = new JLabel("저장소 생성");
+        titleLabel.setForeground(Style.PRIMARY_COLOR);
+        titleLabel.setFont(Style.TITLE_FONT);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JComboBox<String> visibilityComboBox = new JComboBox<>(new String[] { "private", "public" });
-
-        // MigLayout으로 패널 생성
-        JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]", "[]10[]10[]10[]"));
+        JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]",
+                "[]10[]10[]10[]"));
         panel.setBackground(Style.FIELD_BACKGROUND);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setSize(new Dimension(400, 400));
 
         JScrollPane scrollPane = new JScrollPane(descField);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // Layout에 라벨 추가
+        panel.add(titleLabel, "span 2, center, gapbottom 20");
+
         panel.add(new JLabel("이름:"));
         panel.add(nameField, "growx, wmin 150");
 
@@ -125,46 +141,58 @@ public class MainFunc {
         panel.add(new JLabel("권한:"));
         panel.add(visibilityComboBox, "growx, wmin 150");
 
-        // 메시지 출력
-        int result = JOptionPane.showConfirmDialog(null, panel, "저장소 생성", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
-        // OK 선택 시
-        if (result == JOptionPane.OK_OPTION) {
+        JButton cancelButton = Style.createStyledButton("취소", Style.PRIMARY_COLOR, Style.FIELD_BACKGROUND);
+        JButton saveButton = Style.createStyledButton("생성", Style.WARNING_COLOR, Style.FIELD_BACKGROUND);
+        
+        saveButton.addActionListener(e -> {
             String rawName = nameField.getText().trim();
             String name = rawName.replaceAll("\\s+", "_");
             String description = descField.getText().trim();
             String selected = (String) visibilityComboBox.getSelectedItem();
-            // 저장소 이름 공백 밑줄 처리
+
             if (!name.equals(rawName)) {
                 JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 '_'로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
                         JOptionPane.INFORMATION_MESSAGE);
             }
-            // 저장소 이름 입력 안 할 경우
             if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "저장소 이름을 입력해주세요.");
                 return;
             }
-            // 서버에 저장소 생성 시도
+
             try {
                 String safeDescription = description.replace("\n", "\\n");
                 ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
                 String response = ClientSock.receiveResponse();
 
-                // 저장소 생성 성공
                 if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
                     JOptionPane.showMessageDialog(null, "저장소 생성 성공");
                     loadRepositories();
-                    // 생성 실패
+                    toggleOverlayPanel();
+                    nameField.setText("");
+                    descField.setText("");
                 } else if (response != null && response.startsWith("/#/error")) {
                     String msg = response.replace("/#/error", "").trim();
                     showErrorDialog("저장소 생성 실패: " + msg);
                 } else {
                     showErrorDialog("알 수 없는 서버 응답: " + response);
                 }
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "서버 연결 실패");
             }
-        }
+        });
+        cancelButton.addActionListener(e -> {
+            loadRepositories();
+            toggleOverlayPanel();
+            nameField.setText("");
+            descField.setText("");
+        });
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(saveButton);
+        panel.add(buttonPanel, "span 2, center, gapy 10");
+
+        return panel;
     }
 
     // 저장소 패널 여는 로직
@@ -341,6 +369,7 @@ public class MainFunc {
 
     // 콜라보 해제 로직
     public void handleRmCollabo(String repoName, String curUser, String owner) {
+
         ClientSock.sendCommand("/remove_collaborator " + repoName + " " + curUser + " " + owner);
         System.out.println("/remove_collaborator " + repoName + " " + curUser + " " + owner);
         String result = ClientSock.receiveResponse();
@@ -352,4 +381,25 @@ public class MainFunc {
         }
         loadRepositories();
     }
+
+    // 저장소 추가 애니메이션 로직
+    public void toggleOverlayPanel() {
+        int startHeight = overlayPanel.getHeight();
+        int targetHeight = (startHeight == 0) ? 335 : 0; // 열릴 때 높이
+        Animator animator = new Animator(500);
+        animator.setAcceleration(0.5f);
+        animator.setDeceleration(0.5f);
+        animator.setResolution(0);
+        animator.addTarget(new TimingTargetAdapter() {
+            @Override
+            public void timingEvent(float fraction) {
+                int newHeight = (int) (startHeight + (targetHeight - startHeight) * fraction);
+                overlayPanel.setBounds(0, 0, 400, newHeight);
+                overlayPanel.revalidate();
+                overlayPanel.repaint();
+            }
+        });
+        animator.start();
+    }
+
 }

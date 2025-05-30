@@ -38,7 +38,7 @@ public class FreezingView extends JFrame {
 
         // 프리징 추가 버튼
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        addButton = ic.createImageButton("src/icons/freezeadd.png", Style.PRIMARY_COLOR, 30, 30, "", "프리징 파일 추가");
+        addButton = ic.createImageButton("src/icons/freezeadd.png", Style.PRIMARY_COLOR, 30, 30, "", "프리징 파일 추가",true);
         bottomPanel.add(addButton);
 
         // 파일 추가 버튼 동작: 파일 선택 후 프리징 처리

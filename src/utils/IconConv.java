@@ -61,7 +61,7 @@ public class IconConv {
 
     // 버튼 생성 로직
     public JButton createImageButton(String imagePath, Color color, int width, int height, String buttonText,
-            String Hint) {
+            String Hint, boolean enableHover) {
         JLabel imageLabel = createImageLabel(imagePath, color, width, height);
         ImageIcon normalIcon = (ImageIcon) imageLabel.getIcon();
 
@@ -101,21 +101,22 @@ public class IconConv {
         });
         hoverTimer.setRepeats(false);
 
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setIcon(hoverIcon);
-                hoverTimer.restart();
-            }
+        if (enableHover) {
+            button.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    button.setIcon(hoverIcon);
+                    hoverTimer.restart();
+                }
 
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setIcon(normalIcon);
-                hoverTimer.stop();
-                button.setToolTipText(null); // 툴팁 제거
-            }
-        });
-
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    button.setIcon(normalIcon);
+                    hoverTimer.stop();
+                    button.setToolTipText(null); // 툴팁 제거
+                }
+            });
+        }
         return button;
     }
 }

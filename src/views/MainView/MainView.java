@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -58,13 +60,15 @@ public class MainView extends JFrame {
 	private Timer timer = null;
 	private IconConv ic = new IconConv();
 	private JTextField searchField;
+	private JPanel overlayPanel;
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
 		this.currentUser = user;
 		listModel = new DefaultListModel<>();
 		detailPanel = new JPanel();
-		mainFunc = new MainFunc(listModel, detailPanel, currentUser, this);
+		overlayPanel = new JPanel(null);
+		mainFunc = new MainFunc(listModel, detailPanel, currentUser, this, overlayPanel);
 		mainFunc.loadRepositories();
 		initializeUI();
 	}
@@ -78,7 +82,7 @@ public class MainView extends JFrame {
 		setLocationRelativeTo(null);
 
 		// 새로고침 버튼
-		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침");
+		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침", true);
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 		refreshIconButton.addActionListener(e -> {
@@ -126,7 +130,8 @@ public class MainView extends JFrame {
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
 		// 검색 버튼
-		JButton searchButton = ic.createImageButton("src/icons/search.png", Style.PRIMARY_COLOR, 20, 20, null, "검색");
+		JButton searchButton = ic.createImageButton("src/icons/search.png", Style.PRIMARY_COLOR, 20, 20, null, "검색",
+				true);
 
 		// 검색 필드
 		searchField = new JTextField(20);
@@ -186,11 +191,34 @@ public class MainView extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 
 		// 메뉴 버튼
-		JButton btnAddRepo = ic.createImageButton("src/icons/addfile.png", Style.PRIMARY_COLOR, 30, 30, null, "저장소 생성");
-		JButton btnLogout = ic.createImageButton("src/icons/logout.png", Style.PRIMARY_COLOR, 30, 30, null, "로그아웃");
+		JButton btnAddRepo = ic.createImageButton("src/icons/addfile.png", Style.PRIMARY_COLOR, 30, 30, null, "저장소 생성",
+				false);
+		JButton btnLogout = ic.createImageButton("src/icons/logout.png", Style.PRIMARY_COLOR, 30, 30, null, "로그아웃",
+				false);
+
+		// 저장소 추가 화면
+		overlayPanel = new JPanel(null);
+		overlayPanel.setOpaque(false);
+		overlayPanel.setBounds(0, 0, getWidth(), getHeight()); // 프레임 크기와 동일
+		overlayPanel.add(mainFunc.showCreateRepositoryPanel());
+
+		JPanel glass = (JPanel) getGlassPane();
+		glass.setLayout(null);
+		glass.add(overlayPanel);
+		glass.setVisible(false);
+
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				overlayPanel.setBounds(0, 0, getWidth(), getHeight());
+			}
+		});
 
 		// 메뉴 기능
-		btnAddRepo.addActionListener(e -> mainFunc.showCreateRepositoryDialog());
+		btnAddRepo.addActionListener(e -> {
+			glass.setVisible(!glass.isVisible()); // overlay 토글
+		});
+		btnAddRepo.addActionListener(e -> mainFunc.toggleOverlayPanel());
 		btnLogout.addActionListener(e -> handleLogout());
 
 		// 메뉴 정렬
@@ -204,7 +232,7 @@ public class MainView extends JFrame {
 		setJMenuBar(menuBar);
 
 		// 메뉴바 전체 크기 조정
-		menuBar.setPreferredSize(new Dimension(0, 36));
+		menuBar.setPreferredSize(new Dimension(0, 40));
 
 		// 저장소 패널 ...
 		// 저장소 리스트 상단 패널
@@ -431,15 +459,17 @@ public class MainView extends JFrame {
 		int start = splitPane.getDividerLocation();
 		int end = targetLocation;
 
-		animator = new Animator(800);
-		animator.setAcceleration(0.5f);
-		animator.setDeceleration(0.5f);
-		animator.setResolution(10); // 부드러운 애니메이션
+		animator = new Animator(400);
+		animator.setAcceleration(0.4f);
+		animator.setDeceleration(0.4f);
+		animator.setResolution(50); // 부드러운 애니메이션
 		animator.addTarget(new TimingTargetAdapter() {
 			@Override
 			public void timingEvent(float fraction) {
 				int newLocation = (int) (start + (end - start) * fraction);
-				splitPane.setDividerLocation(newLocation);
+				SwingUtilities.invokeLater(() -> { // 🔥 deferred 처리
+					splitPane.setDividerLocation(newLocation);
+				});
 			}
 		});
 		animator.start();

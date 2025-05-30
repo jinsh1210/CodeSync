@@ -112,7 +112,8 @@ public class ColView extends JDialog {
             });
 
             // 콜라보 추가 로직
-            JButton addButton = ic.createImageButton("src/icons/coladd.png", Style.PRIMARY_COLOR, 40, 40, "", "콜라보 추가");
+            JButton addButton = ic.createImageButton("src/icons/coladd.png", Style.PRIMARY_COLOR, 40, 40, "", "콜라보 추가",
+                    true);
             addButton.addActionListener(e -> {
                 String newUser = addColDialog("추가할 사용자 아이디 입력:", dialog);
                 if (newUser != null && !newUser.trim().isEmpty()) {
@@ -169,10 +170,6 @@ public class ColView extends JDialog {
         panel.add(label, BorderLayout.NORTH);
         panel.setBackground(Style.FIELD_BACKGROUND);
 
-        // JTextField textField = Style.createStyledTextField();
-        // textField.setBorder(BorderFactory.createCompoundBorder(
-        //         BorderFactory.createLineBorder(new Color(200, 200, 200)),
-        //         BorderFactory.createEmptyBorder(10, 15, 10, 15)));
         JTextField textField = Style.createStyledTextField();
 
         JPanel marginPanel = new JPanel(new BorderLayout());
