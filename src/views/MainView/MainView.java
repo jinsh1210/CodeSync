@@ -102,7 +102,26 @@ public class MainView extends JFrame {
 
 		// 상단 패널 구성 요소 ...
 		// 제목
-		JLabel titleLabel = new JLabel("어서오세요, " + currentUser.getUsername() + "님");
+		String wusername = currentUser.getUsername();
+		String fullText = "어서오세요, " + wusername + "님";
+		JLabel titleLabel = new JLabel();
+		titleLabel.setFont(Style.TITLE_FONT);
+		titleLabel.setForeground(Style.PRIMARY_COLOR);
+
+		// 타이핑 애니메이션 로직
+		Timer typingTimer = new Timer(150, null); // 글자당 딜레이 (ms)
+		final int[] index = { 0 };
+
+		typingTimer.addActionListener(e -> {
+			if (index[0] < fullText.length()) {
+				titleLabel.setText(fullText.substring(0, index[0] + 1));
+				index[0]++;
+			} else {
+				typingTimer.stop(); // 반복 없이 멈춤
+				// typingTimer.restart(); // 반복하려면 주석 해제
+			}
+		});
+		typingTimer.start();
 
 		titleLabel.setFont(Style.TITLE_FONT);
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
