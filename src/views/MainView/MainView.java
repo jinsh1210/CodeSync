@@ -117,8 +117,7 @@ public class MainView extends JFrame {
 				titleLabel.setText(fullText.substring(0, index[0] + 1));
 				index[0]++;
 			} else {
-				typingTimer.stop(); // 반복 없이 멈춤
-				// typingTimer.restart(); // 반복하려면 주석 해제
+				typingTimer.stop();
 			}
 		});
 		typingTimer.start();
