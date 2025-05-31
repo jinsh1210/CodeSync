@@ -33,16 +33,13 @@ public class MainFunc {
     private DefaultListModel<Repository> listModel;
     private MainView mainView;
     private IconConv ic = new IconConv();
-    private JPanel overlayPanel;
 
     // 생성자
-    public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView,
-            JPanel overlayPanel) {
+    public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView) {
         this.listModel = listModel;
         this.detailPanel = detailPanel;
         this.currentUser = currentUser;
         this.mainView = mainView;
-        this.overlayPanel = overlayPanel;
     }
 
     // 저장소 목록을 불러와 리스트에 표시

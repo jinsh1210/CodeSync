@@ -37,6 +37,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Repository;
 import models.User;
+import net.miginfocom.swing.MigLayout;
 import utils.ClientSock;
 import utils.IconConv;
 import utils.Style;
@@ -59,7 +60,9 @@ public class MainView extends JFrame {
 	private Timer timer = null;
 	private IconConv ic = new IconConv();
 	private JTextField searchField;
-	private JPanel overlayPanel;
+	private JPanel contentPanel;
+	private JPanel listPanel;
+	private JPanel rightPanel;
 
 	private JPanel mainEditRepoPanel = null;
 	private boolean isPanelVisible = false; // 패널 표시 상태 플래그
@@ -69,8 +72,7 @@ public class MainView extends JFrame {
 		this.currentUser = user;
 		listModel = new DefaultListModel<>();
 		detailPanel = new JPanel();
-		overlayPanel = new JPanel(null);
-		mainFunc = new MainFunc(listModel, detailPanel, currentUser, this, overlayPanel);
+		mainFunc = new MainFunc(listModel, detailPanel, currentUser, this);
 		mainFunc.loadRepositories();
 		initializeUI();
 	}
@@ -83,28 +85,15 @@ public class MainView extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
+		// 메인 패널
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		mainPanel.setBackground(Style.BACKGROUND_COLOR);
+
 		// 새로고침 버튼
 		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침", true);
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-		refreshIconButton.addActionListener(e -> {
-			toggleSplitPaneDivider(splitPane, 800);
-			detailPanel.removeAll();
-			detailPanel.revalidate();
-			detailPanel.repaint();
-			mainFunc.loadRepositories();
-			SwingUtilities.invokeLater(() -> {
-				if (!listModel.isEmpty()) {
-					repositoryList.setSelectedIndex(0);
-					repositoryList.clearSelection();
-				}
-			});
-		});
-
-		// 메인 패널
-		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-		mainPanel.setBackground(Style.BACKGROUND_COLOR);
+		refreshIconButton.addActionListener(e -> performSearch());
 
 		// 상단 패널 구성 요소 ...
 		// 제목
@@ -143,36 +132,8 @@ public class MainView extends JFrame {
 		searchField.setFont(Style.LABEL_FONT.deriveFont(14f));
 		searchField.setForeground(Style.BASIC_TEXT_COLOR);
 		// 검색 기능
-		searchButton.addActionListener(e -> {
-			toggleSplitPaneDivider(splitPane, 800);
-			detailPanel.removeAll();
-			detailPanel.revalidate();
-			detailPanel.repaint();
-			mainFunc.loadRepositories();
-			SwingUtilities.invokeLater(() -> {
-				if (!listModel.isEmpty()) {
-					repositoryList.setSelectedIndex(0);
-					repositoryList.clearSelection();
-				}
-			});
-			mainFunc.searchRepositories();
-			searchField.setText("");
-		});
-		searchField.addActionListener(e -> {
-			toggleSplitPaneDivider(splitPane, 800);
-			detailPanel.removeAll();
-			detailPanel.revalidate();
-			detailPanel.repaint();
-			mainFunc.loadRepositories();
-			SwingUtilities.invokeLater(() -> {
-				if (!listModel.isEmpty()) {
-					repositoryList.setSelectedIndex(0);
-					repositoryList.clearSelection();
-				}
-			});
-			mainFunc.searchRepositories();
-			searchField.setText("");
-		});
+		searchButton.addActionListener(e -> performSearch());
+		searchField.addActionListener(e -> performSearch());
 
 		// 메인 상단 우측 패널
 		JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -233,38 +194,6 @@ public class MainView extends JFrame {
 		JMenuItem changeVisible = new JMenuItem("공개여부 변경");
 		JMenuItem rmCollabo = new JMenuItem("콜라보 탈퇴");
 
-		// 마우스 우클릭 -> 팝 메뉴(저장소 삭제, 공개여부 변경)
-		repositoryList.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				int index = repositoryList.locationToIndex(e.getPoint());
-				// 우클릭 처리
-				if (index != -1) {
-					Rectangle bounds = repositoryList.getCellBounds(index, index);
-					if (bounds.contains(e.getPoint())) {
-						repositoryList.setSelectedIndex(index);
-						if (SwingUtilities.isRightMouseButton(e)) {
-							Repository selected = repositoryList.getSelectedValue();
-							popupMenu.removeAll();
-							// 본인 저장소일 경우
-							if (selected != null && selected.getUsername().equals(currentUser.getUsername())) {
-								popupMenu.add(deleteItem);
-								popupMenu.add(changeVisible);
-								popupMenu.show(repositoryList, e.getX(), e.getY());
-								// 본인 저장소가 아닐 경우
-							} else if (selected != null && !selected.getUsername().equals(currentUser.getUsername())) {
-								popupMenu.add(rmCollabo);
-								popupMenu.show(repositoryList, e.getX(), e.getY());
-							}
-							// 더블클릭 처리 -> 애니메이션 요청 및 저장소 불러오기
-						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-							toggleSplitPaneDivider(splitPane, 300);
-							timer = mainFunc.openRepositoryPanel(listModel.get(index));
-						}
-					}
-				}
-			}
-		});
 		// 공개 여부 변경 요청
 		changeVisible.addActionListener(e -> {
 			Repository selected = repositoryList.getSelectedValue();
@@ -292,7 +221,7 @@ public class MainView extends JFrame {
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
 		// 상단 및 스크롤팬 저장소 패널에 추가
-		JPanel listPanel = new JPanel();
+		listPanel = new JPanel();
 		listPanel.setLayout(new BorderLayout());
 		listPanel.setBackground(Style.BACKGROUND_COLOR);
 		listPanel.add(topRepoPanel, BorderLayout.NORTH);
@@ -303,7 +232,7 @@ public class MainView extends JFrame {
 		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
 		detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-		JPanel rightPanel = new JPanel();
+		rightPanel = new JPanel();
 		rightPanel.setLayout(new BorderLayout());
 		rightPanel.setBackground(Style.BACKGROUND_COLOR);
 
@@ -345,16 +274,14 @@ public class MainView extends JFrame {
 
 		rightPanel.add(detailPanel, BorderLayout.CENTER);
 
+		contentPanel = new JPanel(new MigLayout("insets 0, fill", "[grow][grow]", "[grow]"));
+		contentPanel.add(listPanel, "grow, push, w 70%, h 100%");
+		contentPanel.add(rightPanel, "grow, push, w 30%, h 100%");
+
+		mainPanel.add(contentPanel, BorderLayout.CENTER);
+
 		// 나누기 팬 ...
 		// 저장소 패널과 나누는 팬
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, rightPanel);
-		// x좌표 800을 포인트로 나누기
-		splitPane.setDividerLocation(800);
-		splitPane.setResizeWeight(0.7);
-		splitPane.setBorder(null);
-		// 크기 조절 비활성화
-		splitPane.setEnabled(false);
-		splitPane.setDividerSize(0);
 
 		// 리스트 항목 선택 시 상세 패널 갱신
 		repositoryList.addListSelectionListener(e -> {
@@ -412,9 +339,40 @@ public class MainView extends JFrame {
 			}
 		});
 		// 메인 패널 구현
-		mainPanel.add(splitPane, BorderLayout.CENTER);
 		add(mainPanel);
 
+		// 마우스 우클릭 -> 팝 메뉴(저장소 삭제, 공개여부 변경)
+		repositoryList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int index = repositoryList.locationToIndex(e.getPoint());
+				// 우클릭 처리
+				if (index != -1) {
+					Rectangle bounds = repositoryList.getCellBounds(index, index);
+					if (bounds.contains(e.getPoint())) {
+						repositoryList.setSelectedIndex(index);
+						if (SwingUtilities.isRightMouseButton(e)) {
+							Repository selected = repositoryList.getSelectedValue();
+							popupMenu.removeAll();
+							// 본인 저장소일 경우
+							if (selected != null && selected.getUsername().equals(currentUser.getUsername())) {
+								popupMenu.add(deleteItem);
+								popupMenu.add(changeVisible);
+								popupMenu.show(repositoryList, e.getX(), e.getY());
+								// 본인 저장소가 아닐 경우
+							} else if (selected != null && !selected.getUsername().equals(currentUser.getUsername())) {
+								popupMenu.add(rmCollabo);
+								popupMenu.show(repositoryList, e.getX(), e.getY());
+							}
+							// 더블클릭 처리 -> 애니메이션 요청 및 저장소 불러오기
+						} else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+							animatePanelResize(contentPanel, listPanel, rightPanel, 0.7, 0.3);
+							timer = mainFunc.openRepositoryPanel(listModel.get(index));
+						}
+					}
+				}
+			}
+		});
 	}
 
 	// 로그아웃 처리 - 로그인 화면으로 전환하고 현재 창 닫기
@@ -433,28 +391,52 @@ public class MainView extends JFrame {
 	// 애니메이션 로직
 	private Animator animator = null;
 
-	private void toggleSplitPaneDivider(JSplitPane splitPane, int targetLocation) {
-
-		if (animator != null && animator.isRunning()) {
-			animator.stop(); // 이전 애니메이션 중단
-		}
-		int start = splitPane.getDividerLocation();
-		int end = targetLocation;
-
-		animator = new Animator(400);
-		animator.setAcceleration(0.4f);
-		animator.setDeceleration(0.4f);
-		animator.setResolution(50);
-		animator.addTarget(new TimingTargetAdapter() {
-			@Override
-			public void timingEvent(float fraction) {
-				int newLocation = (int) (start + (end - start) * fraction);
-				SwingUtilities.invokeLater(() -> {
-					splitPane.setDividerLocation(newLocation);
-				});
+	// 메인 원래 비율 로직
+	private void performSearch() {
+		animatePanelResize(contentPanel, listPanel, rightPanel, 0.3, 0.7);
+		detailPanel.removeAll();
+		detailPanel.revalidate();
+		detailPanel.repaint();
+		mainFunc.loadRepositories();
+		SwingUtilities.invokeLater(() -> {
+			if (!listModel.isEmpty()) {
+				repositoryList.setSelectedIndex(0);
+				repositoryList.clearSelection();
 			}
 		});
-		animator.start();
+		mainFunc.searchRepositories();
+		searchField.setText("");
+	}
+
+	// 메인 <-> 저장소 애니메이션
+	private void animatePanelResize(JPanel contentPanel, JPanel listPanel, JPanel rightPanel, double startRatio,
+			double endRatio) {
+		if (startRatio == 0.3 || startRatio == 0.7) {
+			if (animator != null && animator.isRunning()) {
+				animator.stop();
+			}
+
+			MigLayout layout = (MigLayout) contentPanel.getLayout();
+
+			animator = new Animator(500);
+			animator.setAcceleration(0.5f);
+			animator.setDeceleration(0.5f);
+			animator.setResolution(0);
+			animator.addTarget(new TimingTargetAdapter() {
+				@Override
+				public void timingEvent(float fraction) {
+					double ratio = startRatio + (endRatio - startRatio) * fraction;
+					layout.setComponentConstraints(listPanel, "grow, push, w " + (int) (ratio * 100) + "%, h 100%");
+					layout.setComponentConstraints(rightPanel,
+							"grow, push, w " + (int) ((1 - ratio) * 100) + "%, h 100%");
+					contentPanel.revalidate();
+					contentPanel.repaint();
+				}
+			});
+			animator.start();
+		} else {
+			return; // 그 외 경우 무시
+		}
 	}
 
 	// 저장소 생성 애니메이션
