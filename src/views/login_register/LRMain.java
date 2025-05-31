@@ -79,7 +79,7 @@ public class LRMain extends javax.swing.JFrame {
         Animator animator = new Animator(800, target);
         animator.setAcceleration(0.5f);
         animator.setDeceleration(0.5f);
-        animator.setResolution(0); // 부드러운 애니메이션
+        animator.setResolution(0);
         bg.setLayout(layout);
         bg.add(cover, "width " + coverSize + "%, pos 0al 0 n 100%");
         bg.add(loginAndRegister, "width " + loginSize + "%, pos 1al 0 n 100%");

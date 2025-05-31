@@ -1,30 +1,18 @@
 package views.MainView;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Image;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
-import org.jdesktop.animation.timing.Animator;
-import org.jdesktop.animation.timing.TimingTargetAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -32,10 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Repository;
 import models.User;
-import net.miginfocom.swing.MigLayout;
 import utils.ClientSock;
 import utils.IconConv;
-import utils.Style;
 import views.repositoryView.RepoMainPanel;
 
 @Getter
@@ -48,7 +34,6 @@ public class MainFunc {
     private MainView mainView;
     private IconConv ic = new IconConv();
     private JPanel overlayPanel;
-    private Animator animator;
 
     // 생성자
     public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView,
@@ -109,91 +94,6 @@ public class MainFunc {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "저장소 로딩 실패");
         }
-    }
-
-    // 저장소 생성 다이얼로그를 띄우고 서버에 생성 요청
-    public JPanel showCreateRepositoryPanel() {
-        JTextField nameField = Style.createStyledTextField();
-        JTextArea descField = Style.createStyledTextArea(3, 20);
-        JComboBox<String> visibilityComboBox = new JComboBox<>(new String[] {
-                "private", "public" });
-        JLabel titleLabel = new JLabel("저장소 생성");
-        titleLabel.setForeground(Style.PRIMARY_COLOR);
-        titleLabel.setFont(Style.TITLE_FONT);
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]",
-                "[]10[]10[]10[]"));
-        panel.setBackground(Style.FIELD_BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.setSize(new Dimension(400, 335));
-
-        JScrollPane scrollPane = new JScrollPane(descField);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
-        panel.add(titleLabel, "span 2, center, gapbottom 20");
-
-        panel.add(new JLabel("이름:"));
-        panel.add(nameField, "growx, wmin 150");
-
-        panel.add(new JLabel("설명:"));
-        panel.add(scrollPane, "growx, h 80!");
-
-        panel.add(new JLabel("권한:"));
-        panel.add(visibilityComboBox, "growx, wmin 150");
-
-        JButton cancelButton = Style.createStyledButton("취소", Style.PRIMARY_COLOR, Style.FIELD_BACKGROUND);
-        JButton saveButton = Style.createStyledButton("생성", Style.WARNING_COLOR, Style.FIELD_BACKGROUND);
-
-        saveButton.addActionListener(e -> {
-            String rawName = nameField.getText().trim();
-            String name = rawName.replaceAll("\\s+", "_");
-            String description = descField.getText().trim();
-            String selected = (String) visibilityComboBox.getSelectedItem();
-
-            if (!name.equals(rawName)) {
-                JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 '_'로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "저장소 이름을 입력해주세요.");
-                return;
-            }
-
-            try {
-                String safeDescription = description.replace("\n", "\\n");
-                ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
-                String response = ClientSock.receiveResponse();
-
-                if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
-                    JOptionPane.showMessageDialog(null, "저장소 생성 성공");
-                    loadRepositories();
-                    toggleOverlayPanel();
-                    nameField.setText("");
-                    descField.setText("");
-                } else if (response != null && response.startsWith("/#/error")) {
-                    String msg = response.replace("/#/error", "").trim();
-                    showErrorDialog("저장소 생성 실패: " + msg);
-                } else {
-                    showErrorDialog("알 수 없는 서버 응답: " + response);
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "서버 연결 실패");
-            }
-        });
-        cancelButton.addActionListener(e -> {
-            loadRepositories();
-            toggleOverlayPanel();
-            nameField.setText("");
-            descField.setText("");
-        });
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(saveButton);
-        panel.add(buttonPanel, "span 2, center, gapy 10");
-
-        return panel;
     }
 
     // 저장소 패널 여는 로직
@@ -383,45 +283,35 @@ public class MainFunc {
         loadRepositories();
     }
 
-    // 저장소 추가 애니메이션 로직
-    public void toggleOverlayPanel() {
-        if (animator != null && animator.isRunning()) {
-            animator.stop();
+    public void handleAddRepo(String rawName, String description, String selected) {
+
+        String name = rawName.replaceAll("\\s+", "_");
+
+        if (!name.equals(rawName)) {
+            JOptionPane.showMessageDialog(null, "저장소 이름에 포함된 공백은 '_'로 자동 변경됩니다.\n변경된 이름: " + name, "이름 자동 수정",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "저장소 이름을 입력해주세요.");
+            return;
         }
 
-        boolean isVisible = overlayPanel.isVisible();
-        int startHeight = overlayPanel.getHeight();
-        int targetHeight = (!isVisible || startHeight == 0) ? 335 : 0; // visible이 false거나 높이가 0이면 열림
+        try {
+            String safeDescription = description.replace("\n", "\\n");
+            ClientSock.sendCommand("/repo_create " + name + " \"" + safeDescription + "\" " + selected);
+            String response = ClientSock.receiveResponse();
 
-        if (!isVisible) {
-            overlayPanel.setVisible(true); // 🌟 패널이 닫힌 상태라면 열기
+            if (response != null && response.contains("/#/repo_create 저장소 생성 성공")) {
+                JOptionPane.showMessageDialog(null, "저장소 생성 성공");
+                loadRepositories();
+            } else if (response != null && response.startsWith("/#/error")) {
+                String msg = response.replace("/#/error", "").trim();
+                showErrorDialog("저장소 생성 실패: " + msg);
+            } else {
+                showErrorDialog("알 수 없는 서버 응답: " + response);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "서버 연결 실패");
         }
-
-        int frameWidth = mainView.getWidth();
-        int x = (frameWidth - 400) / 2;
-        int y = 100;
-
-        animator = new Animator(500);
-        animator.setAcceleration(0.4f);
-        animator.setDeceleration(0.4f);
-        animator.setResolution(10);
-
-        animator.addTarget(new TimingTargetAdapter() {
-            @Override
-            public void timingEvent(float fraction) {
-                int newHeight = (int) (startHeight + (targetHeight - startHeight) * fraction);
-                overlayPanel.setBounds(x, y, 400, newHeight);
-                overlayPanel.revalidate();
-                overlayPanel.repaint();
-            }
-
-            @Override
-            public void end() {
-                if (targetHeight == 0) {
-                    overlayPanel.setVisible(false); // 닫힘 시에만 감춤
-                }
-            }
-        });
-        animator.start();
     }
 }

@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -18,6 +16,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -61,6 +60,9 @@ public class MainView extends JFrame {
 	private IconConv ic = new IconConv();
 	private JTextField searchField;
 	private JPanel overlayPanel;
+
+	private JPanel mainEditRepoPanel = null;
+	private boolean isPanelVisible = false; // 패널 표시 상태 플래그
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
@@ -196,34 +198,44 @@ public class MainView extends JFrame {
 		JButton btnLogout = ic.createImageButton("src/icons/logout.png", Style.PRIMARY_COLOR, 30, 30, null, "로그아웃",
 				false);
 
-		// 저장소 추가 화면
-		overlayPanel = new JPanel(null);
-		overlayPanel.setOpaque(false);
-		overlayPanel.setBounds(0, 0, getWidth(), getHeight());
-		overlayPanel.add(mainFunc.showCreateRepositoryPanel());
-
-		JPanel glass = (JPanel) getGlassPane();
-		glass.setLayout(null);
-		glass.add(overlayPanel);
-		glass.setVisible(false); // 항상 visible 유지 (GlassPane은 배경 역할)
-
-		// 크기 동기화
-		addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				overlayPanel.setBounds(0, 0, getWidth(), getHeight());
-			}
-		});
-
 		// 메뉴 기능
 		btnAddRepo.addActionListener(e -> {
-			boolean isVisible = glass.isVisible();
-			glass.setVisible(!isVisible);
-			if (!isVisible) {
-				mainFunc.toggleOverlayPanel();
-			} else {
-				mainFunc.toggleOverlayPanel();
+			if (mainEditRepoPanel == null) {
+				mainEditRepoPanel = new MainEditRepo(mainFunc, this).createPanel();
+				mainEditRepoPanel.setBounds(0, 40, 350, 0);
+				this.getLayeredPane().add(mainEditRepoPanel, JLayeredPane.POPUP_LAYER);
 			}
+
+			Animator animator = new Animator(300);
+			animator.setAcceleration(0.5f);
+			animator.setDeceleration(0.5f);
+			animator.setResolution(0);
+			animator.addTarget(new TimingTargetAdapter() {
+				@Override
+				public void timingEvent(float fraction) {
+					int targetHeight = 335;
+					int currentHeight;
+					if (!isPanelVisible) { // 아래로 슬라이드
+						currentHeight = (int) (targetHeight * fraction);
+					} else { // 위로 슬라이드
+						currentHeight = (int) (targetHeight * (1 - fraction));
+					}
+					mainEditRepoPanel.setBounds(0, 40, 350, currentHeight);
+					mainEditRepoPanel.revalidate();
+					mainEditRepoPanel.repaint();
+				}
+
+				@Override
+				public void end() {
+					if (isPanelVisible) {
+						getLayeredPane().remove(mainEditRepoPanel);
+						getLayeredPane().repaint();
+						mainEditRepoPanel = null; // 초기화
+					}
+					isPanelVisible = !isPanelVisible; // 상태 토글
+				}
+			});
+			animator.start();
 		});
 		btnLogout.addActionListener(e -> handleLogout());
 
@@ -467,14 +479,50 @@ public class MainView extends JFrame {
 		animator = new Animator(400);
 		animator.setAcceleration(0.4f);
 		animator.setDeceleration(0.4f);
-		animator.setResolution(50); // 부드러운 애니메이션
+		animator.setResolution(50);
 		animator.addTarget(new TimingTargetAdapter() {
 			@Override
 			public void timingEvent(float fraction) {
 				int newLocation = (int) (start + (end - start) * fraction);
-				SwingUtilities.invokeLater(() -> { // 🔥 deferred 처리
+				SwingUtilities.invokeLater(() -> {
 					splitPane.setDividerLocation(newLocation);
 				});
+			}
+		});
+		animator.start();
+	}
+	// 저장소 생성 애니메이션
+	public void toggleEditRepoPanel() {
+		if (mainEditRepoPanel == null) {
+			mainEditRepoPanel = new MainEditRepo(mainFunc, this).createPanel();
+			mainEditRepoPanel.setBounds(0, 40, 350, 0);
+			this.getLayeredPane().add(mainEditRepoPanel, JLayeredPane.POPUP_LAYER);
+		}
+
+		Animator animator = new Animator(300);
+		animator.setAcceleration(0.5f);
+		animator.setDeceleration(0.5f);
+		animator.setResolution(0);
+		animator.addTarget(new TimingTargetAdapter() {
+			@Override
+			public void timingEvent(float fraction) {
+				int targetHeight = 335;
+				int currentHeight = !isPanelVisible
+						? (int) (targetHeight * fraction)
+						: (int) (targetHeight * (1 - fraction));
+				mainEditRepoPanel.setBounds(0, 40, 350, currentHeight);
+				mainEditRepoPanel.revalidate();
+				mainEditRepoPanel.repaint();
+			}
+
+			@Override
+			public void end() {
+				if (isPanelVisible) {
+					getLayeredPane().remove(mainEditRepoPanel);
+					getLayeredPane().repaint();
+					mainEditRepoPanel = null;
+				}
+				isPanelVisible = !isPanelVisible;
 			}
 		});
 		animator.start();
