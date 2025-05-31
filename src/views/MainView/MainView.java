@@ -115,7 +115,7 @@ public class MainView extends JFrame {
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
 
 		// 타이핑 애니메이션 로직
-		Timer typingTimer = new Timer(10, null); // 글자당 딜레이 (ms)
+		Timer typingTimer = new Timer(20, null); // 글자당 딜레이 (ms)
 		final int[] index = { 0 };
 
 		typingTimer.addActionListener(e -> {
@@ -199,44 +199,7 @@ public class MainView extends JFrame {
 				false);
 
 		// 메뉴 기능
-		btnAddRepo.addActionListener(e -> {
-			if (mainEditRepoPanel == null) {
-				mainEditRepoPanel = new MainEditRepo(mainFunc, this).createPanel();
-				mainEditRepoPanel.setBounds(0, 40, 350, 0);
-				this.getLayeredPane().add(mainEditRepoPanel, JLayeredPane.POPUP_LAYER);
-			}
-
-			Animator animator = new Animator(300);
-			animator.setAcceleration(0.5f);
-			animator.setDeceleration(0.5f);
-			animator.setResolution(0);
-			animator.addTarget(new TimingTargetAdapter() {
-				@Override
-				public void timingEvent(float fraction) {
-					int targetHeight = 335;
-					int currentHeight;
-					if (!isPanelVisible) { // 아래로 슬라이드
-						currentHeight = (int) (targetHeight * fraction);
-					} else { // 위로 슬라이드
-						currentHeight = (int) (targetHeight * (1 - fraction));
-					}
-					mainEditRepoPanel.setBounds(0, 40, 350, currentHeight);
-					mainEditRepoPanel.revalidate();
-					mainEditRepoPanel.repaint();
-				}
-
-				@Override
-				public void end() {
-					if (isPanelVisible) {
-						getLayeredPane().remove(mainEditRepoPanel);
-						getLayeredPane().repaint();
-						mainEditRepoPanel = null; // 초기화
-					}
-					isPanelVisible = !isPanelVisible; // 상태 토글
-				}
-			});
-			animator.start();
-		});
+		btnAddRepo.addActionListener(e -> toggleEditRepoPanel());
 		btnLogout.addActionListener(e -> handleLogout());
 
 		// 메뉴 정렬
@@ -338,13 +301,18 @@ public class MainView extends JFrame {
 		// 저장소 상세 패널 ...
 		detailPanel.setBackground(Style.BACKGROUND_COLOR);
 		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
-		detailPanel.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createLineBorder(Color.GRAY),
-				"저장소 정보",
-				0, 0,
-				Style.TITLE_FONT.deriveFont(18f),
-				Style.BASIC_TEXT_COLOR));
-		detailPanel.setFont(Style.LABEL_FONT);
+		detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+		JPanel rightPanel = new JPanel();
+		rightPanel.setLayout(new BorderLayout());
+		rightPanel.setBackground(Style.BACKGROUND_COLOR);
+
+		JLabel detailTitle = new JLabel("저장소 정보");
+		detailTitle.setFont(Style.TITLE_FONT.deriveFont(15f));
+		detailTitle.setForeground(Style.BASIC_TEXT_COLOR);
+		detailTitle.setPreferredSize(new Dimension(detailTitle.getPreferredSize().width, 33));
+
+		rightPanel.add(detailTitle, BorderLayout.NORTH);
 
 		// 저장소 정보 ...
 		JLabel nameLabel = new JLabel();
@@ -375,9 +343,11 @@ public class MainView extends JFrame {
 		detailPanel.add(Box.createVerticalStrut(5));
 		detailPanel.add(sizeLabel);
 
+		rightPanel.add(detailPanel, BorderLayout.CENTER);
+
 		// 나누기 팬 ...
 		// 저장소 패널과 나누는 팬
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, detailPanel);
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, rightPanel);
 		// x좌표 800을 포인트로 나누기
 		splitPane.setDividerLocation(800);
 		splitPane.setResizeWeight(0.7);
@@ -390,14 +360,9 @@ public class MainView extends JFrame {
 		repositoryList.addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
 				if (detailPanel.getComponentCount() == 0) {
-					detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
-					detailPanel.setBorder(BorderFactory.createTitledBorder(
-							BorderFactory.createLineBorder(Color.GRAY),
-							"저장소 정보",
-							0, 0,
-							Style.TITLE_FONT.deriveFont(18f),
-							Style.BASIC_TEXT_COLOR));
 					detailPanel.setBackground(Style.BACKGROUND_COLOR);
+					detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
+					detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 					// 폰트
 					nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
 					descLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
@@ -491,6 +456,7 @@ public class MainView extends JFrame {
 		});
 		animator.start();
 	}
+
 	// 저장소 생성 애니메이션
 	public void toggleEditRepoPanel() {
 		if (mainEditRepoPanel == null) {

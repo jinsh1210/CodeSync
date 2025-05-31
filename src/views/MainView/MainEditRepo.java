@@ -36,7 +36,10 @@ public class MainEditRepo {
 
         JPanel panel = new JPanel(new MigLayout("wrap 2", "[right][grow,fill]", "[]10[]10[]10[]"));
         panel.setBackground(Style.FIELD_BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Style.BASIC_TEXT_COLOR, 1), // 바깥 테두리
+                BorderFactory.createEmptyBorder(10, 10, 10, 10) // 안쪽 여백
+        ));
         panel.setPreferredSize(new Dimension(350, 335));
 
         JScrollPane scrollPane = new JScrollPane(descField);
