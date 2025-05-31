@@ -90,7 +90,6 @@ public class RepoFunc {
 					refreshTimer.stop();
 					return;
 				}
-				// TODO: Dead Code
 				if (line == null)
 					break;
 				response += line;

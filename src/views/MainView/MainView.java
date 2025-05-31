@@ -199,14 +199,15 @@ public class MainView extends JFrame {
 		// 저장소 추가 화면
 		overlayPanel = new JPanel(null);
 		overlayPanel.setOpaque(false);
-		overlayPanel.setBounds(0, 0, getWidth(), getHeight()); // 프레임 크기와 동일
+		overlayPanel.setBounds(0, 0, getWidth(), getHeight());
 		overlayPanel.add(mainFunc.showCreateRepositoryPanel());
 
 		JPanel glass = (JPanel) getGlassPane();
 		glass.setLayout(null);
 		glass.add(overlayPanel);
-		glass.setVisible(false);
+		glass.setVisible(false); // 항상 visible 유지 (GlassPane은 배경 역할)
 
+		// 크기 동기화
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -216,9 +217,14 @@ public class MainView extends JFrame {
 
 		// 메뉴 기능
 		btnAddRepo.addActionListener(e -> {
-			glass.setVisible(!glass.isVisible()); // overlay 토글
+			boolean isVisible = glass.isVisible();
+			glass.setVisible(!isVisible);
+			if (!isVisible) {
+				mainFunc.toggleOverlayPanel();
+			} else {
+				mainFunc.toggleOverlayPanel();
+			}
 		});
-		btnAddRepo.addActionListener(e -> mainFunc.toggleOverlayPanel());
 		btnLogout.addActionListener(e -> handleLogout());
 
 		// 메뉴 정렬
@@ -272,7 +278,6 @@ public class MainView extends JFrame {
 								popupMenu.show(repositoryList, e.getX(), e.getY());
 								// 본인 저장소가 아닐 경우
 							} else if (selected != null && !selected.getUsername().equals(currentUser.getUsername())) {
-								// TODO: 콜라보에 속해 있을 때만 뜨게 변경 필요
 								popupMenu.add(rmCollabo);
 								popupMenu.show(repositoryList, e.getX(), e.getY());
 							}

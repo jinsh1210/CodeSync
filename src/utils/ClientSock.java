@@ -39,8 +39,7 @@ public class ClientSock {
 
     public static Socket socket;
     private static PrintWriter out;
-    //TODO: 사용되지 않는 변수 제거 필요
-    private static BufferedReader in;
+    // private static BufferedReader in;
     private static InputStream inputStream;
     private static String currentUser;
 
@@ -81,7 +80,7 @@ public class ClientSock {
         try {
             socket = new Socket(SERVERIP, PORT);
             out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             inputStream = socket.getInputStream();
 
             // 초기 인증
@@ -366,8 +365,7 @@ public class ClientSock {
             sendCommand("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);
             System.out.println("owner: " + Owner);
             System.out.println("/mkdir " + repository + " \"" + relativePath + "\" " + Owner);// 디버그
-            //TODO: 사용되지 않는 변수 제거 필요
-            String response = receiveResponse();
+            // String response = receiveResponse();
             return;
         }
         

@@ -48,6 +48,7 @@ public class MainFunc {
     private MainView mainView;
     private IconConv ic = new IconConv();
     private JPanel overlayPanel;
+    private Animator animator;
 
     // 생성자
     public MainFunc(DefaultListModel<Repository> listModel, JPanel detailPanel, User currentUser, MainView mainView,
@@ -125,7 +126,7 @@ public class MainFunc {
                 "[]10[]10[]10[]"));
         panel.setBackground(Style.FIELD_BACKGROUND);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.setSize(new Dimension(400, 400));
+        panel.setSize(new Dimension(400, 335));
 
         JScrollPane scrollPane = new JScrollPane(descField);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -143,7 +144,7 @@ public class MainFunc {
 
         JButton cancelButton = Style.createStyledButton("취소", Style.PRIMARY_COLOR, Style.FIELD_BACKGROUND);
         JButton saveButton = Style.createStyledButton("생성", Style.WARNING_COLOR, Style.FIELD_BACKGROUND);
-        
+
         saveButton.addActionListener(e -> {
             String rawName = nameField.getText().trim();
             String name = rawName.replaceAll("\\s+", "_");
@@ -384,22 +385,43 @@ public class MainFunc {
 
     // 저장소 추가 애니메이션 로직
     public void toggleOverlayPanel() {
+        if (animator != null && animator.isRunning()) {
+            animator.stop();
+        }
+
+        boolean isVisible = overlayPanel.isVisible();
         int startHeight = overlayPanel.getHeight();
-        int targetHeight = (startHeight == 0) ? 335 : 0; // 열릴 때 높이
-        Animator animator = new Animator(500);
-        animator.setAcceleration(0.5f);
-        animator.setDeceleration(0.5f);
-        animator.setResolution(0);
+        int targetHeight = (!isVisible || startHeight == 0) ? 335 : 0; // visible이 false거나 높이가 0이면 열림
+
+        if (!isVisible) {
+            overlayPanel.setVisible(true); // 🌟 패널이 닫힌 상태라면 열기
+        }
+
+        int frameWidth = mainView.getWidth();
+        int x = (frameWidth - 400) / 2;
+        int y = 100;
+
+        animator = new Animator(500);
+        animator.setAcceleration(0.4f);
+        animator.setDeceleration(0.4f);
+        animator.setResolution(10);
+
         animator.addTarget(new TimingTargetAdapter() {
             @Override
             public void timingEvent(float fraction) {
                 int newHeight = (int) (startHeight + (targetHeight - startHeight) * fraction);
-                overlayPanel.setBounds(0, 0, 400, newHeight);
+                overlayPanel.setBounds(x, y, 400, newHeight);
                 overlayPanel.revalidate();
                 overlayPanel.repaint();
+            }
+
+            @Override
+            public void end() {
+                if (targetHeight == 0) {
+                    overlayPanel.setVisible(false); // 닫힘 시에만 감춤
+                }
             }
         });
         animator.start();
     }
-
 }
