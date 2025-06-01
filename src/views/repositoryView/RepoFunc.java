@@ -275,39 +275,43 @@ public class RepoFunc {
 
 	// 파일 업로드하기
 	public void handleUpload() {
-		ClientSock.sendCommand("/push " + repository.getName() + " \"" + "checkPermission" + "\" " + 0 + " "
-				+ repository.getUsername());
+		ClientSock.sendCommand("/push " + repository.getName() + " \"checkPermission\" 0 " + repository.getUsername());
 		if (ClientSock.receiveResponse().startsWith("/#/push_error 이 저장소에 푸시할 권한이 없습니다.")) {
 			JOptionPane.showMessageDialog(null, "권한이 없습니다.", "권한 오류", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		System.out.println("권한확인완료");
+
 		if (SavedPath == null || SavedPath.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "로컬 저장소를 지정해주세요");
 			return;
 		}
+
 		File selectedFile = new File(SavedPath);
 		if (!selectedFile.exists()) {
 			JOptionPane.showMessageDialog(null, "지정한 경로가 존재하지 않습니다.");
 			return;
 		}
+
 		new Thread(() -> {
 			try {
+				SwingUtilities.invokeLater(() -> progressBar.setVisible(true));
 				refreshTimer.stop();
-				// Ensure .jsRepohashed.json exists
+
+				// 해시 파일 초기화
 				File hashFile = new File(SavedPath, ".jsRepohashed.json");
 				if (!hashFile.exists()) {
 					try (java.io.FileWriter writer = new java.io.FileWriter(hashFile)) {
 						writer.write("[]");
 						System.out.println("[handleUpload] 초기 해시파일 생성 완료");
-					} catch (java.io.IOException e) {
-						System.err.println("[handleUpload] 초기 해시파일 생성 실패");
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
 
-				if (!ClientSock.mergeCheck(repository.getName(), repository.getUsername())) {
-
+				// 병합 체크 (UI 스레드에서 사용자 선택 처리)
+				boolean hasConflict = !ClientSock.mergeCheck(repository.getName(), repository.getUsername());
+				if (hasConflict) {
 					JSONArray errorArray = ClientSock.mergeFailed;
 					StringBuilder fileNames = new StringBuilder();
 					if (errorArray != null) {
@@ -315,42 +319,46 @@ public class RepoFunc {
 							String errorPath = errorArray.getString(i);
 							String fileName = errorPath.substring(errorPath.lastIndexOf("/") + 1);
 							fileNames.append(fileName);
-							if (i < errorArray.length() - 1) {
+							if (i < errorArray.length() - 1)
 								fileNames.append(", ");
-							}
 						}
 					}
-					int option = JOptionPane.showOptionDialog(null,
-							"병합 충돌 발생!\n파일 이름: " + fileNames.toString(), "병합 충돌",
-							JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null,
-							new String[] { "풀", "강제 푸시", "취소" }, "풀");
-
-					switch (option) {
-						case 0: // 풀
-							handleDownload();
-							break;
-						case 1: // 강제 푸시
-							ClientSock.push(new File(SavedPath), "", repository.getName(), currentUser.getId(),
-									repository.getUsername(), progressBar, array);
-							ClientSock.getHash(repository.getName(), currentUser.getUsername());
-							break;
-						case 2: // 취소
-							// 아무것도 하지 않음
-							break;
-						default:
-							break;
-					}
+					SwingUtilities.invokeAndWait(() -> {
+						int option = JOptionPane.showOptionDialog(null,
+								"병합 충돌 발생!\n파일 이름: " + fileNames,
+								"병합 충돌", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE,
+								null, new String[] { "풀", "강제 푸시", "취소" }, "풀");
+						if (option == 0) {
+							handleDownload(); // 풀
+						} else if (option == 1) {
+							new Thread(() -> {
+								try {
+									ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
+											repository.getUsername(), progressBar, array);
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								ClientSock.getHash(repository.getName(), currentUser.getUsername());
+								SwingUtilities.invokeLater(() -> loadFiles(repository.getUsername()));
+							}).start();
+						}
+						// 취소는 아무 동작 없음
+					});
 				} else {
 					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
 							repository.getUsername(), progressBar, array);
 					ClientSock.getHash(repository.getName(), repository.getUsername());
+					SwingUtilities.invokeLater(() -> loadFiles(repository.getUsername()));
 				}
+
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				JOptionPane.showMessageDialog(null, "업로드 중 오류 발생");
+				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "업로드 중 오류 발생"));
 			} finally {
-				SwingUtilities.invokeLater(() -> progressBar.setVisible(false));
-				refreshTimer.start();
+				SwingUtilities.invokeLater(() -> {
+					progressBar.setVisible(false);
+					refreshTimer.start();
+				});
 			}
 		}).start();
 	}

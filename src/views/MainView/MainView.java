@@ -100,7 +100,7 @@ public class MainView extends JFrame {
 		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침", true);
 		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
 		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-		refreshIconButton.addActionListener(e -> performSearch());
+		refreshIconButton.addActionListener(e -> returnBack());
 
 		// 상단 패널 구성 요소 ...
 		// 제목
@@ -139,8 +139,8 @@ public class MainView extends JFrame {
 		searchField.setFont(Style.LABEL_FONT.deriveFont(14f));
 		searchField.setForeground(Style.BASIC_TEXT_COLOR);
 		// 검색 기능
-		searchButton.addActionListener(e -> performSearch());
-		searchField.addActionListener(e -> performSearch());
+		searchButton.addActionListener(e -> returnBack());
+		searchField.addActionListener(e -> returnBack());
 
 		// 메인 상단 우측 패널
 		JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -376,7 +376,7 @@ public class MainView extends JFrame {
 
 	// 애니메이션 로직
 	// 메인 되돌아가기
-	private void performSearch() {
+	public void returnBack() {
 		animatePanelResize(contentPanel, listPanel, rightPanel, 0.3, 0.7);
 		detailPanel.removeAll();
 		detailPanel.revalidate();

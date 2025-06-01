@@ -156,7 +156,24 @@ public class MainFunc {
     }
 
     // 저장소 삭제 로직
+    private boolean isDeleting = false;
+
     public void handleDeleteRepository(Repository selected) {
+        if (isDeleting)
+            return;
+        isDeleting = true;
+
+        // 열려 있는 저장소 확인 및 Timer 중지
+        if (detailPanel.getComponentCount() > 0 && detailPanel.getComponent(0) instanceof RepoMainPanel) {
+            RepoMainPanel openPanel = (RepoMainPanel) detailPanel.getComponent(0);
+            if (openPanel.getRepository().getName().equals(selected.getName())) {
+                openPanel.stopRefreshTimer(); // 타이머 중지
+                detailPanel.removeAll(); // 패널 초기화
+                detailPanel.revalidate();
+                detailPanel.repaint();
+            }
+        }
+
         int confirm = JOptionPane.showConfirmDialog(null, "정말로 '" + selected.getName() + "' 저장소를 삭제하시겠습니까?",
                 "저장소 삭제 확인", JOptionPane.YES_NO_OPTION);
 
@@ -164,10 +181,12 @@ public class MainFunc {
             try {
                 ClientSock.sendCommand("/repo_delete " + selected.getName());
                 String response = ClientSock.receiveResponse();
+
                 if (response.startsWith("/#/repo_delete_success")) {
                     JOptionPane.showMessageDialog(null, "저장소가 삭제되었습니다.");
                     loadRepositories();
-                } else if (response != null && response.startsWith("/#/repo_delete_fail")) {
+                    mainView.returnBack();
+                } else if (response.startsWith("/#/repo_delete_fail")) {
                     showErrorDialog("삭제 실패: 저장소 삭제 권한이 없습니다.");
                 } else {
                     showErrorDialog(response);
@@ -176,6 +195,8 @@ public class MainFunc {
                 JOptionPane.showMessageDialog(null, "서버 연결 실패");
             }
         }
+
+        isDeleting = false;
     }
 
     // 저장소 검색 로직
@@ -280,6 +301,7 @@ public class MainFunc {
         loadRepositories();
     }
 
+    // 저장소 생성 로직
     public void handleAddRepo(String rawName, String description, String selected) {
 
         String name = rawName.replaceAll("\\s+", "_");
