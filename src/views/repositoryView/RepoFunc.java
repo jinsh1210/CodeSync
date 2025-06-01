@@ -82,6 +82,8 @@ public class RepoFunc {
 			String response = "";
 			while (true) {
 				String line = ClientSock.receiveResponse();
+				if (line == null)
+					break;
 				if (line.contains("/#/repo_content_error 저장소가 존재하지 않습니다")) {
 					JOptionPane.showMessageDialog(null, "저장소가 존재하지 않습니다.", "에러", JOptionPane.ERROR_MESSAGE);
 					refreshTimer.stop();
@@ -90,8 +92,6 @@ public class RepoFunc {
 					refreshTimer.stop();
 					return;
 				}
-				if (line == null)
-					break;
 				response += line;
 				if (line.contains("/#/repo_content_EOL"))
 					break;
