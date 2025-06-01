@@ -115,7 +115,8 @@ public class ColView extends JDialog {
             JButton addButton = ic.createImageButton("src/icons/coladd.png", Style.PRIMARY_COLOR, 40, 40, "", "콜라보 추가",
                     true);
             addButton.addActionListener(e -> {
-                String newUser = addColDialog("추가할 사용자 아이디 입력:", dialog);
+                String newUser = addColDialog(" 추가할 사용자 아이디 입력:", dialog);
+
                 if (newUser != null && !newUser.trim().isEmpty()) {
                     try {
                         ClientSock.sendCommand("/add_collaborator " + repository.getName() + " " + newUser.trim());
@@ -169,6 +170,7 @@ public class ColView extends JDialog {
         label.setFont(Style.LABEL_FONT);
         panel.add(label, BorderLayout.NORTH);
         panel.setBackground(Style.FIELD_BACKGROUND);
+        panel.setPreferredSize(new Dimension(250, 130));
 
         JTextField textField = Style.createStyledTextField();
 
