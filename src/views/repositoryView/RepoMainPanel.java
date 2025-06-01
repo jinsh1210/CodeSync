@@ -90,8 +90,8 @@ public class RepoMainPanel extends JPanel {
                 JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
                 topRightPanel.setBackground(Style.BACKGROUND_COLOR);
                 if (repository.getUsername().equals(currentUser.getUsername())) {
-                        JButton collaborateButton = ic.createImageButton("src/icons/col.png", Style.PRIMARY_COLOR, 30,
-                                        30, null,
+                        JButton collaborateButton = ic.createImageButton("src/icons/col.png", Style.PRIMARY_COLOR, 50,
+                                        50, null,
                                         "콜라보", true);
                         collaborateButton.addActionListener(e -> colView.handleViewCollaborators());
                         topRightPanel.add(collaborateButton);
