@@ -405,7 +405,7 @@ public class MainView extends JFrame {
 
 		MigLayout layout = (MigLayout) contentPanel.getLayout();
 
-		animator = new Animator(800);
+		animator = new Animator(1000);
 		animator.setAcceleration(0.5f);
 		animator.setDeceleration(0.5f);
 		animator.setResolution(0);
