@@ -5,6 +5,7 @@ import java.awt.event.*;
 
 import org.jdesktop.animation.timing.*;
 import net.miginfocom.swing.MigLayout;
+import utils.ClientSock;
 
 import java.text.DecimalFormat;
 
@@ -135,7 +136,7 @@ public class LRMain extends javax.swing.JFrame {
     }
 
     public static void main(String args[]) {
-
+        Runtime.getRuntime().addShutdownHook(new Thread(()->ClientSock.disconnect()));
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {

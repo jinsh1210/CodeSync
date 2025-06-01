@@ -41,7 +41,7 @@ public class ClientSock {
     private static PrintWriter out;
     // private static BufferedReader in;
     private static InputStream inputStream;
-    private static String currentUser;
+    private static String currentUser=null;
 
     public static void setUser(String user){
         currentUser=user;
@@ -415,11 +415,15 @@ public class ClientSock {
 
 
     public static void disconnect() {
-        try {
-            if (socket != null)
+        System.out.println("종료합니다.");
+        try{
+            if(socket!=null&&!socket.isClosed()){
+                if(currentUser==null) sendCommand(":c:logout");
+                else sendCommand("/logout");
                 socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            }
+        }catch(IOException e){
+            System.out.println("종료에 문제가 발생했습니다.");
         }
     }
 
