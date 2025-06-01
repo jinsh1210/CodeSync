@@ -24,7 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -53,9 +52,7 @@ public class MainView extends JFrame {
 	private JList<Repository> repositoryList;
 	private DefaultListModel<Repository> listModel;
 	private JPopupMenu popupMenu;
-	private JPanel detailPanel;
 
-	private JSplitPane splitPane;
 	private MainFunc mainFunc;
 	private Timer timer = null;
 	private IconConv ic = new IconConv();
@@ -63,9 +60,19 @@ public class MainView extends JFrame {
 	private JPanel contentPanel;
 	private JPanel listPanel;
 	private JPanel rightPanel;
+	private JPanel detailPanel;
 
+	// 저장소 정보 ...
+	private JLabel nameLabel = new JLabel();
+	private JLabel descLabel = new JLabel();
+	private JLabel visibilityLabel = new JLabel();
+	private JLabel username = new JLabel();
+	private JLabel sizeLabel = new JLabel();
+
+	private Animator animator = null;
 	private JPanel mainEditRepoPanel = null;
 	private boolean isPanelVisible = false; // 패널 표시 상태 플래그
+	private double currentRatio = 0.7; // 초기값 7:3
 
 	// 생성자 - 현재 사용자 정보를 저장하고 UI 초기화 및 저장소 목록 로딩
 	public MainView(User user) {
@@ -98,7 +105,7 @@ public class MainView extends JFrame {
 		// 상단 패널 구성 요소 ...
 		// 제목
 		String wusername = currentUser.getUsername();
-		String fullText = "어서오세요, " + wusername + "님";
+		String fullText = " 어서오세요, " + wusername + "님";
 		JLabel titleLabel = new JLabel();
 		titleLabel.setFont(Style.TITLE_FONT);
 		titleLabel.setForeground(Style.PRIMARY_COLOR);
@@ -143,6 +150,7 @@ public class MainView extends JFrame {
 
 		// 메인 상단 패널
 		JPanel topPanel = new JPanel(new BorderLayout());
+
 		topPanel.setBackground(Style.BACKGROUND_COLOR);
 		topPanel.add(titleLabel, BorderLayout.WEST);
 		topPanel.add(topRightPanel, BorderLayout.EAST);
@@ -228,90 +236,37 @@ public class MainView extends JFrame {
 		listPanel.add(scrollPane, BorderLayout.CENTER);
 
 		// 저장소 상세 패널 ...
-		detailPanel.setBackground(Style.BACKGROUND_COLOR);
-		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
-		detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-
+		// 우측 패널
 		rightPanel = new JPanel();
 		rightPanel.setLayout(new BorderLayout());
 		rightPanel.setBackground(Style.BACKGROUND_COLOR);
 
+		// 저장소 정보 타이틀 라벨
 		JLabel detailTitle = new JLabel("저장소 정보");
 		detailTitle.setFont(Style.TITLE_FONT.deriveFont(15f));
 		detailTitle.setForeground(Style.BASIC_TEXT_COLOR);
 		detailTitle.setPreferredSize(new Dimension(detailTitle.getPreferredSize().width, 33));
 
+		// 저장소 상세 정보 및 저장소 화면 패널
+		initializeDetailPanel();
+
+		// 우측 패널에 저장소 타이틀 라벨과 화면 추가
 		rightPanel.add(detailTitle, BorderLayout.NORTH);
-
-		// 저장소 정보 ...
-		JLabel nameLabel = new JLabel();
-		JLabel descLabel = new JLabel();
-		JLabel visibilityLabel = new JLabel();
-		JLabel username = new JLabel();
-		JLabel sizeLabel = new JLabel();
-		// 폰트
-		nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
-		descLabel.setFont(Style.DESC_FONT);
-		visibilityLabel.setFont(Style.DESC_FONT);
-		username.setFont(Style.DESC_FONT);
-		sizeLabel.setFont(Style.DESC_FONT);
-		// 색깔
-		nameLabel.setForeground(Style.BASIC_TEXT_COLOR);
-		descLabel.setForeground(Style.BASIC_TEXT_COLOR);
-		visibilityLabel.setForeground(Style.BASIC_TEXT_COLOR);
-		username.setForeground(Style.BASIC_TEXT_COLOR);
-		sizeLabel.setForeground(Style.BASIC_TEXT_COLOR);
-		// detailPanel에 라벨 5픽셀 간격으로 추가
-		detailPanel.add(nameLabel);
-		detailPanel.add(Box.createVerticalStrut(5));
-		detailPanel.add(descLabel);
-		detailPanel.add(Box.createVerticalStrut(5));
-		detailPanel.add(visibilityLabel);
-		detailPanel.add(Box.createVerticalStrut(5));
-		detailPanel.add(username);
-		detailPanel.add(Box.createVerticalStrut(5));
-		detailPanel.add(sizeLabel);
-
 		rightPanel.add(detailPanel, BorderLayout.CENTER);
 
+		// 리스트 패널과 우측 패널 나누는 컨텐츠 패널(MigLayout)
 		contentPanel = new JPanel(new MigLayout("insets 0, fill", "[grow][grow]", "[grow]"));
+		contentPanel.setBackground(Style.BACKGROUND_COLOR);
 		contentPanel.add(listPanel, "grow, push, w 70%, h 100%");
 		contentPanel.add(rightPanel, "grow, push, w 30%, h 100%");
-
+		// 메인 패널에 컨텐츠 패널 추가
 		mainPanel.add(contentPanel, BorderLayout.CENTER);
-
-		// 나누기 팬 ...
-		// 저장소 패널과 나누는 팬
 
 		// 리스트 항목 선택 시 상세 패널 갱신
 		repositoryList.addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) { // 변경 이벤트가 끝났을 때만 처리
 				if (detailPanel.getComponentCount() == 0) {
-					detailPanel.setBackground(Style.BACKGROUND_COLOR);
-					detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
-					detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-					// 폰트
-					nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
-					descLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
-					visibilityLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
-					username.setFont(Style.LABEL_FONT.deriveFont(13f));
-					sizeLabel.setFont(Style.LABEL_FONT.deriveFont(13f));
-					// 색깔
-					nameLabel.setForeground(Style.BASIC_TEXT_COLOR);
-					descLabel.setForeground(Style.BASIC_TEXT_COLOR);
-					visibilityLabel.setForeground(Style.BASIC_TEXT_COLOR);
-					username.setForeground(Style.BASIC_TEXT_COLOR);
-					sizeLabel.setForeground(Style.BASIC_TEXT_COLOR);
-					// 5픽셀 간격으로 추가
-					detailPanel.add(nameLabel);
-					detailPanel.add(Box.createVerticalStrut(5));
-					detailPanel.add(descLabel);
-					detailPanel.add(Box.createVerticalStrut(5));
-					detailPanel.add(visibilityLabel);
-					detailPanel.add(Box.createVerticalStrut(5));
-					detailPanel.add(username);
-					detailPanel.add(Box.createVerticalStrut(5));
-					detailPanel.add(sizeLabel);
+					initializeDetailPanel();
 					detailPanel.revalidate();
 					detailPanel.repaint();
 				}
@@ -375,23 +330,52 @@ public class MainView extends JFrame {
 		});
 	}
 
+	// 저장소 상세 정보 및 저장소 화면 패널
+	private void initializeDetailPanel() {
+		detailPanel.setBackground(Style.BACKGROUND_COLOR);
+		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
+		detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+		// 폰트
+		nameLabel.setFont(Style.LABEL_FONT.deriveFont(14f));
+		descLabel.setFont(Style.DESC_FONT);
+		visibilityLabel.setFont(Style.DESC_FONT);
+		username.setFont(Style.DESC_FONT);
+		sizeLabel.setFont(Style.DESC_FONT);
+
+		// 색깔
+		nameLabel.setForeground(Style.BASIC_TEXT_COLOR);
+		descLabel.setForeground(Style.BASIC_TEXT_COLOR);
+		visibilityLabel.setForeground(Style.BASIC_TEXT_COLOR);
+		username.setForeground(Style.BASIC_TEXT_COLOR);
+		sizeLabel.setForeground(Style.BASIC_TEXT_COLOR);
+
+		// detailPanel에 라벨 5픽셀 간격으로 추가
+		detailPanel.add(nameLabel);
+		detailPanel.add(Box.createVerticalStrut(5));
+		detailPanel.add(descLabel);
+		detailPanel.add(Box.createVerticalStrut(5));
+		detailPanel.add(visibilityLabel);
+		detailPanel.add(Box.createVerticalStrut(5));
+		detailPanel.add(username);
+		detailPanel.add(Box.createVerticalStrut(5));
+		detailPanel.add(sizeLabel);
+	}
+
 	// 로그아웃 처리 - 로그인 화면으로 전환하고 현재 창 닫기
 	private void handleLogout() {
 		int confirm = JOptionPane.showConfirmDialog(this, "정말 로그아웃 하시겠습니까?", "로그아웃", JOptionPane.YES_NO_OPTION);
 		if (confirm == JOptionPane.YES_OPTION) {
-			new LRMain().setVisible(true);
-			this.dispose();
 			if (timer != null)
 				timer.stop();
-			ClientSock.disconnect();
-			ClientSock.connect();
+			ClientSock.disconnect(); // 안전하게 스레드 종료 처리 필요
+			this.dispose();
+			new LRMain().setVisible(true); // 로그인 화면으로 전환
 		}
 	}
 
 	// 애니메이션 로직
-	private Animator animator = null;
-
-	// 메인 원래 비율 로직
+	// 메인 되돌아가기
 	private void performSearch() {
 		animatePanelResize(contentPanel, listPanel, rightPanel, 0.3, 0.7);
 		detailPanel.removeAll();
@@ -411,32 +395,36 @@ public class MainView extends JFrame {
 	// 메인 <-> 저장소 애니메이션
 	private void animatePanelResize(JPanel contentPanel, JPanel listPanel, JPanel rightPanel, double startRatio,
 			double endRatio) {
-		if (startRatio == 0.3 || startRatio == 0.7) {
-			if (animator != null && animator.isRunning()) {
-				animator.stop();
+		if (currentRatio == endRatio) {
+			return; // 이미 목표 비율이면 애니메이션 실행 안함
+		}
+
+		if (animator != null && animator.isRunning()) {
+			animator.stop();
+		}
+
+		MigLayout layout = (MigLayout) contentPanel.getLayout();
+
+		animator = new Animator(800);
+		animator.setAcceleration(0.5f);
+		animator.setDeceleration(0.5f);
+		animator.setResolution(0);
+		animator.addTarget(new TimingTargetAdapter() {
+			@Override
+			public void timingEvent(float fraction) {
+				double ratio = startRatio + (endRatio - startRatio) * fraction;
+				layout.setComponentConstraints(listPanel, "grow, push, w " + (int) (ratio * 100) + "%, h 100%");
+				layout.setComponentConstraints(rightPanel, "grow, push, w " + (int) ((1 - ratio) * 100) + "%, h 100%");
+				contentPanel.revalidate();
+				contentPanel.repaint();
 			}
 
-			MigLayout layout = (MigLayout) contentPanel.getLayout();
-
-			animator = new Animator(500);
-			animator.setAcceleration(0.5f);
-			animator.setDeceleration(0.5f);
-			animator.setResolution(0);
-			animator.addTarget(new TimingTargetAdapter() {
-				@Override
-				public void timingEvent(float fraction) {
-					double ratio = startRatio + (endRatio - startRatio) * fraction;
-					layout.setComponentConstraints(listPanel, "grow, push, w " + (int) (ratio * 100) + "%, h 100%");
-					layout.setComponentConstraints(rightPanel,
-							"grow, push, w " + (int) ((1 - ratio) * 100) + "%, h 100%");
-					contentPanel.revalidate();
-					contentPanel.repaint();
-				}
-			});
-			animator.start();
-		} else {
-			return; // 그 외 경우 무시
-		}
+			@Override
+			public void end() {
+				currentRatio = endRatio; // 애니메이션 종료 후 현재 비율 갱신
+			}
+		});
+		animator.start();
 	}
 
 	// 저장소 생성 애니메이션
