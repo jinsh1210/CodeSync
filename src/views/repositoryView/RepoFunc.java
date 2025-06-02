@@ -323,27 +323,27 @@ public class RepoFunc {
 								fileNames.append(", ");
 						}
 					}
-					SwingUtilities.invokeAndWait(() -> {
-						int option = JOptionPane.showOptionDialog(null,
-								"병합 충돌 발생!\n파일 이름: " + fileNames,
-								"병합 충돌", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE,
-								null, new String[] { "풀", "강제 푸시", "취소" }, "풀");
-						if (option == 0) {
-							handleDownload(); // 풀
-						} else if (option == 1) { //강제푸쉬
-							new Thread(() -> {
-								try {
-									ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
-											repository.getUsername(), progressBar, array);
-									ClientSock.getHash(repository.getName(), currentUser.getUsername());
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-								SwingUtilities.invokeLater(() -> loadFiles(repository.getUsername()));
-							}).start();
+					
+					int option = JOptionPane.showOptionDialog(null,
+							"병합 충돌 발생!\n파일 이름: " + fileNames,
+							"병합 충돌", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE,
+							null, new String[] { "풀", "강제 푸시", "취소" }, "풀");
+					if (option == 0) {
+						handleDownload(); // 풀
+					} else if (option == 1) { //강제푸쉬
+						
+						try {
+							ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
+									repository.getUsername(), progressBar, array);
+							ClientSock.getHash(repository.getName(), currentUser.getUsername());
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-						// 취소는 아무 동작 없음
-					});
+						SwingUtilities.invokeLater(() -> loadFiles(repository.getUsername()));
+						
+					}
+					// 취소는 아무 동작 없음
+				
 				} else {
 					ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
 							repository.getUsername(), progressBar, array);
