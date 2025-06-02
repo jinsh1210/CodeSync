@@ -1,0 +1,26 @@
+# Java build output
+/target/
+/repos/
+/bin/
+nohup.out
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# macOS Finder
+.DS_Store
+.vscode/
+
+# Logs
+*.log
+config.json
+# Temporary files
+*.tmp
+*.bak
+*.swp
