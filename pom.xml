@@ -1,56 +1,98 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>teamProject</groupId>
   <artifactId>teamProject</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+
   <dependencies>
-        <dependency>
-            <groupId>com.fifesoft</groupId>
-            <artifactId>rsyntaxtextarea</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
-            <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
-    		<groupId>mysql</groupId>
-    		<artifactId>mysql-connector-java</artifactId>
-    		<version>8.0.33</version>
-		</dependency>
-		
-		<dependency>
-    		<groupId>org.json</groupId>
-    		<artifactId>json</artifactId>
-    		<version>20210307</version>
-		</dependency>
-
     <dependency>
-        <groupId>com.miglayout</groupId>
-        <artifactId>miglayout-swing</artifactId>
-        <version>5.3</version>
+      <groupId>com.fifesoft</groupId>
+      <artifactId>rsyntaxtextarea</artifactId>
+      <version>3.6.0</version>
     </dependency>
 
     <dependency>
-        <groupId>net.java.dev.timingframework</groupId>
-        <artifactId>timingframework</artifactId>
-        <version>1.0</version>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.38</version>
+      <scope>provided</scope>
     </dependency>
 
-    </dependencies>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.33</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20210307</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.miglayout</groupId>
+      <artifactId>miglayout-swing</artifactId>
+      <version>5.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.java.dev.timingframework</groupId>
+      <artifactId>timingframework</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <sourceDirectory>src</sourceDirectory>
+
+    <!-- ✅ 리소스 경로 추가: src/icons/ 폴더 그대로 포함 -->
+    <resources>
+      <resource>
+        <directory>src/icons</directory>
+        <targetPath>src/icons</targetPath>
+        <includes>
+          <include>**/*.png</include>
+          <include>**/*.jpg</include>
+        </includes>
+      </resource>
+    </resources>
+
     <plugins>
+      <!-- Java 컴파일러 설정 -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
           <release>21</release>
         </configuration>
+      </plugin>
+
+      <!-- Fat JAR + Main-Class 설정 -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+            <manifest>
+              <mainClass>views.login_register.LRMain</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
