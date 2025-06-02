@@ -312,9 +312,12 @@ public class ClientSock {
             long fileSize = file.length(); // 파일 크기 측정
 
             sendCommand("/push " + repoName + " \"" + serverPath + "\" " + fileSize + " " + Owner);
-            System.out.println("/push " + repoName + " \"" + serverPath + "\" " + fileSize + " " + Owner); // 디버그
-            System.out.println("owner: " + Owner);
+            
             String response = receiveResponse();
+            int endIdx = response.indexOf("]") + 1;
+            if (endIdx > 0 && endIdx <= response.length()) {
+                response = response.substring(0, endIdx);
+            }
             if (!"/#/push_ready".equals(response.trim())) {
                 System.err.println("[Client] push 실패: 서버 응답 = " + response);
                 return;

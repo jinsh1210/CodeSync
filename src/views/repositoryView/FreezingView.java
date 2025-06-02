@@ -59,6 +59,12 @@ public class FreezingView extends JFrame {
                 // .jsRepohashed.json 업데이트
                 try {
                     File hashFile = new File(basePath, ".jsRepohashed.json");
+                    Path hashPath = hashFile.toPath(); // 🔹 File → Path 변환
+
+                    if (!Files.exists(hashPath)) {
+                        System.out.println("⚠️ hash 파일 없음: " + hashFile);
+                        Files.writeString(hashPath, "[]");
+                    }
                     JSONArray json = new JSONArray(Files.readString(hashFile.toPath()));
                     for (int i = 0; i < json.length(); i++) {
                         JSONObject obj = json.getJSONObject(i);
