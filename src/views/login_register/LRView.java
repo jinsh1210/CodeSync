@@ -21,6 +21,7 @@ public class LRView extends javax.swing.JLayeredPane {
     private JTextField inusernameField;
     private JPasswordField inpasswordField;
 
+    // LRView 생성자
     public LRView() {
         ClientSock.connect();
         LRFunc.setLRView(this);
@@ -31,7 +32,7 @@ public class LRView extends javax.swing.JLayeredPane {
         login.setVisible(true);
     }
 
-    // 로그인 | 회원가입 화면
+    // 회원가입 화면 초기화
     private void initRegister() {
         register.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]10[]10[]10[]10[]10[]30[]push"));
         // 제목
@@ -73,6 +74,7 @@ public class LRView extends javax.swing.JLayeredPane {
         register.add(signUpButton, "w 30%, h 40");
     }
 
+    // 로그인 화면 초기화
     private void initLogin() {
         login.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]10[]10[]10[]30[]push"));
         // 제목
@@ -105,7 +107,7 @@ public class LRView extends javax.swing.JLayeredPane {
         login.add(loginButton, "w 30%, h 40");
     }
 
-    // 애니메이션 작동 시 로그인or회원가입 전환 로직
+    // 애니메이션 작동 시 로그인 <-> 회원가입 전환 로직
     public void showRegister(boolean show) {
         if (show) {
             register.setVisible(false);
@@ -116,6 +118,7 @@ public class LRView extends javax.swing.JLayeredPane {
         }
     }
 
+    // 컴포넌트 초기화
     private void initComponents() {
 
         login = new javax.swing.JPanel();

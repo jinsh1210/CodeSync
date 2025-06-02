@@ -12,6 +12,7 @@ import utils.*;
 
 public class LRCover extends javax.swing.JPanel {
 
+    // 패널의 배경색, 버튼 색상, 폰트 등 스타일 정의
     private final DecimalFormat df = new DecimalFormat("##0.###");
     private ActionListener event;
     private MigLayout layout;
@@ -20,11 +21,12 @@ public class LRCover extends javax.swing.JPanel {
     private LRView lrView;
     private IconConv ic = new IconConv();
 
+    // LRView 객체를 통해 로그인 및 회원가입 화면에 접근
     public void setLRView(LRView view) {
         lrView = view;
     }
 
-    // 패널 표현 형식
+    // 생성자
     public LRCover(LRView view) {
         this.lrView = view;
         setOpaque(false);
@@ -33,7 +35,8 @@ public class LRCover extends javax.swing.JPanel {
         init();
     }
 
-    // 커버 패널
+    // 초기화 메소드
+    // 로고 이미지와 버튼을 생성하고 레이아웃에 추가
     private void init() {
 
         // 로고 사진 패널
@@ -69,6 +72,7 @@ public class LRCover extends javax.swing.JPanel {
         super.paintComponent(g);
     }
 
+    // 이벤트 리스너 추가 메소드
     public void addEvent(ActionListener event) {
         this.event = event;
     }
