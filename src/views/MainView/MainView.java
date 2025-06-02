@@ -375,7 +375,7 @@ public class MainView extends JFrame {
 	}
 
 	// 애니메이션 로직
-	// 메인 되돌아가기
+	// 메인 화면 초기화 애니메이션
 	public void returnBack() {
 		animatePanelResize(contentPanel, listPanel, rightPanel, 0.3, 0.7);
 		detailPanel.removeAll();
