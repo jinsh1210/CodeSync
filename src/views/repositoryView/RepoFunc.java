@@ -330,15 +330,15 @@ public class RepoFunc {
 								null, new String[] { "풀", "강제 푸시", "취소" }, "풀");
 						if (option == 0) {
 							handleDownload(); // 풀
-						} else if (option == 1) {
+						} else if (option == 1) { //강제푸쉬
 							new Thread(() -> {
 								try {
 									ClientSock.push(selectedFile, "", repository.getName(), currentUser.getId(),
 											repository.getUsername(), progressBar, array);
+									ClientSock.getHash(repository.getName(), currentUser.getUsername());
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
-								ClientSock.getHash(repository.getName(), currentUser.getUsername());
 								SwingUtilities.invokeLater(() -> loadFiles(repository.getUsername()));
 							}).start();
 						}
