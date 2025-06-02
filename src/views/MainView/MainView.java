@@ -332,6 +332,7 @@ public class MainView extends JFrame {
 
 	// 저장소 상세 정보 및 저장소 화면 패널
 	private void initializeDetailPanel() {
+		// detailPanel 초기화
 		detailPanel.setBackground(Style.BACKGROUND_COLOR);
 		detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
 		detailPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -377,90 +378,111 @@ public class MainView extends JFrame {
 	// 애니메이션 로직
 	// 메인 화면 초기화 애니메이션
 	public void returnBack() {
+		// 패널 크기를 원래대로 애니메이션으로 복원 (우측 상세 패널 30% -> 70%)
 		animatePanelResize(contentPanel, listPanel, rightPanel, 0.3, 0.7);
+		// 상세 정보 패널의 모든 컴포넌트 제거
 		detailPanel.removeAll();
+		// 상세 패널 레이아웃 갱신
 		detailPanel.revalidate();
+		// 상세 패널 다시 그리기
 		detailPanel.repaint();
+		// 저장소 목록 새로 불러오기
 		mainFunc.loadRepositories();
+		// 저장소 리스트가 비어있지 않으면 첫 번째 항목 선택 해제
 		SwingUtilities.invokeLater(() -> {
 			if (!listModel.isEmpty()) {
 				repositoryList.setSelectedIndex(0);
 				repositoryList.clearSelection();
 			}
 		});
+		// 저장소 검색(필터링) 실행
 		mainFunc.searchRepositories();
+		// 검색 필드 초기화
 		searchField.setText("");
 	}
 
 	// 메인 <-> 저장소 애니메이션
+	// 패널 크기 애니메이션으로 조정하는 메서드
 	private void animatePanelResize(JPanel contentPanel, JPanel listPanel, JPanel rightPanel, double startRatio,
 			double endRatio) {
+		// 이미 목표 비율이면 애니메이션 실행 안함
 		if (currentRatio == endRatio) {
-			return; // 이미 목표 비율이면 애니메이션 실행 안함
+			return;
 		}
 
+		// 이전 애니메이터가 실행 중이면 중지
 		if (animator != null && animator.isRunning()) {
 			animator.stop();
 		}
 
+		// MigLayout 가져오기
 		MigLayout layout = (MigLayout) contentPanel.getLayout();
 
+		// 애니메이터 생성 (1초)
 		animator = new Animator(1000);
-		animator.setAcceleration(0.5f);
-		animator.setDeceleration(0.5f);
-		animator.setResolution(0);
+		animator.setAcceleration(0.5f); // 가속도 설정
+		animator.setDeceleration(0.5f); // 감속도 설정
+		animator.setResolution(0); // 해상도(최대)
 		animator.addTarget(new TimingTargetAdapter() {
 			@Override
 			public void timingEvent(float fraction) {
+				// 현재 진행률에 따라 비율 계산
 				double ratio = startRatio + (endRatio - startRatio) * fraction;
+				// 리스트 패널과 우측 패널의 크기 비율 동적으로 변경
 				layout.setComponentConstraints(listPanel, "grow, push, w " + (int) (ratio * 100) + "%, h 100%");
 				layout.setComponentConstraints(rightPanel, "grow, push, w " + (int) ((1 - ratio) * 100) + "%, h 100%");
-				contentPanel.revalidate();
-				contentPanel.repaint();
+				contentPanel.revalidate(); // 레이아웃 갱신
+				contentPanel.repaint();    // 다시 그리기
 			}
 
 			@Override
 			public void end() {
-				currentRatio = endRatio; // 애니메이션 종료 후 현재 비율 갱신
+				// 애니메이션 종료 후 현재 비율 갱신
+				currentRatio = endRatio;
 			}
 		});
-		animator.start();
+		animator.start(); // 애니메이션 시작
 	}
 
-	// 저장소 생성 애니메이션
+	// 저장소 생성 패널을 토글(열기/닫기)하는 애니메이션 메서드
 	public void toggleEditRepoPanel() {
+		// 패널이 아직 생성되지 않았다면 생성 및 레이어드팬에 추가
 		if (mainEditRepoPanel == null) {
-			mainEditRepoPanel = new MainEditRepo(mainFunc, this).createPanel();
-			mainEditRepoPanel.setBounds(0, 40, 350, 0);
-			this.getLayeredPane().add(mainEditRepoPanel, JLayeredPane.POPUP_LAYER);
+			mainEditRepoPanel = new MainEditRepo(mainFunc, this).createPanel(); // 저장소 생성 패널 생성
+			mainEditRepoPanel.setBounds(0, 40, 350, 0); // 초기 높이 0으로 설정(숨김)
+			this.getLayeredPane().add(mainEditRepoPanel, JLayeredPane.POPUP_LAYER); // 레이어드팬에 추가
 		}
 
+		// 애니메이터 생성 (300ms 동안 실행)
 		Animator animator = new Animator(300);
-		animator.setAcceleration(0.5f);
-		animator.setDeceleration(0.5f);
-		animator.setResolution(0);
+		animator.setAcceleration(0.5f); // 가속도 설정
+		animator.setDeceleration(0.5f); // 감속도 설정
+		animator.setResolution(0); // 최대 해상도
 		animator.addTarget(new TimingTargetAdapter() {
 			@Override
 			public void timingEvent(float fraction) {
-				int targetHeight = 335;
+				int targetHeight = 335; // 목표 높이
+				// 패널이 보이지 않을 때는 점점 커지고, 보일 때는 점점 작아짐
 				int currentHeight = !isPanelVisible
 						? (int) (targetHeight * fraction)
 						: (int) (targetHeight * (1 - fraction));
-				mainEditRepoPanel.setBounds(0, 40, 350, currentHeight);
-				mainEditRepoPanel.revalidate();
-				mainEditRepoPanel.repaint();
+				mainEditRepoPanel.setBounds(0, 40, 350, currentHeight); // 패널 크기 조정
+				mainEditRepoPanel.revalidate(); // 레이아웃 갱신
+				mainEditRepoPanel.repaint();    // 다시 그리기
 			}
 
 			@Override
 			public void end() {
+				// 패널이 닫히는 경우 레이어드팬에서 제거 및 null 처리
 				if (isPanelVisible) {
 					getLayeredPane().remove(mainEditRepoPanel);
 					getLayeredPane().repaint();
 					mainEditRepoPanel = null;
 				}
+				// 패널 표시 상태 토글
 				isPanelVisible = !isPanelVisible;
 			}
 		});
-		animator.start();
+		animator.start(); // 애니메이션 시작
 	}
 }

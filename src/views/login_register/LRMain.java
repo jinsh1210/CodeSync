@@ -146,17 +146,22 @@ public class LRMain extends javax.swing.JFrame {
                 g2.dispose();
             }
         };
+
         // JFrame 설정
         setMinimumSize(new Dimension(800, 500));
         setResizable(false);
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         bg.setOpaque(false);
 
+        // GroupLayout을 사용하여 레이아웃 매니저 생성
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        // JFrame의 ContentPane에 레이아웃 매니저 설정
         getContentPane().setLayout(layout);
+        // 수평 그룹 설정: bg 컴포넌트를 전체 폭에 맞게 추가
         layout.setHorizontalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(bg));
+        // 수직 그룹 설정: bg 컴포넌트를 전체 높이에 맞게 추가
         layout.setVerticalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(bg));
