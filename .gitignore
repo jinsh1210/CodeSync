@@ -16,7 +16,7 @@
 dependency-reduced-pom.xml
 
 # Logs
-*.log
+# *.log
 config.json
 # Temporary files
 *.tmp
