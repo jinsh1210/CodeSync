@@ -96,13 +96,9 @@ public class MainView extends JFrame {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.setBackground(Style.BACKGROUND_COLOR);
 
-		// 새로고침 버튼
-		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침", true);
-		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
-		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-		refreshIconButton.addActionListener(e -> returnBack());
-
-		// 상단 패널 구성 요소 ...
+		/*
+		 * 메인 상단 패널(웰컴 메시지 + 검색창)
+		 */
 		// 제목
 		String wusername = currentUser.getUsername();
 		String fullText = " 어서오세요, " + wusername + "님";
@@ -150,14 +146,15 @@ public class MainView extends JFrame {
 
 		// 메인 상단 패널
 		JPanel topPanel = new JPanel(new BorderLayout());
-
 		topPanel.setBackground(Style.BACKGROUND_COLOR);
 		topPanel.add(titleLabel, BorderLayout.WEST);
 		topPanel.add(topRightPanel, BorderLayout.EAST);
 		// 메인 패널에 추가
 		mainPanel.add(topPanel, BorderLayout.NORTH);
 
-		// 메뉴 관련 ...
+		/*
+		 * 메뉴 패널
+		 */
 		// 메뉴바
 		JMenuBar menuBar = new JMenuBar();
 
@@ -176,18 +173,25 @@ public class MainView extends JFrame {
 		menuBar.add(Box.createHorizontalStrut(10));
 		menuBar.add(btnLogout);
 
-		// 이 밑으로 메뉴바 오른쪽 정렬
-		menuBar.add(Box.createHorizontalGlue());
-
-		setJMenuBar(menuBar);
-
 		// 메뉴바 전체 크기 조정
 		menuBar.setPreferredSize(new Dimension(0, 40));
 
-		// 저장소 패널 ...
+		// MainView 창 상단에 붙이기
+		setJMenuBar(menuBar);
+
+
+		/*
+		 * 저장소 패널
+		 */
 		// 저장소 리스트 상단 패널
 		JPanel topRepoPanel = new JPanel(new BorderLayout());
 		topRepoPanel.setBackground(Style.BACKGROUND_COLOR);
+
+		// 새로고침 버튼
+		JButton refreshIconButton = ic.createImageButton("src/icons/refresh.png", null, 18, 18, null, "새로고침", true);
+		refreshIconButton.setMargin(new Insets(2, 4, 2, 4));
+		refreshIconButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+		refreshIconButton.addActionListener(e -> returnBack());
 		topRepoPanel.add(refreshIconButton, BorderLayout.EAST);
 
 		// 저장소 리스트 표현
@@ -235,7 +239,9 @@ public class MainView extends JFrame {
 		listPanel.add(topRepoPanel, BorderLayout.NORTH);
 		listPanel.add(scrollPane, BorderLayout.CENTER);
 
-		// 저장소 상세 패널 ...
+		/*
+		 * 저장소 상세 패널
+		 */
 		// 우측 패널
 		rightPanel = new JPanel();
 		rightPanel.setLayout(new BorderLayout());
@@ -257,6 +263,7 @@ public class MainView extends JFrame {
 		// 리스트 패널과 우측 패널 나누는 컨텐츠 패널(MigLayout)
 		contentPanel = new JPanel(new MigLayout("insets 0, fill", "[grow][grow]", "[grow]"));
 		contentPanel.setBackground(Style.BACKGROUND_COLOR);
+		// 초기 7:3 비율로 지정
 		contentPanel.add(listPanel, "grow, push, w 70%, h 100%");
 		contentPanel.add(rightPanel, "grow, push, w 30%, h 100%");
 		// 메인 패널에 컨텐츠 패널 추가
@@ -432,7 +439,7 @@ public class MainView extends JFrame {
 				layout.setComponentConstraints(listPanel, "grow, push, w " + (int) (ratio * 100) + "%, h 100%");
 				layout.setComponentConstraints(rightPanel, "grow, push, w " + (int) ((1 - ratio) * 100) + "%, h 100%");
 				contentPanel.revalidate(); // 레이아웃 갱신
-				contentPanel.repaint();    // 다시 그리기
+				contentPanel.repaint(); // 다시 그리기
 			}
 
 			@Override
@@ -468,7 +475,7 @@ public class MainView extends JFrame {
 						: (int) (targetHeight * (1 - fraction));
 				mainEditRepoPanel.setBounds(0, 40, 350, currentHeight); // 패널 크기 조정
 				mainEditRepoPanel.revalidate(); // 레이아웃 갱신
-				mainEditRepoPanel.repaint();    // 다시 그리기
+				mainEditRepoPanel.repaint(); // 다시 그리기
 			}
 
 			@Override

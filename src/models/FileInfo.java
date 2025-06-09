@@ -14,6 +14,8 @@ public class FileInfo {
 	private byte[] fileData;
 	private Timestamp uploadTime;
 	private String branch;
+	private String path;
+	private String type; // "file" 또는 "dir"
 
 	public FileInfo(int id, int userId, int repositoryId, String filename, byte[] fileData, Timestamp uploadTime, String branch) {
 		this.id = id;
@@ -24,11 +26,6 @@ public class FileInfo {
 		this.uploadTime = uploadTime;
 		this.branch = branch;
 	}
-
-	private String path;
-    private String type; // "file" 또는 "dir"
-
-    public FileInfo() {}
 
     public FileInfo(String path, String type) {
         this.path = path;
@@ -44,7 +41,6 @@ public class FileInfo {
 		}
 		return "(알 수 없음)";
 	}
-
 
 	//롬복이 없을 경우 사용
 //	// Getters and Setters

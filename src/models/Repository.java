@@ -21,7 +21,6 @@ public class Repository {
         this.username = username;
         this.size = size;
     }
-
     
     //롬복이 없을 경우 사용
 //    // Getters and Setters
