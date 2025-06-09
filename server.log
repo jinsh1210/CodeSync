@@ -362,3 +362,488 @@ java.net.SocketException: Connection reset
 [1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
     [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
     [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 221.154.89.95 : 55031
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+종료 명령어 호출
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+클라이언트 입장 147.185.133.157 : 55150
+접근 권한 없음
+전달 받은 토큰값: GET / HTTP/1.0
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 64160
+접근 권한 없음
+전달 받은 토큰값:   i  eU��random1random2random3random4   / 
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 64184
+접근 권한 없음
+전달 받은 토큰값:  �  �������L�J����u*��ݡ�@MP%a�(v ����]g�1"N4u/6�CG�F��G����U\I &�+�/�,�0̨̩�	��
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 64202
+접근 권한 없음
+전달 받은 토큰값: �� u      f  e  d  c  b  :  9  8  5  4  3  2  /                        
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 64230
+접근 권한 없음
+전달 받은 토큰값:   S  O ?G���,��`~� ��{�Ֆ�w����<=�o�n  (   
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 64244
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:328)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:61)
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 61548
+접근 권한 없음
+전달 받은 토큰값: 
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 61552
+접근 권한 없음
+전달 받은 토큰값: GET / HTTP/1.1
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 61562
+접근 권한 없음
+전달 받은 토큰값: OPTIONS / HTTP/1.0
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 61572
+접근 권한 없음
+전달 받은 토큰값: OPTIONS * RTSP/1.0
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.133.157 : 61574
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:328)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:61)
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 56084
+접근 권한 없음
+전달 받은 토큰값: GET / HTTP/1.0
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 64178
+접근 권한 없음
+전달 받은 토큰값:   i  eU��random1random2random3random4   / 
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 64200
+접근 권한 없음
+전달 받은 토큰값:  �  �������L�J����u*��ݡ�@MP%a�(v ����]g�1"N4u/6�CG�F��G����U\I &�+�/�,�0̨̩�	��
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 64224
+접근 권한 없음
+전달 받은 토큰값: �� u      f  e  d  c  b  :  9  8  5  4  3  2  /                        
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 64238
+접근 권한 없음
+전달 받은 토큰값:   S  O ?G���,��`~� ��{�Ֆ�w����<=�o�n  (   
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 63492
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:328)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:61)
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 58070
+접근 권한 없음
+전달 받은 토큰값: 
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 58074
+접근 권한 없음
+전달 받은 토큰값: GET / HTTP/1.1
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 58076
+접근 권한 없음
+전달 받은 토큰값: OPTIONS / HTTP/1.0
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 58088
+접근 권한 없음
+전달 받은 토큰값: OPTIONS * RTSP/1.0
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 147.185.132.157 : 58090
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:328)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:61)
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 192.168.0.1 : 42303
+종료 명령어 호출
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.firstAccess(Server.java:706)
+	at server.msgth.run(Server.java:73)
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 192.168.0.1 : 52054
+DB 삭제 결과: /#/delete_record_success
+DB 삭제 결과: /#/delete_record_not_found
+종료 명령어 호출
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+클라이언트 입장 192.168.0.1 : 52936
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+종료 명령어 호출
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+클라이언트 입장 192.168.0.1 : 52943
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+/#/merge_hashes_SOL
+Merge 요청
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:328)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+클라이언트 입장 192.168.0.1 : 52977
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+/#/merge_hashes_SOL
+Merge 요청
+해쉬값 요청
+전송 완료
+클라이언트 입장 211.235.72.61 : 55424
+종료 명령어 호출
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.firstAccess(Server.java:706)
+	at server.msgth.run(Server.java:73)
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:328)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+클라이언트 입장 192.168.0.1 : 53050
+종료 명령어 호출
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:165)
+	at java.base/sun.nio.ch.NioSocketImpl.beginRead(NioSocketImpl.java:236)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:287)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:330)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:190)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:329)
+	at java.base/java.io.BufferedReader.readLine(BufferedReader.java:396)
+	at server.msgth.run(Server.java:76)
+/192.168.0.18:9969 연결해제
+클라이언트 입장 106.101.132.58 : 42326
+java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "msg" is null
+	at server.msgth.firstAccess(Server.java:707)
+	at server.msgth.run(Server.java:73)
+연결 종료 감지
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 106.101.132.58 : 48704
+java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "msg" is null
+	at server.msgth.firstAccess(Server.java:707)
+	at server.msgth.run(Server.java:73)
+연결 종료 감지
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 106.101.132.58 : 47121
+java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "msg" is null
+	at server.msgth.firstAccess(Server.java:707)
+	at server.msgth.run(Server.java:73)
+연결 종료 감지
+/192.168.0.18:9969 연결해제
+[[1;33mWARNING[m] 
+[1;31mjava.lang.NullPointerException[m: [1;31mCannot invoke "Object.hashCode()" because "key" is null[m
+    [1mat[m java.util.Hashtable.remove ([1mHashtable.java:508[m)
+    [1mat[m server.msgth.run ([1mServer.java:656[m)
+클라이언트 입장 106.101.132.58 : 36717
+연결 종료 감지
+/192.168.0.18:9969 연결해제
