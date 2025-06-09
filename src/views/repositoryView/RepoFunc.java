@@ -2,6 +2,7 @@ package views.repositoryView;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -10,6 +11,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -25,6 +28,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.json.JSONArray;
@@ -109,10 +113,10 @@ public class RepoFunc {
 			}
 			// 현재 트리에서 path 리스트 추출
 			List<String> currentPaths = new ArrayList<>();
-			java.util.Enumeration<?> e = rootNode.depthFirstEnumeration();
+			Enumeration<?> e = rootNode.depthFirstEnumeration();
 			while (e.hasMoreElements()) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
-				javax.swing.tree.TreeNode[] nodes = node.getPath();
+				TreeNode[] nodes = node.getPath();
 				if (nodes.length > 1) {
 					StringBuilder sb = new StringBuilder();
 					for (int i = 1; i < nodes.length; i++) {
@@ -123,8 +127,8 @@ public class RepoFunc {
 					currentPaths.add(sb.toString() + (node.isLeaf() ? "" : "/"));
 				}
 			}
-			java.util.Collections.sort(newPaths);
-			java.util.Collections.sort(currentPaths);
+			Collections.sort(newPaths);
+			Collections.sort(currentPaths);
 			if (newPaths.equals(currentPaths)) {
 				if (rootNode.getChildCount() == 0) {
 					rootNode.add(new DefaultMutableTreeNode("[비어 있음]"));
@@ -301,7 +305,7 @@ public class RepoFunc {
 				// 해시 파일 초기화
 				File hashFile = new File(SavedPath, ".jsRepohashed.json");
 				if (!hashFile.exists()) {
-					try (java.io.FileWriter writer = new java.io.FileWriter(hashFile)) {
+					try (FileWriter writer = new FileWriter(hashFile)) {
 						writer.write("[]");
 						System.out.println("[handleUpload] 초기 해시파일 생성 완료");
 					} catch (IOException e) {
