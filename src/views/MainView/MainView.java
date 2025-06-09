@@ -455,7 +455,7 @@ public class MainView extends JFrame {
 	public void toggleEditRepoPanel() {
 		// 패널이 아직 생성되지 않았다면 생성 및 레이어드팬에 추가
 		if (mainEditRepoPanel == null) {
-			mainEditRepoPanel = new MainEditRepo(mainFunc, this).createPanel(); // 저장소 생성 패널 생성
+			mainEditRepoPanel = new MainCreateRepo(mainFunc, this).createPanel(); // 저장소 생성 패널 생성
 			mainEditRepoPanel.setBounds(0, 40, 350, 0); // 초기 높이 0으로 설정(숨김)
 			this.getLayeredPane().add(mainEditRepoPanel, JLayeredPane.POPUP_LAYER); // 레이어드팬에 추가
 		}

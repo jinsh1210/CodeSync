@@ -15,12 +15,12 @@ import utils.Style;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
-public class MainEditRepo {
+public class MainCreateRepo {
     private MainFunc mainFunc;
     private MainView mainView;
 
     // 생성자
-    public MainEditRepo(MainFunc mainFunc, MainView mainView) {
+    public MainCreateRepo(MainFunc mainFunc, MainView mainView) {
         this.mainFunc = mainFunc;
         this.mainView = mainView;
     }
