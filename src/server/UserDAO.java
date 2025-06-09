@@ -37,6 +37,15 @@ public class UserDAO {
         }
     }
 
+    public void disconnect(){
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("conn 예외처리");
+            e.printStackTrace();
+        }
+    }
+
     public String deleteRepository(String username, String repoName) {
         String getRepoIdSql = "SELECT id FROM repositories WHERE user_id = ? AND name = ?";
         String deleteFilesSql = "DELETE FROM files WHERE repository_id = ?";

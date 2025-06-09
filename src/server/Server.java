@@ -132,7 +132,7 @@ class msgth extends Thread {
 						String dirPath = matcher.group(2);
 						String tmpOwner = matcher.group(3);
 						String owner;
-						if (userDAO.repositoryExists(myName, repoName)) {
+						if (userDAO.repositoryExists(myName, repoName) && tmpOwner.equals(myName)) {
 							owner = myName;
 						} else {
 							String realOwner = userDAO.getRepositoryOwner(repoName,tmpOwner);
@@ -181,7 +181,7 @@ class msgth extends Thread {
 							continue;
 						}
 						String owner;
-						if (userDAO.repositoryExists(myName, repoName)) {
+						if (userDAO.repositoryExists(myName, repoName)&&tmpowner.equals(myName)) {
 							owner = myName;
 						} else {
 							String realOwner = userDAO.getRepositoryOwner(repoName,tmpowner);
@@ -240,7 +240,7 @@ class msgth extends Thread {
 						String tmpOwner = matcher.group(3);
 
 						String owner;
-						if (userDAO.repositoryExists(myName, repoName)) {
+						if (userDAO.repositoryExists(myName, repoName)&& tmpOwner.equals(myName)) {
 							owner = myName;
 						} else {
 							String realOwner = userDAO.getRepositoryOwner(repoName, tmpOwner);
@@ -638,15 +638,29 @@ class msgth extends Thread {
 						send(userDAO.updateRepositoryVisibility(myName,repoName,visible));
 					}else if(msg.equals("/logout")){
 						System.out.println("종료 명령어 호출");
-						socket.close();
+						break;
 					}
+				}else{
+					System.out.println("연결 종료 감지");
+					break;
 				}
+				
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+		}finally{
 			System.out.println(iport+ " 연결해제");
 			clientWriters.remove(myName);
 			usrNick.remove(myName);
+			userDAO.disconnect();
+			try {
+				socket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -713,6 +727,7 @@ class msgth extends Thread {
 					} else send(result);
 				}else if(msg.equals(":c:logout")){
 					System.out.println("종료 명령어 호출");
+					userDAO.disconnect();
 					socket.close();
 				}
 			} catch (Exception e) {
@@ -730,7 +745,8 @@ public class Server {
 
 	public static void main(String[] args) {
 		int socket = 9969;
-		try (ServerSocket ss = new ServerSocket(socket)) {
+		try {
+			ServerSocket ss = new ServerSocket(socket);
 			System.out.println("서버열림 " + serverVersion);
 			while (true) {
 				Socket user = ss.accept();
