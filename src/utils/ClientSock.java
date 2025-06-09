@@ -19,7 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -267,7 +270,7 @@ public class ClientSock {
                 // 기존 해시 목록 불러오기
                 String localRepoPath = getPath(currentUser, repoName);
                 File hashFile = new File(localRepoPath, ".jsRepohashed.json");
-                java.util.Map<String, JSONObject> freezeMap = new java.util.HashMap<>();
+                Map<String, JSONObject> freezeMap = new HashMap<>();
 
                 if (hashFile.exists()) {
                     JSONArray existingList = new JSONArray(Files.readString(hashFile.toPath()));
@@ -435,7 +438,7 @@ public class ClientSock {
 
         boolean updated = false;
         for (int i = 0; i < configEntries.length(); i++) {
-            org.json.JSONObject obj = configEntries.getJSONObject(i);
+            JSONObject obj = configEntries.getJSONObject(i);
             if (obj.getString("user").equals(user) && obj.getString("repoName").equals(repoName)) {
                 File configDir = new File(path);
                 if (!configDir.exists()) {
@@ -448,7 +451,7 @@ public class ClientSock {
         }
 
         if (!updated) {
-            org.json.JSONObject newEntry = new org.json.JSONObject();
+            JSONObject newEntry = new JSONObject();
             File configDir = new File(path);
             if (!configDir.exists()) {
                 configDir.mkdirs(); // 디렉토리 없으면 생성
@@ -486,7 +489,7 @@ public class ClientSock {
             String localRepoPath = getPath(user, repoName);
             if (localRepoPath != null) {
                 File hashFile = new File(localRepoPath, ".jsRepohashed.json");
-                java.util.Map<String, JSONObject> freezeMap = new java.util.HashMap<>();
+                Map<String, JSONObject> freezeMap = new HashMap<>();
 
                 // 이전 freeze 및 hash 값 보존
                 if (hashFile.exists()) {
@@ -512,8 +515,8 @@ public class ClientSock {
                     }
                 }
 
-                java.nio.file.Path jsonPath = java.nio.file.Paths.get(localRepoPath, ".jsRepohashed.json");
-                java.nio.file.Files.writeString(jsonPath, hashList.toString(2));
+                Path jsonPath = Paths.get(localRepoPath, ".jsRepohashed.json");
+                Files.writeString(jsonPath, hashList.toString(2));
                 System.out.println("[해시 스냅샷 저장 완료 - 로컬]");
             } else {
                 System.err.println("[해시 스냅샷 저장 실패: 로컬 경로를 찾을 수 없음]");
@@ -594,7 +597,7 @@ public class ClientSock {
     }
     
     public static Set<String> getFrozenPaths(String user, String repoName,String repoOwner) {
-        Set<String> frozenPaths = new java.util.HashSet<>();
+        Set<String> frozenPaths = new HashSet<>();
         try {
             String localRepoPath = getPath(user, repoName);
             if (localRepoPath == null){System.out.println("1.종료됨");return frozenPaths;}
@@ -663,7 +666,7 @@ public class ClientSock {
             // 기존 해시 목록 불러오기
             String localRepoPath = getPath(currentUser, repoName);
             File hashFile = new File(localRepoPath, ".jsRepohashed.json");
-            java.util.Map<String, Boolean> existingFreezeMap = new java.util.HashMap<>();
+            Map<String, Boolean> existingFreezeMap = new HashMap<>();
 
             if (hashFile.exists()) {
                 JSONArray existingList = new JSONArray(Files.readString(hashFile.toPath()));
