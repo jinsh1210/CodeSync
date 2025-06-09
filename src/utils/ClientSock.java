@@ -211,14 +211,14 @@ public class ClientSock {
             }
             System.out.println(line);
             StringBuilder jsonBuilder = new StringBuilder();
-            String hashLine = "";
+            
             if (line.startsWith("/#/pull_hashes_SOL")) {
-                System.out.println(hashLine);
+                String readLine;
                 do {
-                    hashLine += reader.readLine();
-                    if (hashLine == null || hashLine.endsWith("/#/pull_hashes_EOL\n")) break;
-                    jsonBuilder.append(hashLine);
-                } while (hashLine.endsWith("/#/pull_hashes_EOL\n"));
+                    readLine = reader.readLine();
+                    if (readLine == null || readLine.endsWith("/#/pull_hashes_EOL\n")) break;
+                    jsonBuilder.append(readLine);
+                } while (readLine.endsWith("/#/pull_hashes_EOL\n"));
                 // --- [로컬에만 있는 파일/폴더 제거] ---
                 // 서버 repo_content 결과(pathAll) 기준으로 로컬에만 있는 파일/폴더 제거
                 String basePath = getPath(currentUser, repoName);
@@ -640,21 +640,22 @@ public class ClientSock {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
             StringBuilder jsonBuilder = new StringBuilder();
             String hashLine = "";
-            while(true){
-                hashLine+=reader.readLine();
-                if(hashLine.endsWith("/#/pull_hashes_EOL")) break;
+            boolean started = false;
+            while (true) {
+                hashLine = reader.readLine();
+                if (hashLine.contains("/#/pull_hashes_SOL")) {
+                    started = true;
+                    hashLine = hashLine.replace("/#/pull_hashes_SOL", "");
+                }
+                if (hashLine.contains("/#/pull_hashes_EOL")) {
+                    hashLine = hashLine.replace("/#/pull_hashes_EOL", "");
+                    jsonBuilder.append(hashLine); // 마지막 줄도 포함되도록
+                    break;
+                }
+                if (started) {
+                    jsonBuilder.append(hashLine);
+                }
             }
-            String solMarker = "/#/pull_hashes_SOL";
-            int solIndex = hashLine.indexOf(solMarker);
-            if (solIndex != -1) {
-                hashLine = hashLine.substring(solIndex + solMarker.length()); // SOL 제거
-            }
-            String eolMarker = "/#/pull_hashes_EOL";
-            int eolIndex = hashLine.indexOf(eolMarker);
-            if (eolIndex != -1) {
-                hashLine = hashLine.substring(0, eolIndex); // EOL 제거
-            }
-            jsonBuilder.append(hashLine);
             
 
             JSONArray serverHashList = new JSONArray(jsonBuilder.toString());
