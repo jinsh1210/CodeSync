@@ -15,11 +15,8 @@ class msgth extends Thread {
 	private final String serverVersion = "v0.0.1b";
 	private UserDAO userDAO = new UserDAO();
 	private final String token = System.getenv("ServTOKEN");
-	static ArrayList<Socket> users = new ArrayList<Socket>();
-	static Hashtable<String, Socket> usrNick = new Hashtable<String, Socket>();
+
 	private String myName;
-	public static final Map<String, PrintWriter> clientWriters = new HashMap<>();
-	private PrintWriter pwriter;
 	Socket socket;
 	OutputStream output = null;
 	InputStream input = null;
@@ -27,7 +24,6 @@ class msgth extends Thread {
 	private String iport="0.0.0.0:0000";
 	public msgth(Socket socket) {
 		this.socket = socket;
-		users.add(socket);
 		try {
 			output = socket.getOutputStream();
 			input = socket.getInputStream();
@@ -57,7 +53,7 @@ class msgth extends Thread {
 	public void run() {
 		try {
 			String msg;
-			pwriter = new PrintWriter(socket.getOutputStream(), true);
+			
 			if (!token.equals(msg = reader.readLine())) {
 				System.out.println("접근 권한 없음");
 				System.out.println("전달 받은 토큰값: "+msg);
@@ -71,7 +67,7 @@ class msgth extends Thread {
 			}
 			send("버전: " + serverVersion);
 			firstAccess();
-			clientWriters.put(myName, pwriter);
+			
 			while (true) {
 				if ((msg = reader.readLine()) != null) {
 					//명령어구현
@@ -652,8 +648,7 @@ class msgth extends Thread {
 			
 		}finally{
 			System.out.println(iport+ " 연결해제");
-			clientWriters.remove(myName);
-			usrNick.remove(myName);
+			
 			userDAO.disconnect();
 			try {
 				socket.close();
@@ -736,7 +731,6 @@ class msgth extends Thread {
 			}
 
 		} while (loginAccess == -1);
-		usrNick.put(myName, socket);
 	}
 }
 
